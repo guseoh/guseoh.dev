@@ -14,7 +14,7 @@ const categorySummary = buildCategorySummary(posts);
     <p>Project, Spring, JPA, Database, DevOps, Git 중심으로 학습과 개선 기록을 묶어둡니다.</p>
   </section>
 
-  <ul class="post-list" style="margin-top: 1rem;">
+  <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
     {categorySummary.map(({ slug, name, count }) => (
       <li class="card category-card-row">
         <a class="badge badge--topic" href={`/categories/${slug}/`}>

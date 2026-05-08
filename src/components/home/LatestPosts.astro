@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import PostMetaBadges from "../PostMetaBadges.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { formatPostDate, getReadingTime } from "../../utils/posts";
 
@@ -34,6 +35,7 @@ const { posts } = Astro.props as Props;
               <span>{readingTime}</span>
             </p>
             <p class="latest-item__summary">{post.data.description}</p>
+            <PostMetaBadges category={categoryName} tags={post.data.tags} maxTags={3} />
           </li>
         );
       })}
