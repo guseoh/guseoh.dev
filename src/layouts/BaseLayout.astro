@@ -41,14 +41,12 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
 const sidebarLinks = [
   { href: "/blog", label: "Post" },
   { href: "/categories", label: "Categories" },
-  { href: "/tags", label: "Tags" },
-  { href: "/about", label: "About" }
+  { href: "/tags", label: "Tags" }
 ];
 
 const headerLinks = [
   { href: "/blog", label: "Posts" },
-  { href: "/categories", label: "Categories" },
-  { href: "/about", label: "About" }
+  { href: "/categories", label: "Categories" }
 ];
 
 function isNavActive(href: string) {

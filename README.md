@@ -20,7 +20,6 @@ Personal blog project powered by Astro and deployed via GitHub Pages.
 - `/tags`: tag list
 - `/tags/<tag>`: posts by tag
 - `/search`: search page
-- `/about`: about page
 - `/rss.xml`: RSS feed
 
 ## Frontmatter

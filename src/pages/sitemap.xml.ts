@@ -24,7 +24,7 @@ export async function GET() {
   const tags = buildTagSummary(posts);
   const totalPages = Math.ceil(posts.length / PAGE_SIZE);
 
-  const staticPaths = ["/", "/blog/", "/categories/", "/tags/", "/about/", "/search/"];
+  const staticPaths = ["/", "/blog/", "/categories/", "/tags/", "/search/"];
   const pagePaths = totalPages > 1
     ? Array.from({ length: totalPages - 1 }, (_, index) => `/blog/page/${index + 2}/`)
     : [];
