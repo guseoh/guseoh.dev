@@ -22,7 +22,7 @@ const { posts } = Astro.props as Props;
   ) : (
     <ul class="latest-list">
       {posts.map((post) => {
-        const categoryName = post.data.category?.trim() || "미분�?;
+        const categoryName = post.data.category?.trim() || "미분류";
         const readingTime = getReadingTime(post);
         return (
           <li class="latest-item">
