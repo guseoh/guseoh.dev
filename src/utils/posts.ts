@@ -37,7 +37,7 @@ export function getReadingTime(post: CollectionEntry<"blog">) {
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ");
   const latinWords = plainText.match(/[A-Za-z0-9_]+/g)?.length ?? 0;
-  const koreanCharacters = plainText.match(/[가-??/g)?.length ?? 0;
+  const koreanCharacters = plainText.match(/[가-힣]/g)?.length ?? 0;
   const estimatedWords = latinWords + koreanCharacters / 3;
   const minutes = Math.max(1, Math.ceil(estimatedWords / 220));
 
