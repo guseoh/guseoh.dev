@@ -13,16 +13,16 @@ const isLatest = variant === "latest";
 const readingTime = getReadingTime(post);
 ---
 
-<article class:list={["card", "post-card", isLatest && "post-card--latest"]} data-post-slug={post.slug}>
+<article class:list={["card", "post-card", isLatest && "post-card--latest"]} data-post-slug={post.id}>
   <header class="post-card__header">
-    <h2><a href={`/blog/${post.slug}/`}>{post.data.title}</a></h2>
+    <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
   </header>
 
   <p class="post-card__description">{post.data.description}</p>
 
   <div class="post-card__footer">
     <div class="post-card__meta">
-      <span>작성일</span>
+      <span>?�성??/span>
       <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
       <span aria-hidden="true">·</span>
       <span>{readingTime}</span>
@@ -31,3 +31,4 @@ const readingTime = getReadingTime(post);
     <PostMetaBadges category={post.data.category} tags={post.data.tags} maxTags={isLatest ? 3 : 4} />
   </div>
 </article>
+

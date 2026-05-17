@@ -1,4 +1,4 @@
-﻿import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 
 export type CategorySummary = {
   slug: string;
@@ -14,7 +14,7 @@ export function normalizeCategory(category: string): string {
 
 export function getCategoryName(post: CollectionEntry<"blog">): string {
   const raw = post.data.category?.trim();
-  return raw && raw.length > 0 ? raw : "미분류";
+  return raw && raw.length > 0 ? raw : "�̺з�";
 }
 
 export function getCategorySlug(post: CollectionEntry<"blog">): string {
@@ -51,3 +51,4 @@ export function buildCategorySummary(posts: CollectionEntry<"blog">[]): Category
 export function filterPostsByCategory(posts: CollectionEntry<"blog">[], categorySlug: string) {
   return posts.filter((post) => getCategorySlug(post) === categorySlug);
 }
+

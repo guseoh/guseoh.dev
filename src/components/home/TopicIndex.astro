@@ -15,7 +15,7 @@ const { categories } = Astro.props as Props;
   </div>
 
   {categories.length === 0 ? (
-    <p class="section-empty">카테고리가 없습니다.</p>
+    <p class="section-empty">카테고리가 ?�습?�다.</p>
   ) : (
     <div class="category-chip-list">
       {categories.map(({ slug, name, count }) => (
@@ -27,3 +27,4 @@ const { categories } = Astro.props as Props;
     </div>
   )}
 </section>
+

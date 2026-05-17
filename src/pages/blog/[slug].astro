@@ -11,7 +11,7 @@ export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
 
   return posts.map((post) => ({
-    params: { slug: post.slug },
+    params: { slug: post.id },
     props: { post }
   }));
 }
@@ -23,12 +23,12 @@ const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
 const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
 const readingTime = getReadingTime(post);
-const currentIndex = allPosts.findIndex((entry) => entry.slug === post.slug);
+const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
 const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const olderPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : undefined;
 const postTagSet = new Set(post.data.tags.map((tag) => normalizeTag(tag)));
 const relatedPosts = allPosts
-  .filter((entry) => entry.slug !== post.slug)
+  .filter((entry) => entry.id !== post.id)
   .map((entry) => {
     const sharedTagCount = entry.data.tags.filter((tag) => postTagSet.has(normalizeTag(tag))).length;
     const sameCategory = normalizeCategory(entry.data.category || "") === categorySlug;
@@ -84,7 +84,7 @@ const relatedPosts = allPosts
       <footer class="post-footer">
         <nav class="post-adjacent" aria-label="Previous and next posts">
           {olderPost ? (
-            <a class="post-adjacent__card" href={`/blog/${olderPost.slug}/`}>
+            <a class="post-adjacent__card" href={`/blog/${olderPost.id}/`}>
               <span>이전 글</span>
               <strong>{olderPost.data.title}</strong>
             </a>
@@ -93,7 +93,7 @@ const relatedPosts = allPosts
           )}
 
           {newerPost ? (
-            <a class="post-adjacent__card post-adjacent__card--next" href={`/blog/${newerPost.slug}/`}>
+            <a class="post-adjacent__card post-adjacent__card--next" href={`/blog/${newerPost.id}/`}>
               <span>다음 글</span>
               <strong>{newerPost.data.title}</strong>
             </a>
@@ -108,7 +108,7 @@ const relatedPosts = allPosts
             <div class="related-posts__grid">
               {relatedPosts.map((relatedPost) => (
                 <article class="related-card">
-                  <a class="related-card__title" href={`/blog/${relatedPost.slug}/`}>{relatedPost.data.title}</a>
+                  <a class="related-card__title" href={`/blog/${relatedPost.id}/`}>{relatedPost.data.title}</a>
                   <p>{relatedPost.data.description}</p>
                   <div class="related-card__meta">
                     <time datetime={relatedPost.data.date.toISOString()}>{formatPostDate(relatedPost.data.date)}</time>
@@ -134,7 +134,7 @@ const relatedPosts = allPosts
             <ul class="post-toc__list">
               {tocHeadings.map((heading) => (
                 <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
-                  <a href={`#${heading.slug}`}>{heading.text}</a>
+                  <a href={`#${heading.id}`}>{heading.text}</a>
                 </li>
               ))}
             </ul>

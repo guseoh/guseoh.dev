@@ -1,8 +1,8 @@
 import type { CollectionEntry } from "astro:content";
 
 export const SITE_TITLE = "devjune.dev";
-export const SITE_DESCRIPTION = "Java/Spring 백엔드 개발자 오지훈의 학습과 프로젝트 개선 기록";
-export const SITE_AUTHOR = "오지훈";
+export const SITE_DESCRIPTION = "Java/Spring 백엔??개발???��??�의 ?�습�??�로?�트 개선 기록";
+export const SITE_AUTHOR = "?��???;
 export const SITE_URL = "https://guseoh.github.io";
 export const SITE_OG_IMAGE = "/og-image.svg";
 export const GITHUB_URL = "https://github.com/guseoh";
@@ -37,9 +37,10 @@ export function getReadingTime(post: CollectionEntry<"blog">) {
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ");
   const latinWords = plainText.match(/[A-Za-z0-9_]+/g)?.length ?? 0;
-  const koreanCharacters = plainText.match(/[가-힣]/g)?.length ?? 0;
+  const koreanCharacters = plainText.match(/[가-??/g)?.length ?? 0;
   const estimatedWords = latinWords + koreanCharacters / 3;
   const minutes = Math.max(1, Math.ceil(estimatedWords / 220));
 
-  return `${minutes}분 읽기`;
+  return `${minutes}�??�기`;
 }
+

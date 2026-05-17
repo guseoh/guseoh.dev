@@ -1,4 +1,4 @@
-﻿---
+---
 interface Props {
   currentPage: number;
   totalPages: number;
@@ -15,13 +15,13 @@ function createPageHref(page: number) {
 ---
 
 {totalPages > 1 && (
-  <nav class="pagination" aria-label="게시글 페이지 이동">
+  <nav class="pagination" aria-label="�Խñ� ������ �̵�">
     <a
       class:list={["pagination__item", "pagination__item--arrow", currentPage === 1 && "is-disabled"]}
       href={currentPage === 1 ? undefined : createPageHref(currentPage - 1)}
       aria-disabled={currentPage === 1 ? "true" : "false"}
     >
-      이전
+      ����
     </a>
 
     {pages.map((page) => (
@@ -35,7 +35,8 @@ function createPageHref(page: number) {
       href={currentPage === totalPages ? undefined : createPageHref(currentPage + 1)}
       aria-disabled={currentPage === totalPages ? "true" : "false"}
     >
-      다음
+      ����
     </a>
   </nav>
 )}
+

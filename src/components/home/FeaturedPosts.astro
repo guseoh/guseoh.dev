@@ -14,14 +14,14 @@ const { posts } = Astro.props as Props;
   <section class="home-section" aria-label="Featured posts">
     <div class="home-section__head">
       <h2 class="home-section__title">Featured Posts</h2>
-      <p class="home-section__description">프로젝트와 백엔드 역량을 보여주는 대표 기록입니다.</p>
+      <p class="home-section__description">?�로?�트?� 백엔????��??보여주는 ?�??기록?�니??</p>
     </div>
 
     <div class="featured-grid">
       {posts.map((post, index) => (
         <article class:list={["card", "featured-card", index === 0 && "featured-card--lead"]}>
           <p class="featured-card__label">Featured</p>
-          <h3><a href={`/blog/${post.slug}/`}>{post.data.title}</a></h3>
+          <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
           <p class="featured-card__description">{post.data.description}</p>
 
           <div class="featured-card__meta">
@@ -36,3 +36,4 @@ const { posts } = Astro.props as Props;
     </div>
   </section>
 )}
+

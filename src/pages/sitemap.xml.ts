@@ -28,14 +28,14 @@ export async function GET() {
   const pagePaths = totalPages > 1
     ? Array.from({ length: totalPages - 1 }, (_, index) => `/blog/page/${index + 2}/`)
     : [];
-  const postPaths = posts.map((post) => `/blog/${post.slug}/`);
-  const categoryPaths = categories.map((category) => `/categories/${category.slug}/`);
+  const postPaths = posts.map((post) => `/blog/${post.id}/`);
+  const categoryPaths = categories.map((category) => `/categories/${category.id}/`);
   const tagPaths = tags.map((tag) => `/tags/${tag.tag}/`);
   const today = new Date().toISOString().slice(0, 10);
 
   const urls = [...staticPaths, ...pagePaths, ...postPaths, ...categoryPaths, ...tagPaths]
     .map((path) => {
-      const post = posts.find((entry) => path === `/blog/${entry.slug}/`);
+      const post = posts.find((entry) => path === `/blog/${entry.id}/`);
       const lastmod = post ? (post.data.updated ?? post.data.date).toISOString().slice(0, 10) : today;
 
       return [
@@ -53,3 +53,4 @@ export async function GET() {
     }
   });
 }
+

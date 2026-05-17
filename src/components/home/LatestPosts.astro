@@ -18,15 +18,15 @@ const { posts } = Astro.props as Props;
   </div>
 
   {posts.length === 0 ? (
-    <p class="section-empty">아직 게시글이 없습니다.</p>
+    <p class="section-empty">?�직 게시글???�습?�다.</p>
   ) : (
     <ul class="latest-list">
       {posts.map((post) => {
-        const categoryName = post.data.category?.trim() || "미분류";
+        const categoryName = post.data.category?.trim() || "미분�?;
         const readingTime = getReadingTime(post);
         return (
           <li class="latest-item">
-            <a class="latest-item__title" href={`/blog/${post.slug}/`}>{post.data.title}</a>
+            <a class="latest-item__title" href={`/blog/${post.id}/`}>{post.data.title}</a>
             <p class="latest-item__meta">
               <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
               <span aria-hidden="true">·</span>
@@ -42,3 +42,4 @@ const { posts } = Astro.props as Props;
     </ul>
   )}
 </section>
+
