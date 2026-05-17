@@ -134,7 +134,7 @@ const relatedPosts = allPosts
             <ul class="post-toc__list">
               {tocHeadings.map((heading) => (
                 <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
-                  <a href={`#${heading.id}`}>{heading.text}</a>
+                  <a href={`#${heading.slug}`}>{heading.text}</a>
                 </li>
               ))}
             </ul>
