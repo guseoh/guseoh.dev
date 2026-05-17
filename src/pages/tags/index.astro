@@ -2,18 +2,19 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { buildTagSummary } from "../../utils/tags";
+import { SITE_DESCRIPTION } from "../../utils/posts";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 const tagSummary = buildTagSummary(posts);
 ---
 
-<BaseLayout title="guseo.dev | Tags" description="Tag archive index">
+<BaseLayout title="devjune.dev | Tags" description={SITE_DESCRIPTION}>
   <section class="hero">
     <h1>Tags</h1>
-    <p>Browse notes through focused backend keywords.</p>
+    <p>Spring, JPA, Docker, Monitoring처럼 백엔드 학습 기록을 핵심 키워드로 찾아볼 수 있습니다.</p>
   </section>
 
-  <ul class="post-list" style="margin-top: 1rem;">
+  <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
     {tagSummary.map(({ tag, count }) => (
       <li class="card category-card-row">
         <a class="badge badge--topic badge--topic-tag" href={`/tags/${tag}/`}>

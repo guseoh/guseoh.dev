@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import { buildCategorySummary, filterPostsByCategory } from "../../utils/categories";
+import { SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -13,7 +14,7 @@ export async function getStaticPaths() {
     params: { category: slug },
     props: {
       categoryName: name,
-      posts: filterPostsByCategory(posts, slug)
+      posts: sortPostsByDate(filterPostsByCategory(posts, slug))
     }
   }));
 }
@@ -22,13 +23,26 @@ const { categoryName, posts } = Astro.props as {
   categoryName: string;
   posts: CollectionEntry<"blog">[];
 };
+
+const allPosts = await getCollection("blog", ({ data }) => !data.draft);
+const categorySummary = buildCategorySummary(allPosts);
+const activeCategory = categorySummary.find((category) => category.name === categoryName);
 ---
 
-<BaseLayout title={`guseo.dev | ${categoryName}`} description={`${categoryName} category posts`}>
+<BaseLayout title={`devjune.dev | ${categoryName}`} description={`${categoryName} 카테고리 글 목록 - ${SITE_DESCRIPTION}`}>
   <section class="hero">
     <h1>{categoryName}</h1>
-    <p>{posts.length} posts belong to this category.</p>
+    <p>{posts.length}개의 게시글이 이 카테고리에 연결되어 있습니다.</p>
   </section>
+
+  <nav class="archive-filter-list" aria-label="Category filters">
+    {categorySummary.map(({ slug, name, count }) => (
+      <a class:list={["archive-filter-pill", activeCategory?.slug === slug && "is-active"]} href={`/categories/${slug}/`}>
+        <span>{name}</span>
+        <strong>{count}</strong>
+      </a>
+    ))}
+  </nav>
 
   <ul class="post-list" style="margin-top: 1rem;">
     {posts.map((post) => (

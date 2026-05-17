@@ -2,8 +2,10 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostMetaBadges from "../../components/PostMetaBadges.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { normalizeTag } from "../../utils/tags";
+import { formatPostDate, getReadingTime, sortPostsByDate } from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -16,23 +18,61 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props as { post: CollectionEntry<"blog"> };
 const { Content, headings } = await render(post);
+const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
 const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+const readingTime = getReadingTime(post);
+const currentIndex = allPosts.findIndex((entry) => entry.slug === post.slug);
+const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
+const olderPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : undefined;
+const postTagSet = new Set(post.data.tags.map((tag) => normalizeTag(tag)));
+const relatedPosts = allPosts
+  .filter((entry) => entry.slug !== post.slug)
+  .map((entry) => {
+    const sharedTagCount = entry.data.tags.filter((tag) => postTagSet.has(normalizeTag(tag))).length;
+    const sameCategory = normalizeCategory(entry.data.category || "") === categorySlug;
+
+    return {
+      post: entry,
+      score: (sameCategory ? 2 : 0) + sharedTagCount
+    };
+  })
+  .filter((entry) => entry.score > 0)
+  .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
+  .slice(0, 3)
+  .map((entry) => entry.post);
 ---
 
-<BaseLayout title={`${post.data.title} | guseo.dev`} description={post.data.description}>
+<BaseLayout title={`${post.data.title} | devjune.dev`} description={post.data.description} type="article">
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
     <article class="post">
       <header class="post__header">
         <h1>{post.data.title}</h1>
-        <p class="meta">
-          <span>{post.data.pubDate.toLocaleDateString("ko-KR")}</span>
-          <span data-post-view-count={post.slug}>Views 0</span>
-          {post.data.updatedDate && <span>Updated: {post.data.updatedDate.toLocaleDateString("ko-KR")}</span>}
-        </p>
-        <div class="meta">
-          <a class="tag tag--category" href={`/categories/${categorySlug}/`}>{categoryName}</a>
+        <p class="post__description">{post.data.description}</p>
+
+        <dl class="post-meta-grid">
+          <div class="post-meta-item">
+            <dt>작성일</dt>
+            <dd><time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time></dd>
+          </div>
+          {post.data.updated && (
+            <div class="post-meta-item">
+              <dt>수정일</dt>
+              <dd><time datetime={post.data.updated.toISOString()}>{formatPostDate(post.data.updated)}</time></dd>
+            </div>
+          )}
+          <div class="post-meta-item">
+            <dt>카테고리</dt>
+            <dd><a class="tag tag--category" href={`/categories/${categorySlug}/`}>{categoryName}</a></dd>
+          </div>
+          <div class="post-meta-item">
+            <dt>읽는 시간</dt>
+            <dd>{readingTime}</dd>
+          </div>
+        </dl>
+
+        <div class="post-meta-tags" aria-label="Post tags">
           {post.data.tags.map((tag) => (
             <a class="tag" href={`/tags/${normalizeTag(tag)}/`}>#{tag}</a>
           ))}
@@ -40,6 +80,50 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
       </header>
 
       <Content />
+
+      <footer class="post-footer">
+        <nav class="post-adjacent" aria-label="Previous and next posts">
+          {olderPost ? (
+            <a class="post-adjacent__card" href={`/blog/${olderPost.slug}/`}>
+              <span>이전 글</span>
+              <strong>{olderPost.data.title}</strong>
+            </a>
+          ) : (
+            <span class="post-adjacent__card post-adjacent__card--empty">이전 글이 없습니다.</span>
+          )}
+
+          {newerPost ? (
+            <a class="post-adjacent__card post-adjacent__card--next" href={`/blog/${newerPost.slug}/`}>
+              <span>다음 글</span>
+              <strong>{newerPost.data.title}</strong>
+            </a>
+          ) : (
+            <span class="post-adjacent__card post-adjacent__card--empty post-adjacent__card--next">다음 글이 없습니다.</span>
+          )}
+        </nav>
+
+        <section class="related-posts" aria-label="Related posts">
+          <h2>Related Posts</h2>
+          {relatedPosts.length > 0 ? (
+            <div class="related-posts__grid">
+              {relatedPosts.map((relatedPost) => (
+                <article class="related-card">
+                  <a class="related-card__title" href={`/blog/${relatedPost.slug}/`}>{relatedPost.data.title}</a>
+                  <p>{relatedPost.data.description}</p>
+                  <div class="related-card__meta">
+                    <time datetime={relatedPost.data.date.toISOString()}>{formatPostDate(relatedPost.data.date)}</time>
+                    <span aria-hidden="true">·</span>
+                    <span>{getReadingTime(relatedPost)}</span>
+                  </div>
+                  <PostMetaBadges category={relatedPost.data.category} tags={relatedPost.data.tags} maxTags={2} />
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p class="related-posts__empty">같은 카테고리나 태그의 글이 쌓이면 이곳에 표시됩니다.</p>
+          )}
+        </section>
+      </footer>
     </article>
 
     {
@@ -104,4 +188,87 @@ const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.d
       )
     }
   </div>
+
+  <script is:inline>
+    (() => {
+      const blocks = Array.from(document.querySelectorAll(".post pre"));
+      if (blocks.length === 0) return;
+
+      const languageLabels = new Map([
+        ["java", "Java"],
+        ["js", "JavaScript"],
+        ["javascript", "JavaScript"],
+        ["ts", "TypeScript"],
+        ["typescript", "TypeScript"],
+        ["sql", "SQL"],
+        ["bash", "Bash"],
+        ["sh", "Bash"],
+        ["yaml", "YAML"],
+        ["yml", "YAML"],
+        ["html", "HTML"],
+        ["css", "CSS"],
+        ["json", "JSON"],
+        ["xml", "XML"],
+        ["properties", "Properties"],
+        ["text", "Code"],
+        ["plaintext", "Code"]
+      ]);
+
+      const getLanguageKey = (pre) => {
+        const fromData = pre.dataset.language || "";
+        if (fromData.trim().length > 0) return fromData;
+
+        const code = pre.querySelector("code");
+        const className = `${pre.className} ${code?.className ?? ""}`;
+        const match = className.match(/language-([A-Za-z0-9_-]+)/);
+        return match?.[1] ?? "";
+      };
+
+      const getLanguageLabel = (pre) => {
+        const key = getLanguageKey(pre).trim().toLowerCase();
+        return languageLabels.get(key) ?? (key.length > 0 ? key[0].toUpperCase() + key.slice(1) : "Code");
+      };
+
+      for (const pre of blocks) {
+        if (!(pre instanceof HTMLPreElement) || pre.parentElement?.classList.contains("code-block")) continue;
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "code-block";
+        pre.parentNode?.insertBefore(wrapper, pre);
+
+        const header = document.createElement("div");
+        header.className = "code-block__header";
+
+        const language = document.createElement("span");
+        language.className = "code-block__language";
+        language.textContent = getLanguageLabel(pre);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "code-copy-button";
+        button.textContent = "Copy";
+        button.setAttribute("aria-label", "Copy code block");
+
+        header.append(language, button);
+        wrapper.append(header, pre);
+
+        button.addEventListener("click", async () => {
+          const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
+
+          try {
+            await navigator.clipboard.writeText(code);
+            button.textContent = "Copied";
+            window.setTimeout(() => {
+              button.textContent = "Copy";
+            }, 1400);
+          } catch {
+            button.textContent = "Error";
+            window.setTimeout(() => {
+              button.textContent = "Copy";
+            }, 1400);
+          }
+        });
+      }
+    })();
+  </script>
 </BaseLayout>
