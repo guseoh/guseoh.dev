@@ -1,8 +1,8 @@
 ---
 title: "[Git] Git branch 전략 정리"
 description: ""
-pubDate: 2026-03-27
-updatedDate: 2026-03-27
+date: 2026-03-27
+updated: 2026-05-17
 category: "Git"
 tags:
   - Learning
