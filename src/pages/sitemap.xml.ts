@@ -29,7 +29,7 @@ export async function GET() {
     ? Array.from({ length: totalPages - 1 }, (_, index) => `/blog/page/${index + 2}/`)
     : [];
   const postPaths = posts.map((post) => `/blog/${post.id}/`);
-  const categoryPaths = categories.map((category) => `/categories/${category.id}/`);
+  const categoryPaths = categories.map((category) => `/categories/${category.slug}/`);
   const tagPaths = tags.map((tag) => `/tags/${tag.tag}/`);
   const today = new Date().toISOString().slice(0, 10);
 

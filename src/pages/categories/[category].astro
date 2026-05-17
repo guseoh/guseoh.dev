@@ -37,7 +37,7 @@ const activeCategory = categorySummary.find((category) => category.name === cate
 
   <nav class="archive-filter-list" aria-label="Category filters">
     {categorySummary.map(({ slug, name, count }) => (
-      <a class:list={["archive-filter-pill", activeCategory?.id === slug && "is-active"]} href={`/categories/${slug}/`}>
+      <a class:list={["archive-filter-pill", activeCategory?.slug === slug && "is-active"]} href={`/categories/${slug}/`}>
         <span>{name}</span>
         <strong>{count}</strong>
       </a>
