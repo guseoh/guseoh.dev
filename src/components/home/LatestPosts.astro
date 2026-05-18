@@ -18,7 +18,7 @@ const { posts } = Astro.props as Props;
   </div>
 
   {posts.length === 0 ? (
-    <p class="section-empty">아직 게시글이 없습니다.</p>
+    <p class="section-empty">대표 글 외의 최신 글이 쌓이면 이곳에 이어서 표시됩니다.</p>
   ) : (
     <ul class="latest-list">
       {posts.map((post) => {

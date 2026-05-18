@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
+import CategoryMenu from "../../components/CategoryMenu.astro";
 import { buildCategoryHierarchy } from "../../utils/categories";
 import { SITE_DESCRIPTION } from "../../utils/posts";
 
@@ -14,30 +15,6 @@ const categoryHierarchy = buildCategoryHierarchy(posts);
     <p>Project, Spring, JPA, Database, DevOps, Git 중심으로 학습/개선 기록을 묶어둔 공간입니다.</p>
   </section>
 
-  <div class="category-tree category-tree--page">
-    {categoryHierarchy.map((group) => (
-      <section class="category-tree__group" aria-label={`${group.name} category group`}>
-        <div class="category-tree__group-head">
-          {group.href ? (
-            <a class="category-tree__group-title" href={group.href}>{group.name}</a>
-          ) : (
-            <span class="category-tree__group-title">{group.name}</span>
-          )}
-          <span class="category-tree__count">{group.count}</span>
-        </div>
-
-        {group.children.length > 0 && (
-          <div class="category-tree__children">
-            {group.children.map((child) => (
-              <a class="category-tree__child" href={child.href}>
-                <span>{child.name}</span>
-                <strong>{child.count}</strong>
-              </a>
-            ))}
-          </div>
-        )}
-      </section>
-    ))}
-  </div>
+  <CategoryMenu groups={categoryHierarchy} idPrefix="categories-page" variant="page" label="Category index menu" />
 </BaseLayout>
 

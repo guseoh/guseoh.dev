@@ -1,0 +1,92 @@
+---
+import type { CategoryTreeGroup } from "../utils/categories";
+
+interface Props {
+  groups: CategoryTreeGroup[];
+  idPrefix: string;
+  variant?: "sidebar" | "home" | "page";
+  currentCategory?: string;
+  currentTag?: string;
+  label?: string;
+}
+
+const {
+  groups,
+  idPrefix,
+  variant = "page",
+  currentCategory = "",
+  currentTag = "",
+  label = "Category menu"
+} = Astro.props as Props;
+---
+
+<nav class:list={["category-menu", `category-menu--${variant}`]} aria-label={label} data-category-menu>
+  {groups.map((group, index) => {
+    const isActiveGroup =
+      currentCategory === group.slug || group.children.some((child) => currentTag === child.slug);
+    const isExpanded = isActiveGroup || index === 0;
+    const panelId = `${idPrefix}-${group.slug}-panel`;
+
+    return (
+      <section class:list={["category-menu__group", isActiveGroup && "is-active"]}>
+        <button
+          class="category-menu__toggle"
+          type="button"
+          aria-expanded={isExpanded ? "true" : "false"}
+          aria-controls={panelId}
+          data-category-toggle
+        >
+          <span class="category-menu__title">{group.name}</span>
+          <span class="category-menu__meta">
+            <span class="category-menu__count">{group.count}</span>
+            <span class="category-menu__chevron" aria-hidden="true"></span>
+          </span>
+        </button>
+
+        <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
+          {group.href && (
+            <a class:list={["category-menu__child", "category-menu__child--all", currentCategory === group.slug && "is-active"]} href={group.href}>
+              <span>전체 {group.name}</span>
+              <strong>{group.count}</strong>
+            </a>
+          )}
+
+          {group.children.map((child) => (
+            <a class:list={["category-menu__child", currentTag === child.slug && "is-active"]} href={child.href}>
+              <span>{child.name}</span>
+              <strong>{child.count}</strong>
+            </a>
+          ))}
+        </div>
+      </section>
+    );
+  })}
+</nav>
+
+<script is:inline>
+  (() => {
+    const menus = document.querySelectorAll("[data-category-menu]:not([data-category-menu-ready])");
+
+    for (const menu of menus) {
+      menu.setAttribute("data-category-menu-ready", "true");
+
+      menu.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const button = target.closest("[data-category-toggle]");
+        if (!(button instanceof HTMLButtonElement) || !menu.contains(button)) return;
+
+        const panelId = button.getAttribute("aria-controls");
+        if (!panelId) return;
+
+        const panel = document.getElementById(panelId);
+        if (!(panel instanceof HTMLElement)) return;
+
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+        button.setAttribute("aria-expanded", isExpanded ? "false" : "true");
+        panel.hidden = isExpanded;
+      });
+    }
+  })();
+</script>

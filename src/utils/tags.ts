@@ -11,6 +11,7 @@ export function normalizeTag(tag: string): string {
 const TAG_LABELS: Record<string, string> = {
   actuator: "Actuator",
   "aws-ec2": "AWS EC2",
+  board: "Board",
   "branch-strategy": "Branch Strategy",
   "ci-cd": "CI/CD",
   database: "Database",

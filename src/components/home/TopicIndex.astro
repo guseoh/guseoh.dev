@@ -1,5 +1,6 @@
 ---
 import type { CategoryTreeGroup } from "../../utils/categories";
+import CategoryMenu from "../CategoryMenu.astro";
 
 interface Props {
   categories: CategoryTreeGroup[];
@@ -17,31 +18,7 @@ const { categories } = Astro.props as Props;
   {categories.length === 0 ? (
     <p class="section-empty">카테고리가 없습니다.</p>
   ) : (
-    <div class="category-tree category-tree--home">
-      {categories.map((group) => (
-        <section class="category-tree__group" aria-label={`${group.name} category group`}>
-          <div class="category-tree__group-head">
-            {group.href ? (
-              <a class="category-tree__group-title" href={group.href}>{group.name}</a>
-            ) : (
-              <span class="category-tree__group-title">{group.name}</span>
-            )}
-            <span class="category-tree__count">{group.count}</span>
-          </div>
-
-          {group.children.length > 0 && (
-            <div class="category-tree__children">
-              {group.children.map((child) => (
-                <a class="category-tree__child" href={child.href}>
-                  <span>{child.name}</span>
-                  <strong>{child.count}</strong>
-                </a>
-              ))}
-            </div>
-          )}
-        </section>
-      ))}
-    </div>
+    <CategoryMenu groups={categories} idPrefix="home-category" variant="home" label="Home category menu" />
   )}
 </section>
 

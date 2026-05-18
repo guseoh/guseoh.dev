@@ -4397,3 +4397,278 @@ html[data-theme="dark"] .about-panel,
 html[data-theme="dark"] .post-series {
   box-shadow: 0 16px 34px -32px rgba(0, 0, 0, 0.7);
 }
+
+/* Detail reading layout and shared category accordion */
+.post-view,
+.site-shell.sidebar-collapsed .post-view {
+  width: min(100%, 1160px);
+  margin-inline: auto;
+  grid-template-columns: minmax(0, 890px) minmax(136px, 168px);
+  column-gap: clamp(2.7rem, 4.6vw, 5.8rem);
+  justify-content: center;
+}
+
+.post-view--single,
+.site-shell.sidebar-collapsed .post-view--single {
+  width: min(100%, 960px);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.post,
+.site-shell.sidebar-collapsed .post {
+  width: 100%;
+  max-width: 890px;
+}
+
+.post :where(p, ul, ol, blockquote) {
+  max-width: 76ch;
+}
+
+.post :where(.code-block, pre, table, .post__header, .post-meta-grid, .post-meta-tags, .post-footer) {
+  max-width: none;
+}
+
+.post-toc,
+.site-shell.sidebar-collapsed .post-toc {
+  width: clamp(136px, 12vw, 168px);
+  max-width: 168px;
+  margin-left: 0;
+  padding: 0.58rem 0.62rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card-bg) 92%, var(--bg));
+  box-shadow: none;
+}
+
+.post-toc__title {
+  color: var(--muted-readable);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.post-toc__list {
+  gap: 0.28rem;
+  margin-top: 0.5rem;
+}
+
+.post-toc__item a {
+  display: block;
+  border-radius: 6px;
+  color: var(--muted-readable);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  padding: 0.16rem 0.18rem;
+}
+
+.post-toc__item a:hover,
+.post-toc__item a:focus-visible,
+.post-toc__item a.is-active {
+  background: color-mix(in srgb, var(--tag-bg) 72%, transparent);
+  color: var(--link-hover);
+}
+
+.category-menu {
+  display: grid;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card-bg) 94%, var(--bg));
+  overflow: hidden;
+}
+
+.category-menu--home,
+.category-menu--page {
+  margin-top: 1rem;
+}
+
+.category-menu__group + .category-menu__group {
+  border-top: 1px solid var(--border);
+}
+
+.category-menu__toggle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--heading);
+  cursor: pointer;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 0.84rem 0.92rem;
+  text-align: left;
+}
+
+.category-menu__toggle:hover,
+.category-menu__toggle:focus-visible,
+.category-menu__group.is-active .category-menu__toggle {
+  background: color-mix(in srgb, var(--surface-hover) 72%, transparent);
+  color: var(--link-hover);
+}
+
+.category-menu__toggle:focus-visible,
+.category-menu__child:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--link) 58%, transparent);
+  outline-offset: -2px;
+}
+
+.category-menu__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-menu__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+}
+
+.category-menu__count {
+  min-width: 1.62rem;
+  border: 1px solid var(--tag-border);
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.24rem 0.42rem;
+  text-align: center;
+}
+
+.category-menu__chevron {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.72;
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.category-menu__toggle[aria-expanded="true"] .category-menu__chevron {
+  transform: rotate(225deg);
+}
+
+.category-menu__children {
+  display: grid;
+  gap: 0.08rem;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 72%, var(--bg));
+  padding: 0.42rem 0.5rem 0.54rem 0.7rem;
+}
+
+.category-menu__children[hidden] {
+  display: none;
+}
+
+.category-menu__child {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: center;
+  border-left: 2px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 0 7px 7px 0;
+  color: var(--muted-readable);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.42rem 0.48rem 0.42rem 0.68rem;
+  text-decoration: none;
+}
+
+.category-menu__child span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-menu__child strong {
+  color: var(--muted-readable);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.category-menu__child:hover,
+.category-menu__child:focus-visible,
+.category-menu__child.is-active {
+  border-left-color: var(--link);
+  background: var(--surface-hover);
+  color: var(--link-hover);
+}
+
+.category-menu__child--all {
+  color: var(--heading);
+}
+
+.category-menu--sidebar {
+  border-radius: 8px;
+}
+
+.category-menu--sidebar .category-menu__toggle {
+  font-size: 0.82rem;
+  padding: 0.66rem 0.7rem;
+}
+
+.category-menu--sidebar .category-menu__children {
+  padding: 0.34rem 0.42rem 0.46rem 0.56rem;
+}
+
+.category-menu--sidebar .category-menu__child {
+  font-size: 0.74rem;
+  padding: 0.36rem 0.4rem 0.36rem 0.58rem;
+}
+
+html[data-theme="dark"] .post-toc,
+html[data-theme="dark"] .category-menu {
+  background: color-mix(in srgb, var(--card-bg) 90%, var(--bg));
+}
+
+html[data-theme="dark"] .category-menu__children {
+  background: color-mix(in srgb, var(--surface) 68%, var(--bg));
+}
+
+@media (max-width: 1200px) {
+  .post-view,
+  .site-shell.sidebar-collapsed .post-view,
+  .post-view--single,
+  .site-shell.sidebar-collapsed .post-view--single {
+    width: min(100%, 940px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .post,
+  .site-shell.sidebar-collapsed .post {
+    max-width: 940px;
+  }
+
+  .post-toc,
+  .site-shell.sidebar-collapsed .post-toc {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin-top: 1rem;
+    padding: 0.78rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .post :where(p, ul, ol, blockquote) {
+    max-width: none;
+  }
+
+  .category-menu__toggle {
+    padding-inline: 0.76rem;
+  }
+
+  .category-menu__child {
+    font-size: 0.76rem;
+  }
+}

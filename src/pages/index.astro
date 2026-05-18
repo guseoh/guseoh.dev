@@ -11,8 +11,9 @@ import TopicIndex from "../components/home/TopicIndex.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
 
-const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 4);
-const latestPosts = posts.slice(0, 5);
+const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 1);
+const featuredPostIds = new Set(featuredPosts.map((post) => post.id));
+const latestPosts = posts.filter((post) => !featuredPostIds.has(post.id)).slice(0, 4);
 const categoryHierarchy = buildCategoryHierarchy(posts);
 const boardPost = posts.find((post) => post.data.title.toLowerCase().includes("board"));
 const boardRelatedHref = boardPost ? `/blog/${boardPost.id}/` : "/categories/project/";

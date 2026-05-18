@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { getCollection } from "astro:content";
+import CategoryMenu from "../components/CategoryMenu.astro";
 import { buildCategoryHierarchy } from "../utils/categories";
 import { buildTagSummary } from "../utils/tags";
 import {
@@ -177,33 +178,14 @@ function isNavActive(href: string) {
                 {categoryHierarchy.length === 0 ? (
                   <p class="category-empty">No categories yet.</p>
                 ) : (
-                  <div class="category-tree category-tree--sidebar" role="list">
-                    {categoryHierarchy.map((group) => (
-                      <section class="category-tree__group" aria-label={`${group.name} category group`}>
-                        <div class="category-tree__group-head">
-                          {group.href ? (
-                            <a class:list={["category-tree__group-title", currentCategory === group.slug && "is-active"]} href={group.href}>
-                              {group.name}
-                            </a>
-                          ) : (
-                            <span class="category-tree__group-title">{group.name}</span>
-                          )}
-                          <span class="category-tree__count">{group.count}</span>
-                        </div>
-
-                        {group.children.length > 0 && (
-                          <div class="category-tree__children">
-                            {group.children.map((child) => (
-                              <a class:list={["category-tree__child", currentTag === child.slug && "is-active"]} href={child.href}>
-                                <span>{child.name}</span>
-                                <strong>{child.count}</strong>
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                      </section>
-                    ))}
-                  </div>
+                  <CategoryMenu
+                    groups={categoryHierarchy}
+                    idPrefix="sidebar-category"
+                    variant="sidebar"
+                    currentCategory={currentCategory}
+                    currentTag={currentTag}
+                    label="Sidebar category menu"
+                  />
                 )}
 
                 {tagSummary.length > 0 && (
