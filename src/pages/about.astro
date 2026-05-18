@@ -1,0 +1,49 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { CORE_TECH_TAGS, GITHUB_URL, SITE_DESCRIPTION } from "../utils/posts";
+
+const boardUrl = "https://github.com/guseoh/Board";
+---
+
+<BaseLayout title="devjune.dev | About" description={`Java/Spring 백엔드 개발자 오지훈 소개 - ${SITE_DESCRIPTION}`}>
+  <section class="hero about-hero">
+    <p class="about-hero__eyebrow">About</p>
+    <h1>Java/Spring 백엔드 개발자 오지훈입니다.</h1>
+    <p>
+      Board 프로젝트를 중심으로 기능 구현에서 끝내지 않고, 측정과 원인 분석,
+      구조 개선, 배포 자동화까지 이어지는 과정을 기록하고 있습니다.
+    </p>
+  </section>
+
+  <div class="about-grid">
+    <section class="about-panel">
+      <h2>지금 집중하는 방향</h2>
+      <p>
+        Spring Boot 기반 게시판 프로젝트를 운영 가능한 백엔드 서비스처럼 다듬어가며,
+        회원/게시글/댓글/OAuth2 로그인 흐름과 검색, 배포, 모니터링 개선 과정을 정리합니다.
+      </p>
+    </section>
+
+    <section class="about-panel">
+      <h2>주요 관심 기술</h2>
+      <div class="about-tech-list" aria-label="주요 관심 기술">
+        {CORE_TECH_TAGS.map((tag) => <span>{tag}</span>)}
+        <span>QueryDSL</span>
+        <span>성능 개선</span>
+      </div>
+    </section>
+
+    <section class="about-panel about-panel--wide">
+      <h2>Board 프로젝트</h2>
+      <p>
+        Board는 Spring Boot 기반 게시판 프로젝트입니다. 회원, 게시글, 댓글, OAuth2 로그인,
+        QueryDSL 검색, Docker 배포, CI/CD, 모니터링과 성능 측정 과정을 블로그 글로 확장해 나갈 예정입니다.
+      </p>
+      <div class="about-actions">
+        <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
+        <a href={boardUrl} target="_blank" rel="noreferrer">Board Repository</a>
+        <a href="/categories/project/">Project 글 보기</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

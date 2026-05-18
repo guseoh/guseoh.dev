@@ -1,12 +1,12 @@
 ---
 title: "[Git] Git branch 전략 정리"
-description: ""
+description: "Git Flow와 GitHub Flow의 차이를 정리하고 개인 프로젝트에 맞는 브랜치 운영 방식을 살펴본 기록"
 date: 2026-03-27
 updated: 2026-05-17
 category: "Git"
 tags:
-  - Learning
   - Git
+  - Branch Strategy
 ---
 
 ## Git Branch 전략

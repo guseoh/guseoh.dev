@@ -29,18 +29,20 @@ const { tag, posts } = Astro.props as {
 
 const allPosts = await getCollection("blog", ({ data }) => !data.draft);
 const tagSummary = buildTagSummary(allPosts);
+const activeTag = tagSummary.find((entry) => entry.tag === tag);
+const tagName = activeTag?.name ?? tag;
 ---
 
-<BaseLayout title={`devjune.dev | #${tag}`} description={`#${tag} 태그 글 목록 - ${SITE_DESCRIPTION}`}>
+<BaseLayout title={`devjune.dev | #${tagName}`} description={`#${tagName} 태그 글 목록 - ${SITE_DESCRIPTION}`}>
   <section class="hero">
-    <h1>#{tag}</h1>
+    <h1>#{tagName}</h1>
     <p>{posts.length}개의 게시글이 이 태그에 연결되어 있습니다.</p>
   </section>
 
   <nav class="archive-filter-list" aria-label="Tag filters">
-    {tagSummary.map(({ tag: tagName, count }) => (
-      <a class:list={["archive-filter-pill", tagName === tag && "is-active"]} href={`/tags/${tagName}/`}>
-        <span>#{tagName}</span>
+    {tagSummary.map(({ tag: tagSlug, name, count }) => (
+      <a class:list={["archive-filter-pill", tagSlug === tag && "is-active"]} href={`/tags/${tagSlug}/`}>
+        <span>#{name}</span>
         <strong>{count}</strong>
       </a>
     ))}

@@ -15,10 +15,10 @@ const tagSummary = buildTagSummary(posts);
   </section>
 
   <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
-    {tagSummary.map(({ tag, count }) => (
+    {tagSummary.map(({ tag, name, count }) => (
       <li class="card category-card-row">
         <a class="badge badge--topic badge--topic-tag" href={`/tags/${tag}/`}>
-          <span>#{tag}</span>
+          <span>#{name}</span>
           <strong>{count}</strong>
         </a>
       </li>

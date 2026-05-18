@@ -4,8 +4,8 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostMetaBadges from "../../components/PostMetaBadges.astro";
 import { normalizeCategory } from "../../utils/categories";
-import { normalizeTag } from "../../utils/tags";
-import { formatPostDate, getReadingTime, sortPostsByDate } from "../../utils/posts";
+import { formatTagName, normalizeTag } from "../../utils/tags";
+import { SITE_DESCRIPTION, formatPostDate, getReadingTime, sortPostsByDate } from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -26,16 +26,23 @@ const readingTime = getReadingTime(post);
 const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
 const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const olderPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : undefined;
+const seriesName = post.data.series?.trim();
+const seriesPosts = seriesName
+  ? allPosts
+      .filter((entry) => entry.data.series?.trim() === seriesName)
+      .sort((a, b) => (a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER) - (b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER))
+  : [];
 const postTagSet = new Set(post.data.tags.map((tag) => normalizeTag(tag)));
 const relatedPosts = allPosts
   .filter((entry) => entry.id !== post.id)
   .map((entry) => {
     const sharedTagCount = entry.data.tags.filter((tag) => postTagSet.has(normalizeTag(tag))).length;
     const sameCategory = normalizeCategory(entry.data.category || "") === categorySlug;
+    const sameSeries = seriesName && entry.data.series?.trim() === seriesName;
 
     return {
       post: entry,
-      score: (sameCategory ? 2 : 0) + sharedTagCount
+      score: (sameSeries ? 3 : 0) + (sameCategory ? 2 : 0) + sharedTagCount
     };
   })
   .filter((entry) => entry.score > 0)
@@ -44,7 +51,14 @@ const relatedPosts = allPosts
   .map((entry) => entry.post);
 ---
 
-<BaseLayout title={`${post.data.title} | devjune.dev`} description={post.data.description} type="article">
+<BaseLayout
+  title={`${post.data.title} | devjune.dev`}
+  description={post.data.description || SITE_DESCRIPTION}
+  image={post.data.heroImage}
+  publishedTime={post.data.date.toISOString()}
+  updatedTime={(post.data.updated ?? post.data.date).toISOString()}
+  type="article"
+>
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
     <article class="post">
       <header class="post__header">
@@ -74,7 +88,7 @@ const relatedPosts = allPosts
 
         <div class="post-meta-tags" aria-label="Post tags">
           {post.data.tags.map((tag) => (
-            <a class="tag" href={`/tags/${normalizeTag(tag)}/`}>#{tag}</a>
+            <a class="tag" href={`/tags/${normalizeTag(tag)}/`}>#{formatTagName(tag)}</a>
           ))}
         </div>
       </header>
@@ -82,6 +96,28 @@ const relatedPosts = allPosts
       <Content />
 
       <footer class="post-footer">
+        {seriesName && (
+          <section class="post-series" aria-label="Post series">
+            <p class="post-series__label">Series</p>
+            <h2>{seriesName}</h2>
+            {seriesPosts.length > 1 ? (
+              <ol class="post-series__list">
+                {seriesPosts.map((seriesPost) => (
+                  <li class:list={[seriesPost.id === post.id && "is-current"]}>
+                    {seriesPost.id === post.id ? (
+                      <span>{seriesPost.data.title}</span>
+                    ) : (
+                      <a href={`/blog/${seriesPost.id}/`}>{seriesPost.data.title}</a>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p class="post-series__empty">다음 성능 개선 기록이 발행되면 이 시리즈에 이어서 연결됩니다.</p>
+            )}
+          </section>
+        )}
+
         <nav class="post-adjacent" aria-label="Previous and next posts">
           {olderPost ? (
             <a class="post-adjacent__card" href={`/blog/${olderPost.id}/`}>

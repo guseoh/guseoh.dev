@@ -6,7 +6,18 @@ export type CategorySummary = {
   count: number;
 };
 
-export const RECOMMENDED_CATEGORIES = ["Project", "Spring", "JPA", "Database", "DevOps", "Git"];
+export const RECOMMENDED_CATEGORIES = [
+  "Project",
+  "Spring",
+  "JPA",
+  "QueryDSL",
+  "Database",
+  "Docker",
+  "DevOps",
+  "Security",
+  "Git",
+  "Troubleshooting"
+];
 
 export function normalizeCategory(category: string): string {
   return category.trim().toLowerCase().replace(/\s+/g, "-");
