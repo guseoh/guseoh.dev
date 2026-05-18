@@ -1,4 +1,4 @@
-﻿import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 
 export function normalizeTag(tag: string): string {
   return tag.trim().toLowerCase().replace(/\s+/g, "-");
@@ -18,3 +18,4 @@ export function buildTagSummary(posts: CollectionEntry<"blog">[]) {
     .map(([tag, count]) => ({ tag, count }))
     .sort((a, b) => a.tag.localeCompare(b.tag));
 }
+

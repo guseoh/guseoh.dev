@@ -1,4 +1,4 @@
-﻿import type { CollectionEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 
 export type CategorySummary = {
   slug: string;
@@ -51,3 +51,4 @@ export function buildCategorySummary(posts: CollectionEntry<"blog">[]): Category
 export function filterPostsByCategory(posts: CollectionEntry<"blog">[], categorySlug: string) {
   return posts.filter((post) => getCategorySlug(post) === categorySlug);
 }
+

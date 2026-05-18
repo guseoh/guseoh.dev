@@ -43,3 +43,4 @@ export function getReadingTime(post: CollectionEntry<"blog">) {
 
   return `${minutes}분 읽기`;
 }
+

@@ -21,7 +21,7 @@ const { posts } = Astro.props as Props;
       {posts.map((post, index) => (
         <article class:list={["card", "featured-card", index === 0 && "featured-card--lead"]}>
           <p class="featured-card__label">Featured</p>
-          <h3><a href={`/blog/${post.slug}/`}>{post.data.title}</a></h3>
+          <h3><a href={`/blog/${post.id}/`}>{post.data.title}</a></h3>
           <p class="featured-card__description">{post.data.description}</p>
 
           <div class="featured-card__meta">
@@ -36,3 +36,4 @@ const { posts } = Astro.props as Props;
     </div>
   </section>
 )}
+

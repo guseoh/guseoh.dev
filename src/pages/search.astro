@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
 import { getCollection } from "astro:content";
@@ -14,7 +14,7 @@ const searchablePosts = posts.map((post) => ({
 }));
 ---
 
-<BaseLayout title="devjune.dev | Search" description={`게시글 검색 - ${SITE_DESCRIPTION}`}>
+<BaseLayout title="devjune.dev | Search" description={`검색 결과 - ${SITE_DESCRIPTION}`}>
   <section class="hero">
     <h1>Search</h1>
     <p id="search-status">검색어를 입력하면 결과가 표시됩니다.</p>
@@ -46,11 +46,12 @@ const searchablePosts = posts.map((post) => ({
 
       if (status) {
         if (query.length === 0) {
-          status.textContent = `전체 ${searchItems.length}개의 게시글을 표시합니다.`;
+          status.textContent = `전체 ${searchItems.length}개의 검색 결과를 찾았습니다.`;
         } else {
-          status.textContent = `"${query}" 검색 결과 ${visibleCount}건`;
+          status.textContent = `"${query}" 검색 결과 ${visibleCount}개`;
         }
       }
     })();
   </script>
 </BaseLayout>
+
