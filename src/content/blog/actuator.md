@@ -102,18 +102,16 @@ http://localhost:8080/actuator/metrics/http.server.requests?tag=uri:/post/%7Bid%
 }
 ```
 
-- COUNT: 요청 횟수 (`http://localhost:8080/post/13` 페이지에 10회 접속)
-- TOTAL_TIME: 전체 요청 처리 시간의 합
-- MAX: 가장 오래 걸린 단일 요청 시간
-- 평균 응답 시간: TOTAL_TIME / COUNT
+위의 Actuator 메트릭을 표로 정리하면 다음과 같다.
 
-위의 Actuator 메트릭을 보면 다음과 같다.
+| 지표 | 값 | 의미 |
+|---|---:|---|
+| COUNT | 10 | `/post/13` 페이지에 접속한 총 요청 횟수 |
+| TOTAL_TIME | 1.306s | 전체 요청 처리 시간의 합 |
+| MAX | 0.974s | 가장 오래 걸린 단일 요청 시간 |
+| AVG | 약 0.131s(130ms) | `TOTAL_TIME / COUNT`로 계산한 평균 응답 시간 |
 
-- COUNT = 10
-- TOTAL_TIME = 1.306s
-- MAX = 0.974s
-
-평균 응답 시간은 약 0.131s(130ms)이며, 가장 느린 요청은 약 974ms가 걸렸다.
+평균 응답 시간은 약 130ms이며, 가장 느린 요청은 약 974ms가 걸렸다.
 
 즉, 전체 평균으로 보면 나쁘지 않지만, 일부 요청에서 지연이 발생했을 가능성이 있다.
 
@@ -123,9 +121,12 @@ http://localhost:8080/actuator/metrics/http.server.requests?tag=uri:/post/%7Bid%
 
 ### 4.1 게시글 조회
 
-```sql
+```text
 [SQL] 6ms
 [PARAMS] [13]
+```
+
+```sql
 select
     p1_0.id,
     p1_0.content,
@@ -142,9 +143,12 @@ where p1_0.id=13
 
 ### 4.2 댓글 조회
 
-```sql
+```text
 [SQL] 6ms
 [PARAMS] [13]
+```
+
+```sql
 select
     c1_0.post_id,
     c1_0.id,
@@ -160,9 +164,12 @@ where c1_0.post_id=13
 
 ### 4.3 회원 조회
 
-```sql
+```text
 [SQL] 2ms
 [PARAMS] [15]
+```
+
+```sql
 select
     m1_0.id,
     m1_0.created_at,
@@ -181,9 +188,12 @@ where m1_0.id=15
 
 ### 4.4 게시글 count 조회
 
-```sql
+```text
 [SQL] 6ms
 [PARAMS] [13]
+```
+
+```sql
 select
     count(*)
 from post p1_0
@@ -192,10 +202,13 @@ where p1_0.id=13
 
 ### 4.5 댓글 재조회
 
-```sql
+```text
 2026-03-26 16:08:05.074 [http-nio-8080-exec-1] INFO  p6spy -
 [SQL] 0ms
 [PARAMS] [0]
+```
+
+```sql
 select
     c1_0.id,
     c1_0.content,
@@ -212,21 +225,27 @@ order by c1_0.id
 
 ## 5. 발견한 문제
 
-- 댓글 조회가 두 번 발생한다.
-- 게시글 count 조회가 추가로 발생한다.
-- 평균 응답 시간은 괜찮지만, 최대 응답 시간이 튄다.
+이번 측정에서 바로 확인된 현상은 다음과 같다.
+
+| 확인된 현상 | 관찰 내용 | 다음 글에서 확인할 분석 포인트 |
+|---|---|---|
+| 댓글 조회 중복 | 댓글 조회 후 댓글 목록을 다시 조회한다. | View 렌더링 과정에서 댓글 목록을 중복 접근하는지 확인한다. |
+| 게시글 count 조회 | 게시글 단건 조회와 별도로 `count(*)` 조회가 발생한다. | 댓글 수 조회 또는 존재 여부 확인 로직이 분리되어 있는지 확인한다. |
+| 최대 응답 시간 증가 | 평균은 약 130ms지만, 가장 느린 요청은 약 974ms가 걸렸다. | 첫 요청 초기화 비용, 캐시 미적용 구간, Repository 호출 중복 여부를 확인한다. |
+
+아직 원인을 단정할 단계는 아니다. 우선 P6Spy 로그에서 보이는 쿼리 흐름을 기준으로 Controller, Service, View 렌더링 과정에서 같은 데이터에 다시 접근하는 지점을 좁혀볼 필요가 있다.
 
 ## 6. 다음 개선 방향
 
-1. 두 번의 댓글 조회 확인
-2. 게시글 count 조회가 왜 발생하는지 확인
-3. 개선 후 Actuator / P6Spy 결과 비교
+1. 댓글 조회가 두 번 발생하는 지점을 Controller, Service, View 렌더링 관점에서 확인한다.
+2. 게시글 count 조회가 어떤 코드 경로에서 발생하는지 확인한다.
+3. 개선 후 Actuator / P6Spy 결과를 다시 측정해 개선 전후 차이를 비교한다.
 
 이번 측정으로 성능 문제에 대해 막연히 추측하기보다는 먼저 측정하고 기록하는 과정이 중요하다는 것을 알게 되었다.
 
-다음 글에서는 상세 조회 로직을 실제로 수정하고, 개선 전후 차이를 비교해볼 예정이다.
+다음 글에서는 "[Board 프로젝트] 댓글 중복 조회 원인 분석"을 통해 댓글 조회가 두 번 발생한 원인을 Controller, Service, View 렌더링 관점에서 추적해볼 예정이다.
 
-Actuator로 요청 시간을 확인했으니 Grafana를 적용하여 시각화도 해보고 싶다.
+Actuator로 요청 시간을 확인했으니, 이후에는 Grafana를 적용해 요청 시간과 SQL 흐름을 시각화하는 방향도 함께 검토해보고 싶다.
 
 ## 7. 시리즈 확장 계획
 

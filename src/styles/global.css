@@ -4672,3 +4672,120 @@ html[data-theme="dark"] .category-menu__children {
     font-size: 0.76rem;
   }
 }
+
+/* Scroll and reading-width adjustment */
+.site-layout:not(.site-layout--minimal) {
+  grid-template-columns: minmax(240px, 270px) minmax(0, 1fr);
+  gap: clamp(1.4rem, 2.3vw, 2.9rem);
+}
+
+.site-sidebar {
+  align-self: start;
+  max-height: calc(100vh - 98px);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.site-sidebar::-webkit-scrollbar,
+.post-toc::-webkit-scrollbar {
+  width: 0.55rem;
+}
+
+.site-sidebar::-webkit-scrollbar-thumb,
+.post-toc::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted-readable) 34%, transparent);
+}
+
+.post-view,
+.site-shell.sidebar-collapsed .post-view {
+  width: min(100%, 1180px);
+  grid-template-columns: minmax(0, 940px) minmax(120px, 148px);
+  column-gap: clamp(3.4rem, 5.4vw, 6.4rem);
+}
+
+.post,
+.site-shell.sidebar-collapsed .post {
+  max-width: 940px;
+}
+
+.post :where(p, ul, ol, blockquote) {
+  max-width: 78ch;
+}
+
+.post-toc,
+.site-shell.sidebar-collapsed .post-toc {
+  width: clamp(120px, 10vw, 148px);
+  max-width: 148px;
+  max-height: calc(100vh - 112px);
+  overflow-y: auto;
+}
+
+.page-home-simple .archive-hero--simple h1 {
+  max-width: none;
+  font-size: clamp(2rem, 2.8vw, 2.72rem);
+  line-height: 1.12;
+}
+
+@media (min-width: 861px) {
+  .page-home-simple .archive-hero--simple h1 {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 980px) {
+  .site-layout:not(.site-layout--minimal) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .site-sidebar {
+    max-height: none;
+    height: 100vh;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 1200px) {
+  .post-view,
+  .site-shell.sidebar-collapsed .post-view,
+  .post-view--single,
+  .site-shell.sidebar-collapsed .post-view--single {
+    width: min(100%, 960px);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .post-toc,
+  .site-shell.sidebar-collapsed .post-toc {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+  }
+}
+
+.related-followup {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface) 78%, var(--bg));
+  padding: 0.9rem 1rem;
+}
+
+.related-followup p {
+  margin: 0;
+}
+
+.related-followup__label {
+  color: var(--link);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.related-followup__label + p {
+  margin-top: 0.42rem;
+  color: var(--muted-readable);
+}
