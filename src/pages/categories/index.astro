@@ -1,11 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { buildCategorySummary } from "../../utils/categories";
+import { buildCategoryHierarchy } from "../../utils/categories";
 import { SITE_DESCRIPTION } from "../../utils/posts";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
-const categorySummary = buildCategorySummary(posts);
+const categoryHierarchy = buildCategoryHierarchy(posts);
 ---
 
 <BaseLayout title="devjune.dev | Categories" description={SITE_DESCRIPTION}>
@@ -14,15 +14,30 @@ const categorySummary = buildCategorySummary(posts);
     <p>Project, Spring, JPA, Database, DevOps, Git 중심으로 학습/개선 기록을 묶어둔 공간입니다.</p>
   </section>
 
-  <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
-    {categorySummary.map(({ slug, name, count }) => (
-      <li class="card category-card-row">
-        <a class="badge badge--topic" href={`/categories/${slug}/`}>
-          <span>{name}</span>
-          <strong>{count}</strong>
-        </a>
-      </li>
+  <div class="category-tree category-tree--page">
+    {categoryHierarchy.map((group) => (
+      <section class="category-tree__group" aria-label={`${group.name} category group`}>
+        <div class="category-tree__group-head">
+          {group.href ? (
+            <a class="category-tree__group-title" href={group.href}>{group.name}</a>
+          ) : (
+            <span class="category-tree__group-title">{group.name}</span>
+          )}
+          <span class="category-tree__count">{group.count}</span>
+        </div>
+
+        {group.children.length > 0 && (
+          <div class="category-tree__children">
+            {group.children.map((child) => (
+              <a class="category-tree__child" href={child.href}>
+                <span>{child.name}</span>
+                <strong>{child.count}</strong>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
     ))}
-  </ul>
+  </div>
 </BaseLayout>
 

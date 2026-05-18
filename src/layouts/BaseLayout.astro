@@ -1,7 +1,7 @@
 ---
 import "../styles/global.css";
 import { getCollection } from "astro:content";
-import { buildCategorySummary } from "../utils/categories";
+import { buildCategoryHierarchy } from "../utils/categories";
 import { buildTagSummary } from "../utils/tags";
 import {
   GITHUB_URL,
@@ -32,7 +32,7 @@ const {
 } = Astro.props;
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
-const categorySummary = buildCategorySummary(posts);
+const categoryHierarchy = buildCategoryHierarchy(posts);
 const tagSummary = buildTagSummary(posts).slice(0, 18);
 const siteUrl = Astro.site ?? new URL(SITE_URL);
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
@@ -174,15 +174,34 @@ function isNavActive(href: string) {
                   <a href="/categories/">All</a>
                 </div>
 
-                {categorySummary.length === 0 ? (
+                {categoryHierarchy.length === 0 ? (
                   <p class="category-empty">No categories yet.</p>
                 ) : (
-                  <div class="topic-cloud" role="list">
-                    {categorySummary.map(({ slug, name, count }) => (
-                      <a class:list={["topic-pill", "topic-pill--category", currentCategory === slug && "is-active"]} href={`/categories/${slug}/`}>
-                        <span>{name}</span>
-                        <strong>{count}</strong>
-                      </a>
+                  <div class="category-tree category-tree--sidebar" role="list">
+                    {categoryHierarchy.map((group) => (
+                      <section class="category-tree__group" aria-label={`${group.name} category group`}>
+                        <div class="category-tree__group-head">
+                          {group.href ? (
+                            <a class:list={["category-tree__group-title", currentCategory === group.slug && "is-active"]} href={group.href}>
+                              {group.name}
+                            </a>
+                          ) : (
+                            <span class="category-tree__group-title">{group.name}</span>
+                          )}
+                          <span class="category-tree__count">{group.count}</span>
+                        </div>
+
+                        {group.children.length > 0 && (
+                          <div class="category-tree__children">
+                            {group.children.map((child) => (
+                              <a class:list={["category-tree__child", currentTag === child.slug && "is-active"]} href={child.href}>
+                                <span>{child.name}</span>
+                                <strong>{child.count}</strong>
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </section>
                     ))}
                   </div>
                 )}

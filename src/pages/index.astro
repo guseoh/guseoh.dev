@@ -1,7 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { buildCategorySummary } from "../utils/categories";
+import { buildCategoryHierarchy } from "../utils/categories";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
 import FeaturedProject from "../components/home/FeaturedProject.astro";
@@ -13,7 +13,7 @@ const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.dr
 
 const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 4);
 const latestPosts = posts.slice(0, 5);
-const categorySummary = buildCategorySummary(posts);
+const categoryHierarchy = buildCategoryHierarchy(posts);
 const boardPost = posts.find((post) => post.data.title.toLowerCase().includes("board"));
 const boardRelatedHref = boardPost ? `/blog/${boardPost.id}/` : "/categories/project/";
 ---
@@ -27,6 +27,6 @@ const boardRelatedHref = boardPost ? `/blog/${boardPost.id}/` : "/categories/pro
   <FeaturedProject relatedHref={boardRelatedHref} />
   <FeaturedPosts posts={featuredPosts} />
   <LatestPosts posts={latestPosts} />
-  <TopicIndex categories={categorySummary} />
+  <TopicIndex categories={categoryHierarchy} />
 </BaseLayout>
 

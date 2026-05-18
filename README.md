@@ -72,7 +72,7 @@ draft: true
 ## Local Development
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
