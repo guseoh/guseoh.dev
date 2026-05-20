@@ -21,7 +21,7 @@ const { Content, headings } = await render(post);
 const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
-const tocHeadings = headings.filter((heading) => heading.depth >= 2 && heading.depth <= 3);
+const tocHeadings = headings.filter((heading) => heading.depth >= 1 && heading.depth <= 3);
 const readingTime = getReadingTime(post);
 const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
 const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
