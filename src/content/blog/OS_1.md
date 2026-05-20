@@ -4,7 +4,7 @@ description: ""
 date: 2026-05-20
 updated: 2026-05-20
 category: OS
-tags: "OS"
+tags: ["OS"]
 series: "아주 쉬운 세가지 이야기"
 seriesOrder: 1
 featured: true
