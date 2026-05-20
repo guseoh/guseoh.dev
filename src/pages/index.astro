@@ -3,17 +3,9 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
-import FeaturedProject from "../components/home/FeaturedProject.astro";
-import FeaturedPosts from "../components/home/FeaturedPosts.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
-
-const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 1);
-const featuredPostIds = new Set(featuredPosts.map((post) => post.id));
-const latestPosts = posts.filter((post) => !featuredPostIds.has(post.id)).slice(0, 4);
-const boardPost = posts.find((post) => post.data.title.toLowerCase().includes("board"));
-const boardRelatedHref = boardPost ? `/blog/${boardPost.id}/` : "/categories/project/";
 ---
 
 <BaseLayout
@@ -22,8 +14,6 @@ const boardRelatedHref = boardPost ? `/blog/${boardPost.id}/` : "/categories/pro
   minimalHome={true}
 >
   <ArchiveHero />
-  <FeaturedProject relatedHref={boardRelatedHref} />
-  <FeaturedPosts posts={featuredPosts} />
-  <LatestPosts posts={latestPosts} />
+  <LatestPosts posts={posts} />
 </BaseLayout>
 

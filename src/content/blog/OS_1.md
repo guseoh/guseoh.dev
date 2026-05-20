@@ -7,7 +7,6 @@ category: OS
 tags: ["OS"]
 series: "아주 쉬운 세가지 이야기"
 seriesOrder: 1
-featured: true
 draft: false
 ---
 

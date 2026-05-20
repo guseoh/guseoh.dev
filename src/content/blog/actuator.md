@@ -7,7 +7,6 @@ category: Project
 tags: ["Board", "Spring Boot", "JPA", "Database", "SQL", "Performance", "Monitoring", "P6Spy", "Actuator"]
 series: "Board 프로젝트 성능 개선"
 seriesOrder: 1
-featured: true
 draft: false
 ---
 

@@ -38,6 +38,7 @@ export type CategoryTreeGroup = {
 
 export const RECOMMENDED_CATEGORIES = [
   "Project",
+  "OS",
   "Spring",
   "JPA",
   "QueryDSL",
@@ -57,6 +58,11 @@ export const CATEGORY_TREE: CategoryTreeGroupConfig[] = [
       { name: "Board", slug: "board", matchTags: ["board"], titleIncludes: ["board"] },
       { name: "Blog", slug: "blog", matchTags: ["blog"], matchCategories: ["blog"], titleIncludes: ["blog"] }
     ]
+  },
+  {
+    name: "OS",
+    slug: "os",
+    children: []
   },
   {
     name: "Spring",

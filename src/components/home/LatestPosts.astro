@@ -11,14 +11,14 @@ interface Props {
 const { posts } = Astro.props as Props;
 ---
 
-<section class="home-section" aria-label="Latest posts">
+<section class="home-section" aria-label="All posts">
   <div class="home-section__head home-section__head--inline">
-    <h2 class="home-section__title">Latest Posts</h2>
+    <h2 class="home-section__title">All Posts</h2>
     <a class="home-section__link" href="/blog/">All posts</a>
   </div>
 
   {posts.length === 0 ? (
-    <p class="section-empty">대표 글 외의 최신 글이 쌓이면 이곳에 이어서 표시됩니다.</p>
+    <p class="section-empty">아직 공개된 글이 없습니다.</p>
   ) : (
     <ul class="latest-list">
       {posts.map((post) => {

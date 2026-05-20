@@ -64,7 +64,6 @@ category: Project
 tags: ["Spring Boot", "JPA", "QueryDSL"]
 series: "Board 프로젝트 성능 개선"
 seriesOrder: 1
-featured: false
 draft: true
 ---
 ```

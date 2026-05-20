@@ -7,7 +7,6 @@ category: Project
 tags: []
 series:
 seriesOrder:
-featured: false
 draft: true
 ---
 
