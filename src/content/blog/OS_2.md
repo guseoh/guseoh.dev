@@ -1,6 +1,6 @@
 ---
-title: "[OS] 가상화의 세계"
-description: "아주 쉬운 세가지 이야기 - "
+title: "[OS] 가상화의 세계 - 프로세스의 개념"
+description: "아주 쉬운 세가지 이야기 - 가상화의 세계"
 date: 2026-05-25
 updated: 2026-05-25
 category: OS
