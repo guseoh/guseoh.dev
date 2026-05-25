@@ -2,40 +2,45 @@
 import type { CollectionEntry } from "astro:content";
 import PostMetaBadges from "../PostMetaBadges.astro";
 import { normalizeCategory } from "../../utils/categories";
-import { formatPostDate, getReadingTime } from "../../utils/posts";
+import { formatPostDate, getPostDescription, getReadingTime, HOME_POST_LIMIT } from "../../utils/posts";
 
 interface Props {
   posts: CollectionEntry<"blog">[];
+  limit?: number;
 }
 
-const { posts } = Astro.props as Props;
+const { posts, limit = HOME_POST_LIMIT } = Astro.props as Props;
+const visiblePosts = posts.slice(0, limit);
 ---
 
-<section class="home-section" aria-label="All posts">
+<section class="home-section" aria-label="Recent posts">
   <div class="home-section__head home-section__head--inline">
-    <h2 class="home-section__title">All Posts</h2>
-    <a class="home-section__link" href="/blog/">All posts</a>
+    <h2 class="home-section__title">최근 글</h2>
+    <a class="home-section__link" href="/blog/">전체 글</a>
   </div>
 
-  {posts.length === 0 ? (
+  {visiblePosts.length === 0 ? (
     <p class="section-empty">아직 공개된 글이 없습니다.</p>
   ) : (
     <ul class="latest-list">
-      {posts.map((post) => {
+      {visiblePosts.map((post) => {
         const categoryName = post.data.category?.trim() || "미분류";
         const readingTime = getReadingTime(post);
+        const description = getPostDescription(post);
         return (
           <li class="latest-item">
-            <a class="latest-item__title" href={`/blog/${post.id}/`}>{post.data.title}</a>
-            <p class="latest-item__meta">
-              <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
-              <span aria-hidden="true">·</span>
-              <a href={`/categories/${normalizeCategory(categoryName)}/`}>{categoryName}</a>
-              <span aria-hidden="true">·</span>
-              <span>{readingTime}</span>
-            </p>
-            <p class="latest-item__summary">{post.data.description}</p>
-            <PostMetaBadges category={categoryName} tags={post.data.tags} maxTags={3} />
+            <article class="latest-item__article">
+              <a class="latest-item__title" href={`/blog/${post.id}/`}>{post.data.title}</a>
+              <p class="latest-item__meta">
+                <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
+                <span aria-hidden="true">·</span>
+                <a href={`/categories/${normalizeCategory(categoryName)}/`}>{categoryName}</a>
+                <span aria-hidden="true">·</span>
+                <span>{readingTime}</span>
+              </p>
+              <p class="latest-item__summary">{description}</p>
+              <PostMetaBadges category={categoryName} tags={post.data.tags} maxTags={3} />
+            </article>
           </li>
         );
       })}

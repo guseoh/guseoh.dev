@@ -2,10 +2,13 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
+import { buildCategoryHierarchy } from "../utils/categories";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
+import TopicIndex from "../components/home/TopicIndex.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const categoryHierarchy = buildCategoryHierarchy(posts);
 ---
 
 <BaseLayout
@@ -15,5 +18,6 @@ const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.dr
 >
   <ArchiveHero />
   <LatestPosts posts={posts} />
+  <TopicIndex categories={categoryHierarchy} />
 </BaseLayout>
 

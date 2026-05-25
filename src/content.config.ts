@@ -1,5 +1,6 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const blog = defineCollection({
   loader: glob({
@@ -16,7 +17,7 @@ const blog = defineCollection({
     series: z.string().optional(),
     seriesOrder: z.number().optional(),
     heroImage: z.string().optional(),
-    draft: z.boolean().optional(),
+    draft: z.boolean().optional()
   }),
 });
 

@@ -1,0 +1,44 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+import { GITHUB_URL } from "../../utils/posts";
+
+interface Props {
+  currentPath: string;
+}
+
+const { currentPath } = Astro.props as Props;
+
+const headerLinks = [
+  { href: "/blog", label: "Posts" },
+  { href: "/categories", label: "Categories" },
+  { href: "/about", label: "About" }
+];
+
+function isNavActive(href: string) {
+  const normalizedHref = href.replace(/\/+$/, "");
+  return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
+}
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="brand" href="/" aria-label="devjune.dev 홈으로 이동">devjune.dev</a>
+
+    <div class="header-actions">
+      <nav class="top-nav" aria-label="Primary navigation">
+        {
+          headerLinks.map(({ href, label }) => (
+            <a class:list={["top-nav__link", isNavActive(href) && "is-active"]} href={href}>
+              {label}
+            </a>
+          ))
+        }
+        <a class="top-nav__link top-nav__link--external" href={GITHUB_URL} target="_blank" rel="noreferrer">
+          GitHub
+        </a>
+      </nav>
+
+      <ThemeToggle />
+    </div>
+  </div>
+</header>

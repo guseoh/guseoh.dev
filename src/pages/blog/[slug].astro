@@ -4,7 +4,14 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { formatTagName, normalizeTag } from "../../utils/tags";
-import { SITE_DESCRIPTION, formatPostDate, getReadingTime, sortPostsByDate } from "../../utils/posts";
+import {
+  DETAIL_TAG_LIMIT,
+  SITE_DESCRIPTION,
+  formatPostDate,
+  getPostDescription,
+  getReadingTime,
+  sortPostsByDate
+} from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -20,8 +27,18 @@ const { Content, headings } = await render(post);
 const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
-const tocHeadings = headings.filter((heading) => heading.depth >= 1 && heading.depth <= 3);
+const postTitle = post.data.title.trim();
+const tocHeadings = headings
+  .filter((heading) => heading.depth >= 1 && heading.depth <= 3)
+  .filter((heading) => !(heading.depth === 1 && heading.text.trim() === postTitle))
+  .map((heading) => ({
+    ...heading,
+    depth: heading.depth === 1 ? 2 : heading.depth
+  }));
 const readingTime = getReadingTime(post);
+const description = getPostDescription(post);
+const visibleTags = post.data.tags.slice(0, DETAIL_TAG_LIMIT);
+const hiddenTagCount = Math.max(0, post.data.tags.length - visibleTags.length);
 const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
 const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
 const olderPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : undefined;
@@ -35,7 +52,7 @@ const seriesPosts = seriesName
 
 <BaseLayout
   title={`${post.data.title} | devjune.dev`}
-  description={post.data.description || SITE_DESCRIPTION}
+  description={description || SITE_DESCRIPTION}
   image={post.data.heroImage}
   publishedTime={post.data.date.toISOString()}
   updatedTime={(post.data.updated ?? post.data.date).toISOString()}
@@ -45,7 +62,7 @@ const seriesPosts = seriesName
     <article class="post">
       <header class="post__header">
         <h1>{post.data.title}</h1>
-        <p class="post__description">{post.data.description}</p>
+        <p class="post__description">{description}</p>
 
         <dl class="post-meta-grid">
           <div class="post-meta-item">
@@ -68,11 +85,16 @@ const seriesPosts = seriesName
           </div>
         </dl>
 
-        <div class="post-meta-tags" aria-label="Post tags">
-          {post.data.tags.map((tag) => (
-            <a class="tag" href={`/tags/${normalizeTag(tag)}/`}>#{formatTagName(tag)}</a>
-          ))}
-        </div>
+        {
+          post.data.tags.length > 0 && (
+            <div class="post-meta-tags" aria-label="Post tags">
+              {visibleTags.map((tag) => (
+                <a class="tag" href={`/tags/${normalizeTag(tag)}/`}>#{formatTagName(tag)}</a>
+              ))}
+              {hiddenTagCount > 0 && <span class="tag tag--muted">+{hiddenTagCount} tags</span>}
+            </div>
+          )
+        }
       </header>
 
       <Content />
@@ -126,7 +148,7 @@ const seriesPosts = seriesName
       tocHeadings.length > 0 && (
         <>
           <aside class="post-toc" aria-label="Document table of contents">
-            <p class="post-toc__title">On This Page</p>
+            <p class="post-toc__title">ON THIS PAGE</p>
             <ul class="post-toc__list">
               {tocHeadings.map((heading) => (
                 <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
@@ -248,17 +270,43 @@ const seriesPosts = seriesName
         header.append(language, button);
         wrapper.append(header, pre);
 
+        const copyText = async (text) => {
+          if (window.navigator?.clipboard && window.isSecureContext) {
+            await window.navigator.clipboard.writeText(text);
+            return "copied";
+          }
+
+          if (typeof document.createElement !== "function") {
+            return "selected";
+          }
+
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "true");
+          textarea.style.position = "fixed";
+          textarea.style.top = "-1000px";
+          textarea.style.left = "-1000px";
+          document.body.append(textarea);
+          textarea.select();
+
+          const execCopy = document["exec" + "Command"];
+          const copied = typeof execCopy === "function" && execCopy.call(document, "copy");
+          textarea.remove();
+
+          return copied ? "copied" : "selected";
+        };
+
         button.addEventListener("click", async () => {
           const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
 
           try {
-            await navigator.clipboard.writeText(code);
-            button.textContent = "Copied";
+            const result = await copyText(code);
+            button.textContent = result === "copied" ? "Copied" : "Selected";
             window.setTimeout(() => {
               button.textContent = "Copy";
             }, 1400);
           } catch {
-            button.textContent = "Error";
+            button.textContent = "Selected";
             window.setTimeout(() => {
               button.textContent = "Copy";
             }, 1400);

@@ -28,7 +28,7 @@ const {
     const panelId = `${idPrefix}-${group.slug}-panel`;
 
     return (
-      <section class:list={["category-menu__group", isActiveGroup && "is-active"]}>
+      <div class:list={["category-menu__group", isActiveGroup && "is-active"]}>
         <button
           class="category-menu__toggle"
           type="button"
@@ -58,7 +58,7 @@ const {
             </a>
           ))}
         </div>
-      </section>
+      </div>
     );
   })}
 </nav>

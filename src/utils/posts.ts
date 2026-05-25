@@ -6,6 +6,9 @@ export const SITE_AUTHOR = "오지훈";
 export const SITE_URL = "https://guseoh.github.io";
 export const SITE_OG_IMAGE = "/og-image.svg";
 export const GITHUB_URL = "https://github.com/guseoh";
+export const HOME_POST_LIMIT = 5;
+export const SIDEBAR_TAG_LIMIT = 16;
+export const DETAIL_TAG_LIMIT = 8;
 
 export const CORE_TECH_TAGS = [
   "Spring Boot",
@@ -30,6 +33,13 @@ export function formatPostDate(date: Date) {
   });
 }
 
+export function getPostDescription(post: CollectionEntry<"blog">) {
+  const description = post.data.description?.trim();
+  return description && description.length > 0
+    ? description
+    : "학습 과정과 구현 맥락을 정리한 기록입니다.";
+}
+
 export function getReadingTime(post: CollectionEntry<"blog">) {
   const source = post.body ?? "";
   const plainText = source
@@ -38,8 +48,9 @@ export function getReadingTime(post: CollectionEntry<"blog">) {
     .replace(/<[^>]+>/g, " ");
   const latinWords = plainText.match(/[A-Za-z0-9_]+/g)?.length ?? 0;
   const koreanCharacters = plainText.match(/[가-힣]/g)?.length ?? 0;
-  const estimatedWords = latinWords + koreanCharacters / 3;
-  const minutes = Math.max(1, Math.ceil(estimatedWords / 220));
+  const cjkCharacters = plainText.match(/[\u3040-\u30ff\u3400-\u9fff]/g)?.length ?? 0;
+  const estimatedWords = latinWords + koreanCharacters / 3.2 + cjkCharacters / 2.4;
+  const minutes = Math.max(1, Math.ceil(estimatedWords / 230));
 
   return `${minutes}분 읽기`;
 }
