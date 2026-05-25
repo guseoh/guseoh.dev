@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import PostMetaBadges from "./PostMetaBadges.astro";
-import { formatPostDate, getReadingTime } from "../utils/posts";
+import { formatPostDate, getPostDescription, getReadingTime } from "../utils/posts";
 
 interface Props {
   post: CollectionEntry<"blog">;
@@ -11,6 +11,7 @@ interface Props {
 const { post, variant = "default" } = Astro.props as Props;
 const isLatest = variant === "latest";
 const readingTime = getReadingTime(post);
+const description = getPostDescription(post);
 ---
 
 <article class:list={["card", "post-card", isLatest && "post-card--latest"]} data-post-slug={post.id}>
@@ -18,7 +19,7 @@ const readingTime = getReadingTime(post);
     <h2><a href={`/blog/${post.id}/`}>{post.data.title}</a></h2>
   </header>
 
-  <p class="post-card__description">{post.data.description}</p>
+  <p class="post-card__description">{description}</p>
 
   <div class="post-card__footer">
     <div class="post-card__meta">

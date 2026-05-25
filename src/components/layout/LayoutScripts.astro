@@ -1,0 +1,105 @@
+---
+---
+
+<script is:inline>
+  (() => {
+    const themeButton = document.getElementById("theme-toggle");
+    if (themeButton instanceof HTMLButtonElement) {
+      const label = themeButton.querySelector(".theme-toggle__label");
+
+      const updateThemeButton = (theme) => {
+        const current = theme === "dark" ? "Dark" : "Light";
+
+        themeButton.dataset.theme = theme;
+        themeButton.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
+        themeButton.setAttribute("aria-label", `현재 테마: ${current}. 테마를 전환합니다.`);
+        themeButton.title = `현재 테마: ${current}`;
+
+        if (label instanceof HTMLElement) {
+          label.textContent = current;
+        }
+      };
+
+      const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+      updateThemeButton(currentTheme);
+
+      themeButton.addEventListener("click", () => {
+        const now = document.documentElement.getAttribute("data-theme") || "light";
+        const next = now === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+        updateThemeButton(next);
+      });
+    }
+
+    const shell = document.querySelector(".site-shell");
+    const sidebar = document.getElementById("site-sidebar");
+    const sidebarOpenButton = document.getElementById("sidebar-open");
+    const sidebarCloseButton = document.getElementById("sidebar-close");
+    const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+    if (
+      shell instanceof HTMLElement &&
+      sidebar instanceof HTMLElement &&
+      sidebarOpenButton instanceof HTMLButtonElement &&
+      sidebarCloseButton instanceof HTMLButtonElement
+    ) {
+      const SIDEBAR_KEY = "guseo:sidebar-collapsed";
+      const media = window.matchMedia("(max-width: 980px)");
+      const isNarrow = () => media.matches;
+
+      const getStoredDesktopState = () => localStorage.getItem(SIDEBAR_KEY) === "true";
+
+      const applySidebarState = (collapsed, persistDesktop = false) => {
+        const narrow = isNarrow();
+
+        shell.classList.toggle("sidebar-collapsed", collapsed);
+        document.body.classList.toggle("has-sidebar-open", narrow && !collapsed);
+        sidebar.setAttribute("aria-hidden", collapsed ? "true" : "false");
+        sidebarOpenButton.hidden = !collapsed;
+        sidebarOpenButton.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        sidebarCloseButton.hidden = collapsed;
+
+        if (sidebarBackdrop instanceof HTMLButtonElement) {
+          sidebarBackdrop.hidden = collapsed || !narrow;
+        }
+
+        if (persistDesktop && !narrow) {
+          localStorage.setItem(SIDEBAR_KEY, collapsed ? "true" : "false");
+        }
+      };
+
+      applySidebarState(isNarrow() ? true : getStoredDesktopState());
+
+      sidebarOpenButton.addEventListener("click", () => {
+        applySidebarState(false, true);
+      });
+
+      sidebarCloseButton.addEventListener("click", () => {
+        applySidebarState(true, true);
+      });
+
+      if (sidebarBackdrop instanceof HTMLButtonElement) {
+        sidebarBackdrop.addEventListener("click", () => {
+          applySidebarState(true, true);
+        });
+      }
+
+      window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !shell.classList.contains("sidebar-collapsed")) {
+          applySidebarState(true, true);
+          sidebarOpenButton.focus();
+        }
+      });
+
+      media.addEventListener("change", () => {
+        applySidebarState(isNarrow() ? true : getStoredDesktopState());
+      });
+    }
+
+    const sidebarSearchInput = document.getElementById("sidebar-search-input");
+    if (sidebarSearchInput instanceof HTMLInputElement && window.location.pathname.startsWith("/search")) {
+      sidebarSearchInput.value = new URLSearchParams(window.location.search).get("q") ?? "";
+    }
+  })();
+</script>

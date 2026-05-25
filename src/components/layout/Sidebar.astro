@@ -1,0 +1,109 @@
+---
+import CategoryMenu from "../CategoryMenu.astro";
+import type { CategoryTreeGroup } from "../../utils/categories";
+import type { TagSummary } from "../../utils/tags";
+import { SITE_DESCRIPTION } from "../../utils/posts";
+
+interface Props {
+  categoryHierarchy: CategoryTreeGroup[];
+  tagSummary: TagSummary[];
+  currentCategory: string;
+  currentTag: string;
+  currentPath: string;
+}
+
+const { categoryHierarchy, tagSummary, currentCategory, currentTag, currentPath } = Astro.props as Props;
+
+const sidebarLinks = [
+  { href: "/blog", label: "Posts" },
+  { href: "/categories", label: "Categories" },
+  { href: "/tags", label: "Tags" },
+  { href: "/about", label: "About" }
+];
+
+function isNavActive(href: string) {
+  const normalizedHref = href.replace(/\/+$/, "");
+  return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
+}
+---
+
+<button id="sidebar-open" class="sidebar-open" type="button" aria-label="사이드바 열기" aria-controls="site-sidebar" aria-expanded="false">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="사이드바 닫기" hidden></button>
+
+<aside id="site-sidebar" class="site-sidebar" aria-label="Blog sidebar" aria-hidden="true">
+  <section class="sidebar-close-section" aria-label="Sidebar controls">
+    <button id="sidebar-close" class="sidebar-close" type="button" aria-label="사이드바 닫기" aria-controls="site-sidebar">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 6l12 12M18 6 6 18"></path>
+      </svg>
+    </button>
+  </section>
+
+  <section class="profile-card">
+    <div class="profile-card__cover" aria-hidden="true"></div>
+    <div class="profile-card__avatar" aria-hidden="true">G</div>
+    <div class="profile-card__body">
+      <p class="profile-card__name">devjune.dev</p>
+      <p class="profile-card__bio">{SITE_DESCRIPTION}</p>
+    </div>
+  </section>
+
+  <form class="sidebar-search" action="/search/" method="get" aria-label="Search posts">
+    <label class="sr-only" for="sidebar-search-input">Search</label>
+    <input id="sidebar-search-input" name="q" type="search" placeholder="Search posts" />
+    <button type="submit" aria-label="검색 실행">Search</button>
+  </form>
+
+  <nav class="sidebar-nav" aria-label="Sidebar links">
+    {
+      sidebarLinks.map(({ href, label }) => (
+        <a class:list={["sidebar-nav__item", isNavActive(href) && "is-active"]} href={href}>
+          {label}
+        </a>
+      ))
+    }
+  </nav>
+
+  <section class="category-panel" aria-label="Topic index">
+    <div class="category-panel__header">
+      <h2>Topic Index</h2>
+      <a href="/categories/">All</a>
+    </div>
+
+    {
+      categoryHierarchy.length === 0 ? (
+        <p class="category-empty">No categories yet.</p>
+      ) : (
+        <CategoryMenu
+          groups={categoryHierarchy}
+          idPrefix="sidebar-category"
+          variant="sidebar"
+          currentCategory={currentCategory}
+          currentTag={currentTag}
+          label="Sidebar category menu"
+        />
+      )
+    }
+
+    {
+      tagSummary.length > 0 && (
+        <>
+          <p class="category-panel__subhead">Tags</p>
+          <div class="topic-cloud topic-cloud--tags" role="list">
+            {tagSummary.map(({ tag, name, count }) => (
+              <a class:list={["topic-pill", "topic-pill--tag", currentTag === tag && "is-active"]} href={`/tags/${tag}/`} role="listitem">
+                <span>#{name}</span>
+                <strong>{count}</strong>
+              </a>
+            ))}
+          </div>
+        </>
+      )
+    }
+  </section>
+</aside>

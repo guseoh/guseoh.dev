@@ -1,11 +1,14 @@
 ---
 import "../styles/global.css";
 import { getCollection } from "astro:content";
-import CategoryMenu from "../components/CategoryMenu.astro";
+import Header from "../components/layout/Header.astro";
+import Sidebar from "../components/layout/Sidebar.astro";
+import LayoutScripts from "../components/layout/LayoutScripts.astro";
 import { buildCategoryHierarchy } from "../utils/categories";
 import { buildTagSummary } from "../utils/tags";
 import {
-  GITHUB_URL,
+  SIDEBAR_TAG_LIMIT,
+  SITE_AUTHOR,
   SITE_DESCRIPTION,
   SITE_OG_IMAGE,
   SITE_TITLE,
@@ -34,7 +37,7 @@ const {
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 const categoryHierarchy = buildCategoryHierarchy(posts);
-const tagSummary = buildTagSummary(posts).slice(0, 18);
+const tagSummary = buildTagSummary(posts).slice(0, SIDEBAR_TAG_LIMIT);
 const siteUrl = Astro.site ?? new URL(SITE_URL);
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = new URL(image, siteUrl).toString();
@@ -42,24 +45,6 @@ const ogImageUrl = new URL(image, siteUrl).toString();
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
 const currentCategory = currentPath.startsWith("/categories/") ? currentPath.split("/")[2] ?? "" : "";
 const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] ?? "" : "";
-
-const sidebarLinks = [
-  { href: "/about", label: "About" },
-  { href: "/blog", label: "Post" },
-  { href: "/categories", label: "Categories" },
-  { href: "/tags", label: "Tags" }
-];
-
-const headerLinks = [
-  { href: "/about", label: "About" },
-  { href: "/blog", label: "Posts" },
-  { href: "/categories", label: "Categories" }
-];
-
-function isNavActive(href: string) {
-  const normalizedHref = href.replace(/\/+$/, "");
-  return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
-}
 ---
 
 <!doctype html>
@@ -68,20 +53,26 @@ function isNavActive(href: string) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="author" content={SITE_AUTHOR} />
     <meta name="color-scheme" content="light dark" />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE_TITLE} RSS`} href={new URL("/rss.xml", siteUrl).toString()} />
+    <meta property="og:locale" content="ko_KR" />
     <meta property="og:site_name" content={SITE_TITLE} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={`${SITE_TITLE} 대표 이미지`} />
+    {type === "article" && <meta property="article:author" content={SITE_AUTHOR} />}
     {type === "article" && publishedTime && <meta property="article:published_time" content={publishedTime} />}
     {type === "article" && updatedTime && <meta property="article:modified_time" content={updatedTime} />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={`${SITE_TITLE} 대표 이미지`} />
     <title>{title}</title>
     <script is:inline>
       (() => {
@@ -94,117 +85,20 @@ function isNavActive(href: string) {
   </head>
   <body class:list={[minimalHome && "page-home-simple"]}>
     <div class="site-shell">
-      <header class="site-header">
-        <div class="site-header__inner">
-          <a class="brand" href="/">devjune.dev</a>
-
-          <div class="header-actions">
-            <nav class="top-nav" aria-label="Top navigation">
-              {headerLinks.map(({ href, label }) => (
-                <a class:list={["top-nav__link", isNavActive(href) && "is-active"]} href={href}>
-                  {label}
-                </a>
-              ))}
-              <a class="top-nav__link top-nav__link--external" href={GITHUB_URL} target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-            </nav>
-
-            <button
-              id="theme-toggle"
-              class="theme-toggle"
-              type="button"
-              aria-label="Toggle dark mode"
-              data-theme="light"
-            >
-              <span class="theme-toggle__icon" aria-hidden="true">
-                <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" role="img" aria-hidden="true">
-                  <path d="M20 14.25A8.25 8.25 0 0 1 9.75 4a8.26 8.26 0 1 0 10.25 10.25Z"></path>
-                </svg>
-                <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" role="img" aria-hidden="true">
-                  <circle cx="12" cy="12" r="3.6"></circle>
-                  <path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9L5.3 5.3"></path>
-                </svg>
-              </span>
-              <span class="theme-toggle__label">Dark</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header currentPath={currentPath} />
 
       <div class:list={["site-layout", minimalHome && "site-layout--minimal"]}>
-        {!minimalHome && (
-          <>
-            <button id="sidebar-open" class="sidebar-open" type="button" aria-label="Open sidebar" aria-controls="site-sidebar">
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-
-            <aside id="site-sidebar" class="site-sidebar" aria-label="Blog sidebar">
-              <section class="sidebar-close-section" aria-label="Close menu section">
-                <button id="sidebar-close" class="sidebar-close" type="button" aria-label="Close sidebar">X</button>
-              </section>
-
-              <section class="profile-card">
-                <div class="profile-card__cover" aria-hidden="true"></div>
-                <div class="profile-card__avatar" aria-hidden="true">G</div>
-                <div class="profile-card__body">
-                  <p class="profile-card__name">devjune.dev</p>
-                  <p class="profile-card__bio">{SITE_DESCRIPTION}</p>
-                </div>
-              </section>
-
-              <form class="sidebar-search" action="/search/" method="get" aria-label="Search posts">
-                <label class="sr-only" for="sidebar-search-input">Search</label>
-                <input id="sidebar-search-input" name="q" type="search" placeholder="Search posts" />
-                <button type="submit" aria-label="Run search">Go</button>
-              </form>
-
-              <nav class="sidebar-nav" aria-label="Primary links">
-                {sidebarLinks.map(({ href, label }) => (
-                  <a class:list={["sidebar-nav__item", isNavActive(href) && "is-active"]} href={href}>
-                    {label}
-                  </a>
-                ))}
-              </nav>
-
-              <section class="category-panel" aria-label="Topic index">
-                <div class="category-panel__header">
-                  <h2>Topic Index</h2>
-                  <a href="/categories/">All</a>
-                </div>
-
-                {categoryHierarchy.length === 0 ? (
-                  <p class="category-empty">No categories yet.</p>
-                ) : (
-                  <CategoryMenu
-                    groups={categoryHierarchy}
-                    idPrefix="sidebar-category"
-                    variant="sidebar"
-                    currentCategory={currentCategory}
-                    currentTag={currentTag}
-                    label="Sidebar category menu"
-                  />
-                )}
-
-                {tagSummary.length > 0 && (
-                  <>
-                    <p class="category-panel__subhead">Tags</p>
-                    <div class="topic-cloud topic-cloud--tags" role="list">
-                      {tagSummary.map(({ tag, name, count }) => (
-                        <a class:list={["topic-pill", "topic-pill--tag", currentTag === tag && "is-active"]} href={`/tags/${tag}/`}>
-                          <span>#{name}</span>
-                          <strong>{count}</strong>
-                        </a>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </section>
-            </aside>
-          </>
-        )}
+        {
+          !minimalHome && (
+            <Sidebar
+              categoryHierarchy={categoryHierarchy}
+              tagSummary={tagSummary}
+              currentCategory={currentCategory}
+              currentTag={currentTag}
+              currentPath={currentPath}
+            />
+          )
+        }
 
         <div class="site-content">
           <main class="site-main">
@@ -214,75 +108,6 @@ function isNavActive(href: string) {
       </div>
     </div>
 
-    <script is:inline>
-      (() => {
-        const themeButton = document.getElementById("theme-toggle");
-        if (themeButton instanceof HTMLButtonElement) {
-          const label = themeButton.querySelector(".theme-toggle__label");
-
-          const updateThemeButton = (theme) => {
-            themeButton.dataset.theme = theme;
-
-            if (label instanceof HTMLElement) {
-              label.textContent = theme === "dark" ? "Dark" : "Light";
-            }
-
-            themeButton.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
-          };
-
-          const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-          updateThemeButton(currentTheme);
-
-          themeButton.addEventListener("click", () => {
-            const now = document.documentElement.getAttribute("data-theme") || "light";
-            const next = now === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", next);
-            localStorage.setItem("theme", next);
-            updateThemeButton(next);
-          });
-        }
-
-        const shell = document.querySelector(".site-shell");
-        const sidebarOpenButton = document.getElementById("sidebar-open");
-        const sidebarCloseButton = document.getElementById("sidebar-close");
-
-        if (
-          shell instanceof HTMLElement &&
-          sidebarOpenButton instanceof HTMLButtonElement &&
-          sidebarCloseButton instanceof HTMLButtonElement
-        ) {
-          const SIDEBAR_KEY = "guseo:sidebar-collapsed";
-
-          const applySidebarState = (collapsed) => {
-            shell.classList.toggle("sidebar-collapsed", collapsed);
-            sidebarOpenButton.setAttribute("aria-hidden", collapsed ? "false" : "true");
-            sidebarCloseButton.setAttribute("aria-hidden", collapsed ? "true" : "false");
-            sidebarOpenButton.setAttribute("aria-expanded", collapsed ? "false" : "true");
-          };
-
-          const storedSidebarState = localStorage.getItem(SIDEBAR_KEY);
-          const prefersCollapsedSidebar = window.matchMedia("(max-width: 980px)").matches;
-          const initialCollapsed =
-            storedSidebarState === "true" || (storedSidebarState === null && prefersCollapsedSidebar);
-          applySidebarState(initialCollapsed);
-
-          sidebarOpenButton.addEventListener("click", () => {
-            applySidebarState(false);
-            localStorage.setItem(SIDEBAR_KEY, "false");
-          });
-
-          sidebarCloseButton.addEventListener("click", () => {
-            applySidebarState(true);
-            localStorage.setItem(SIDEBAR_KEY, "true");
-          });
-        }
-
-        const sidebarSearchInput = document.getElementById("sidebar-search-input");
-        if (sidebarSearchInput instanceof HTMLInputElement && window.location.pathname.startsWith("/search")) {
-          sidebarSearchInput.value = new URLSearchParams(window.location.search).get("q") ?? "";
-        }
-      })();
-    </script>
+    <LayoutScripts />
   </body>
 </html>
-
