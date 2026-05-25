@@ -27,7 +27,14 @@ const { Content, headings } = await render(post);
 const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
-const tocHeadings = headings.filter((heading) => heading.depth >= 1 && heading.depth <= 3);
+const postTitle = post.data.title.trim();
+const tocHeadings = headings
+  .filter((heading) => heading.depth >= 1 && heading.depth <= 3)
+  .filter((heading) => !(heading.depth === 1 && heading.text.trim() === postTitle))
+  .map((heading) => ({
+    ...heading,
+    depth: heading.depth === 1 ? 2 : heading.depth
+  }));
 const readingTime = getReadingTime(post);
 const description = getPostDescription(post);
 const visibleTags = post.data.tags.slice(0, DETAIL_TAG_LIMIT);
@@ -141,7 +148,7 @@ const seriesPosts = seriesName
       tocHeadings.length > 0 && (
         <>
           <aside class="post-toc" aria-label="Document table of contents">
-            <p class="post-toc__title">On This Page</p>
+            <p class="post-toc__title">ON THIS PAGE</p>
             <ul class="post-toc__list">
               {tocHeadings.map((heading) => (
                 <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
