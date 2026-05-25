@@ -19,7 +19,7 @@
 }
 
 .site-layout {
-  width: min(1480px, calc(100vw - 2rem));
+  width: min(1760px, calc(100vw - 2rem));
   margin-inline: auto;
 }
 
@@ -460,9 +460,11 @@
   }
 
   .site-shell.sidebar-collapsed .site-sidebar {
-    opacity: 1;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
     transform: translateX(-105%);
-    visibility: visible;
+    visibility: hidden;
   }
 
   .sidebar-open {
