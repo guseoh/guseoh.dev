@@ -13,9 +13,13 @@
   backdrop-filter: blur(12px);
 }
 
-.site-header__inner,
-.site-layout {
+.site-header__inner {
   width: min(1240px, calc(100vw - 2rem));
+  margin-inline: auto;
+}
+
+.site-layout {
+  width: min(1480px, calc(100vw - 2rem));
   margin-inline: auto;
 }
 

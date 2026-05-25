@@ -84,7 +84,7 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
     </script>
   </head>
   <body class:list={[minimalHome && "page-home-simple"]}>
-    <div class="site-shell">
+    <div class:list={["site-shell", !minimalHome && "sidebar-collapsed"]}>
       <Header currentPath={currentPath} />
 
       <div class:list={["site-layout", minimalHome && "site-layout--minimal"]}>
