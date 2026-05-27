@@ -3,7 +3,7 @@ title: "[Spring] 회원 삭제 시 연관 게시글/댓글 처리 정책 설계"
 description: "회원 탈퇴 또는 관리자 회원 삭제 시 게시글과 댓글 같은 연관 데이터를 어떻게 처리할지 고민하고, 명시 삭제 방식을 선택한 이유를 정리합니다."
 date: 2026-05-26
 updated: 2026-05-26
-category: Spring
+category: Board
 tags: ["Spring", "JPA"]
 series: "Board 프로젝트 개선 기록"
 seriesOrder: 1
