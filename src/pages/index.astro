@@ -17,7 +17,9 @@ const categoryHierarchy = buildCategoryHierarchy(posts);
   minimalHome={true}
 >
   <ArchiveHero />
-  <LatestPosts posts={posts} />
-  <TopicIndex categories={categoryHierarchy} />
+  <div class="home-content-grid">
+    <LatestPosts posts={posts} />
+    <TopicIndex categories={categoryHierarchy} />
+  </div>
 </BaseLayout>
 

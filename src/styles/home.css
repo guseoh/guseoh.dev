@@ -6,7 +6,7 @@
 
 .page-home-simple .site-layout--minimal {
   display: block;
-  width: min(980px, calc(100vw - 2rem));
+  width: min(1120px, calc(100vw - 3rem));
   padding-top: 2rem;
 }
 
@@ -56,6 +56,13 @@
   gap: 0.82rem;
 }
 
+.home-content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(18rem, 1fr);
+  gap: 1.2rem;
+  align-items: start;
+}
+
 .home-section__head {
   display: flex;
   align-items: center;
@@ -94,8 +101,8 @@
 
 .latest-item__article {
   display: grid;
-  gap: 0.55rem;
-  padding: 1rem;
+  gap: 0.46rem;
+  padding: 0.86rem;
   transition: background-color 160ms ease;
 }
 
@@ -105,12 +112,16 @@
 }
 
 .latest-item__title {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--heading);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1.38;
   text-decoration: none;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .latest-item__title:hover,
@@ -133,13 +144,33 @@
 }
 
 .latest-item__summary {
+  display: -webkit-box;
+  overflow: hidden;
   color: var(--muted-readable);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.latest-item .badge-group {
+  gap: 0.32rem;
+}
+
+.latest-item .badge {
+  font-size: 0.72rem;
+  padding: 0.28rem 0.44rem;
+}
+
+@media (max-width: 860px) {
+  .home-content-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 680px) {
   .page-home-simple .site-layout--minimal {
-    width: min(100% - 1rem, 980px);
+    width: min(100% - 2rem, 1120px);
     padding-top: 1rem;
   }
 

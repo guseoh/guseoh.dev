@@ -1,9 +1,7 @@
 import { getCollection } from "astro:content";
 import { buildCategorySummary } from "../utils/categories";
 import { buildTagSummary } from "../utils/tags";
-import { SITE_URL, sortPostsByDate } from "../utils/posts";
-
-const PAGE_SIZE = 5;
+import { POSTS_PER_PAGE, SITE_URL, sortPostsByDate } from "../utils/posts";
 
 function escapeXml(value: string) {
   return value
@@ -22,7 +20,7 @@ export async function GET() {
   const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
   const categories = buildCategorySummary(posts);
   const tags = buildTagSummary(posts);
-  const totalPages = Math.ceil(posts.length / PAGE_SIZE);
+  const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
 
   const staticPaths = ["/", "/about/", "/blog/", "/categories/", "/tags/", "/search/"];
   const pagePaths = totalPages > 1
