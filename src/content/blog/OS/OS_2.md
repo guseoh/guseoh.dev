@@ -193,5 +193,5 @@ Post post = new Post("운영체제 정리");
 
 # 참고 자료
 
-https://pages.cs.wisc.edu/~remzi/OSTEP/Korean/04-cpu-intro.pdf
-https://os2024.jeju.ai/week02/cpu-intro.html
+- https://pages.cs.wisc.edu/~remzi/OSTEP/Korean/04-cpu-intro.pdf  
+- https://os2024.jeju.ai/week02/cpu-intro.html
