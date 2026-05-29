@@ -61,6 +61,8 @@
 
 .post {
   --post-content-width: 54rem;
+  --post-body-weight: 450;
+  --post-heading-weight: 780;
   width: 100%;
   min-width: 0;
   border: 1px solid var(--border);
@@ -69,6 +71,7 @@
   color: var(--ink);
   padding: 1.45rem;
   box-shadow: 0 18px 34px -30px var(--shadow);
+  text-rendering: optimizeLegibility;
 }
 
 .post__header {
@@ -81,6 +84,7 @@
 
 .post__header h1 {
   font-size: 2rem;
+  font-weight: 800;
   line-height: 1.28;
   overflow-wrap: anywhere;
 }
@@ -88,6 +92,8 @@
 .post__description {
   color: var(--muted-readable);
   font-size: 1rem;
+  font-weight: var(--post-body-weight);
+  line-height: 1.62;
 }
 
 .post-meta-grid {
@@ -154,10 +160,34 @@
   color: var(--ink);
 }
 
+.post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
+  font-weight: var(--post-body-weight);
+}
+
+.post > :where(p, ul, ol, blockquote, .markdown-alert) {
+  line-height: 1.72;
+}
+
+.post > :where(ul, ol) :where(li) {
+  line-height: 1.72;
+}
+
+.post > table :where(td) {
+  font-weight: var(--post-body-weight);
+}
+
+.post > table :where(th) {
+  font-weight: 650;
+}
+
 .post > h1 {
   margin: 2.3rem auto 0.8rem;
   padding-top: 0.25rem;
   font-size: 1.6rem;
+}
+
+.post > :where(h1, h2, h3, h4) {
+  font-weight: var(--post-heading-weight);
 }
 
 .post :where(h1, h2, h3, h4) {
@@ -172,6 +202,15 @@
 .post h3 {
   margin-top: 1.55rem;
   font-size: 1.16rem;
+}
+
+.post > :where(h3, h4) {
+  font-weight: 760;
+}
+
+.post > h4 {
+  margin-top: 1.35rem;
+  font-size: 1.04rem;
 }
 
 .post p {
@@ -205,7 +244,7 @@
   border-left: 4px solid var(--accent);
   border-radius: 0 8px 8px 0;
   background: var(--accent-soft);
-  color: var(--muted-readable);
+  color: var(--ink);
   padding: 0.8rem 1rem;
 }
 
@@ -216,6 +255,7 @@
   color: var(--heading);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.92em;
+  font-weight: 500;
   padding: 0.08rem 0.3rem;
 }
 
@@ -235,6 +275,7 @@
   border-radius: 0;
   background: transparent;
   color: inherit;
+  font-weight: var(--post-body-weight);
   padding: 0;
 }
 
@@ -365,6 +406,7 @@ html[data-theme="dark"] .astro-code span {
   margin: 0.55rem auto 0;
   color: var(--muted-readable);
   font-size: 0.85rem;
+  font-weight: var(--post-body-weight);
   line-height: 1.55;
 }
 
