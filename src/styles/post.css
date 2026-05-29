@@ -61,6 +61,7 @@
 
 .post {
   --post-content-width: 54rem;
+  --post-content-font: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --post-body-weight: 500;
   --post-heading-weight: 780;
   width: 100%;
@@ -87,6 +88,12 @@
   font-weight: 800;
   line-height: 1.28;
   overflow-wrap: anywhere;
+}
+
+.post__header h1,
+.post__description,
+.post > :where(h1, h2, h3, h4, p, ul, ol, blockquote, .markdown-alert, table, figure) {
+  font-family: var(--post-content-font);
 }
 
 .post__description {
