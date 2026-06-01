@@ -226,12 +226,16 @@
 
 .post ul,
 .post ol {
-  margin-top: 0.9rem;
+  margin-top: 0.7rem;
   padding-left: 1.35rem;
 }
 
+.post li > :where(ul, ol) {
+  margin-top: 0.32rem;
+}
+
 .post li + li {
-  margin-top: 0.35rem;
+  margin-top: 0.22rem;
 }
 
 .post a:not(.tag) {
@@ -247,12 +251,20 @@
 }
 
 .post blockquote {
-  margin: 1rem auto 0;
+  margin: 0.85rem auto 0;
   border-left: 4px solid var(--accent);
   border-radius: 0 8px 8px 0;
   background: var(--accent-soft);
   color: var(--ink);
-  padding: 0.8rem 1rem;
+  padding: 0.62rem 0.9rem;
+}
+
+.post blockquote > :where(p, ul, ol) {
+  margin-top: 0.52rem;
+}
+
+.post blockquote > :first-child {
+  margin-top: 0;
 }
 
 .post code {
@@ -419,13 +431,13 @@ html[data-theme="dark"] .astro-code span {
 
 .post .markdown-alert {
   --alert-color: var(--alert-note);
-  margin: 1.1rem auto 0;
+  margin: 0.95rem auto 0;
   border: 1px solid color-mix(in srgb, var(--alert-color) 24%, var(--border));
   border-left: 4px solid var(--alert-color);
   border-radius: 8px;
   background: color-mix(in srgb, var(--alert-color) 8%, var(--surface));
   color: var(--ink);
-  padding: 0.82rem 1rem;
+  padding: 0.68rem 0.9rem;
 }
 
 .post .markdown-alert-note {
@@ -467,7 +479,7 @@ html[data-theme="dark"] .astro-code span {
 }
 
 .post .markdown-alert p:not(.markdown-alert-title) {
-  margin: 0.58rem 0 0;
+  margin: 0.42rem 0 0;
   color: inherit;
 }
 
