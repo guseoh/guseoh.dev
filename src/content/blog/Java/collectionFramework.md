@@ -5,8 +5,8 @@ date: 2026-05-28
 updated: 2026-05-28
 category: Java
 tags: ["java", "자료구조"]
-series:
-seriesOrder:
+series: "Data Structure"
+seriesOrder: 1
 draft: true
 ---
 
