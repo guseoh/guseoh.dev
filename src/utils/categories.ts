@@ -1,24 +1,10 @@
 import type { CollectionEntry } from "astro:content";
-import { normalizeTag } from "./tags";
+import { formatTagName, normalizeTag } from "./tags";
 
 export type CategorySummary = {
   slug: string;
   name: string;
   count: number;
-};
-
-type CategoryTreeChildConfig = {
-  name: string;
-  slug: string;
-  matchTags?: string[];
-  matchCategories?: string[];
-  titleIncludes?: string[];
-};
-
-type CategoryTreeGroupConfig = {
-  name: string;
-  slug: string;
-  children: CategoryTreeChildConfig[];
 };
 
 export type CategoryTreeChild = {
@@ -31,108 +17,10 @@ export type CategoryTreeChild = {
 export type CategoryTreeGroup = {
   name: string;
   slug: string;
-  href?: string;
+  href: string;
   count: number;
   children: CategoryTreeChild[];
 };
-
-export const RECOMMENDED_CATEGORIES = [
-  "Project",
-  "OS",
-  "Spring",
-  "JPA",
-  "QueryDSL",
-  "Database",
-  "Docker",
-  "DevOps",
-  "Security",
-  "Git",
-  "Troubleshooting"
-];
-
-const RECOMMENDED_CATEGORY_SLUGS = RECOMMENDED_CATEGORIES.map((category) => normalizeCategory(category));
-
-export const CATEGORY_TREE: CategoryTreeGroupConfig[] = [
-  {
-    name: "Project",
-    slug: "project",
-    children: [
-      { name: "Board", slug: "board", matchTags: ["board"], titleIncludes: ["board"] },
-      { name: "Blog", slug: "blog", matchTags: ["blog"], matchCategories: ["blog"], titleIncludes: ["blog"] }
-    ]
-  },
-  {
-    name: "OS",
-    slug: "os",
-    children: []
-  },
-  {
-    name: "Spring",
-    slug: "spring",
-    children: [
-      { name: "Spring Boot", slug: "spring-boot", matchTags: ["spring-boot"] },
-      { name: "Spring Security", slug: "spring-security", matchTags: ["spring-security"] },
-      { name: "OAuth2", slug: "oauth2", matchTags: ["oauth2"] },
-      { name: "JPA", slug: "jpa", matchTags: ["jpa"] },
-      { name: "QueryDSL", slug: "querydsl", matchTags: ["querydsl"] }
-    ]
-  },
-  {
-    name: "Database",
-    slug: "database",
-    children: [
-      { name: "MySQL", slug: "mysql", matchTags: ["mysql"] },
-      { name: "MariaDB", slug: "mariadb", matchTags: ["mariadb"] },
-      { name: "SQL", slug: "sql", matchTags: ["sql", "database"] },
-      { name: "Redis", slug: "redis", matchTags: ["redis"] }
-    ]
-  },
-  {
-    name: "DevOps",
-    slug: "devops",
-    children: [
-      { name: "Docker", slug: "docker", matchTags: ["docker"] },
-      { name: "GitHub Actions", slug: "github-actions", matchTags: ["github-actions"] },
-      { name: "AWS EC2", slug: "aws-ec2", matchTags: ["aws-ec2"] },
-      { name: "Monitoring", slug: "monitoring", matchTags: ["monitoring", "actuator", "p6spy"] }
-    ]
-  },
-  {
-    name: "Security",
-    slug: "security",
-    children: [
-      { name: "Git Security", slug: "git-security", matchTags: ["git-security"] },
-      { name: "Secret Management", slug: "secret-management", matchTags: ["secret-management"] },
-      { name: "Supply Chain", slug: "supply-chain", matchTags: ["supply-chain"] }
-    ]
-  },
-  {
-    name: "Git",
-    slug: "git",
-    children: [
-      { name: "Branch", slug: "branch-strategy", matchTags: ["branch-strategy"] },
-      { name: "GitHub", slug: "github", matchTags: ["github", "github-actions"] },
-      { name: "Troubleshooting", slug: "git-troubleshooting", matchTags: ["git-troubleshooting"] }
-    ]
-  },
-  {
-    name: "Algorithm",
-    slug: "algorithm",
-    children: [
-      { name: "BOJ", slug: "boj", matchTags: ["boj"] },
-      { name: "Programmers", slug: "programmers", matchTags: ["programmers"] }
-    ]
-  },
-  {
-    name: "Troubleshooting",
-    slug: "troubleshooting",
-    children: [
-      { name: "Spring Error", slug: "spring-error", matchTags: ["spring-error"] },
-      { name: "Docker Error", slug: "docker-error", matchTags: ["docker-error"] },
-      { name: "Database Error", slug: "database-error", matchTags: ["database-error"] }
-    ]
-  }
-];
 
 export function normalizeCategory(category: string): string {
   return category
@@ -168,12 +56,7 @@ export function buildCategorySummary(posts: CollectionEntry<"blog">[]): Category
   }
 
   return Array.from(counts.values()).sort((a, b) => {
-    const orderA = RECOMMENDED_CATEGORY_SLUGS.indexOf(a.slug);
-    const orderB = RECOMMENDED_CATEGORY_SLUGS.indexOf(b.slug);
-    const rankA = orderA === -1 ? Number.MAX_SAFE_INTEGER : orderA;
-    const rankB = orderB === -1 ? Number.MAX_SAFE_INTEGER : orderB;
-
-    if (rankA !== rankB) return rankA - rankB;
+    if (a.count !== b.count) return b.count - a.count;
     return a.name.localeCompare(b.name, "ko");
   });
 }
@@ -182,69 +65,43 @@ export function filterPostsByCategory(posts: CollectionEntry<"blog">[], category
   return posts.filter((post) => getCategorySlug(post) === categorySlug);
 }
 
-function postMatchesChild(post: CollectionEntry<"blog">, child: CategoryTreeChildConfig) {
-  const categorySlug = getCategorySlug(post);
-  const tagSlugs = post.data.tags.map((tag) => normalizeTag(tag));
-  const lowerTitle = post.data.title.toLowerCase();
-
-  return (
-    child.matchCategories?.some((slug) => categorySlug === slug) ||
-    child.matchTags?.some((slug) => tagSlugs.includes(slug)) ||
-    child.titleIncludes?.some((keyword) => lowerTitle.includes(keyword.toLowerCase())) ||
-    false
-  );
-}
-
 export function buildCategoryHierarchy(posts: CollectionEntry<"blog">[]): CategoryTreeGroup[] {
-  const categorySummary = buildCategorySummary(posts);
-  const configuredGroupSlugs = new Set(CATEGORY_TREE.map((group) => group.slug));
+  return buildCategorySummary(posts).map(({ slug, name, count }) => {
+    const categoryPosts = posts.filter((post) => getCategorySlug(post) === slug);
+    const tagCounts = new Map<string, CategoryTreeChild>();
 
-  const configuredGroups = CATEGORY_TREE.map((group) => {
-    const groupPostIds = new Set<string>();
-    const directCategoryCount = posts.filter((post) => getCategorySlug(post) === group.slug).length;
+    for (const post of categoryPosts) {
+      for (const rawTag of post.data.tags) {
+        const tagSlug = normalizeTag(rawTag);
+        if (!tagSlug || tagSlug === slug) continue;
 
-    const children = group.children
-      .map((child) => {
-        const matchingPosts = posts.filter((post) => postMatchesChild(post, child));
+        const entry = tagCounts.get(tagSlug);
 
-        for (const post of matchingPosts) {
-          groupPostIds.add(post.id);
+        if (entry) {
+          entry.count += 1;
+          continue;
         }
 
-        return {
-          name: child.name,
-          slug: child.slug,
-          href: `/tags/${child.slug}/`,
-          count: matchingPosts.length
-        };
-      })
-      .filter((child) => child.count > 0);
-
-    for (const post of posts) {
-      if (getCategorySlug(post) === group.slug) {
-        groupPostIds.add(post.id);
+        tagCounts.set(tagSlug, {
+          name: formatTagName(rawTag),
+          slug: tagSlug,
+          href: `/tags/${tagSlug}/`,
+          count: 1
+        });
       }
     }
 
-    return {
-      name: group.name,
-      slug: group.slug,
-      href: directCategoryCount > 0 ? `/categories/${group.slug}/` : undefined,
-      count: groupPostIds.size,
-      children
-    };
-  }).filter((group) => group.count > 0 || group.children.length > 0);
+    const children = Array.from(tagCounts.values()).sort((a, b) => {
+      if (a.count !== b.count) return b.count - a.count;
+      return a.name.localeCompare(b.name, "ko");
+    });
 
-  const dynamicCategoryGroups = categorySummary
-    .filter(({ slug }) => !configuredGroupSlugs.has(slug))
-    .map(({ slug, name, count }) => ({
+    return {
       name,
       slug,
       href: `/categories/${slug}/`,
       count,
-      children: []
-    }));
-
-  return [...configuredGroups, ...dynamicCategoryGroups];
+      children
+    };
+  });
 }
-

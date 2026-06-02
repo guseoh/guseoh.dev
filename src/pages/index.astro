@@ -18,7 +18,7 @@ const categoryHierarchy = buildCategoryHierarchy(posts);
 >
   <ArchiveHero />
   <div class="home-content-grid">
-    <TopicIndex categories={categoryHierarchy} />
+    <TopicIndex categories={categoryHierarchy} totalCount={posts.length} />
     <LatestPosts posts={posts} />
   </div>
 </BaseLayout>

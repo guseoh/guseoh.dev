@@ -44,56 +44,50 @@
       sidebarOpenButton instanceof HTMLButtonElement &&
       sidebarCloseButton instanceof HTMLButtonElement
     ) {
-      const SIDEBAR_KEY = "guseo:sidebar-collapsed";
       const media = window.matchMedia("(max-width: 980px)");
       const isNarrow = () => media.matches;
 
-      const getStoredDesktopState = () => localStorage.getItem(SIDEBAR_KEY) === "true";
-
-      const applySidebarState = (collapsed, persistDesktop = false) => {
+      const applySidebarState = (collapsed) => {
         const narrow = isNarrow();
+        const shouldCollapse = narrow ? collapsed : false;
 
-        shell.classList.toggle("sidebar-collapsed", collapsed);
-        document.body.classList.toggle("has-sidebar-open", narrow && !collapsed);
-        sidebar.setAttribute("aria-hidden", collapsed ? "true" : "false");
-        sidebarOpenButton.hidden = !collapsed;
-        sidebarOpenButton.setAttribute("aria-expanded", collapsed ? "false" : "true");
-        sidebarCloseButton.hidden = collapsed;
+        shell.classList.toggle("sidebar-collapsed", shouldCollapse);
+        document.body.classList.toggle("has-sidebar-open", narrow && !shouldCollapse);
+        sidebar.setAttribute("aria-hidden", narrow && shouldCollapse ? "true" : "false");
+        sidebarOpenButton.hidden = !narrow || !shouldCollapse;
+        sidebarOpenButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
+        sidebarCloseButton.hidden = !narrow;
 
         if (sidebarBackdrop instanceof HTMLButtonElement) {
-          sidebarBackdrop.hidden = collapsed || !narrow;
-        }
-
-        if (persistDesktop && !narrow) {
-          localStorage.setItem(SIDEBAR_KEY, collapsed ? "true" : "false");
+          sidebarBackdrop.hidden = shouldCollapse || !narrow;
         }
       };
 
-      applySidebarState(isNarrow() ? true : getStoredDesktopState());
+      applySidebarState(isNarrow());
 
       sidebarOpenButton.addEventListener("click", () => {
-        applySidebarState(false, true);
+        applySidebarState(false);
       });
 
       sidebarCloseButton.addEventListener("click", () => {
-        applySidebarState(true, true);
+        applySidebarState(true);
       });
 
       if (sidebarBackdrop instanceof HTMLButtonElement) {
         sidebarBackdrop.addEventListener("click", () => {
-          applySidebarState(true, true);
+          applySidebarState(true);
         });
       }
 
       window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !shell.classList.contains("sidebar-collapsed")) {
-          applySidebarState(true, true);
+        if (event.key === "Escape" && isNarrow() && !shell.classList.contains("sidebar-collapsed")) {
+          applySidebarState(true);
           sidebarOpenButton.focus();
         }
       });
 
       media.addEventListener("change", () => {
-        applySidebarState(isNarrow() ? true : getStoredDesktopState());
+        applySidebarState(isNarrow());
       });
     }
 

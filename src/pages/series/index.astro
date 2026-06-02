@@ -1,0 +1,57 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { buildSeriesSummary } from "../../utils/series";
+import { SITE_DESCRIPTION, formatPostDate, sortPostsByDate } from "../../utils/posts";
+
+const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const seriesSummary = buildSeriesSummary(posts);
+---
+
+<BaseLayout title="devjune.dev | Series" description={`시리즈별 글 목록 - ${SITE_DESCRIPTION}`}>
+  <section class="hero">
+    <h1>Series</h1>
+    <p>연속해서 읽기 좋은 학습 기록과 프로젝트 개선 과정을 묶어둔 공간입니다.</p>
+  </section>
+
+  {
+    seriesSummary.length === 0 ? (
+      <p class="section-empty" style="margin-top: 1rem;">아직 공개된 시리즈가 없습니다.</p>
+    ) : (
+      <ul class="post-list series-list" style="margin-top: 1rem;">
+        {seriesSummary.map((series) => {
+          const firstPost = series.posts[0]!;
+          const previewPosts = series.posts.slice(0, 4);
+          const hiddenPostCount = Math.max(0, series.posts.length - previewPosts.length);
+
+          return (
+            <li>
+              <article class="card series-card">
+                <div class="series-card__head">
+                  <div>
+                    <p class="series-card__eyebrow">Series</p>
+                    <h2>
+                      <a href={`/blog/${firstPost.id}/`}>{series.name}</a>
+                    </h2>
+                  </div>
+                  <span class="series-card__count">{series.count} posts</span>
+                </div>
+
+                <ol class="series-card__posts">
+                  {previewPosts.map((post) => (
+                    <li>
+                      <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+                      <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
+                    </li>
+                  ))}
+                </ol>
+
+                {hiddenPostCount > 0 && <p class="series-card__more">+{hiddenPostCount}개 글이 더 있습니다.</p>}
+              </article>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+</BaseLayout>

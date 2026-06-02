@@ -5,8 +5,11 @@ interface Props {
   groups: CategoryTreeGroup[];
   idPrefix: string;
   variant?: "sidebar" | "home" | "page";
+  totalCount?: number;
+  currentPath?: string;
   currentCategory?: string;
   currentTag?: string;
+  showAllLink?: boolean;
   label?: string;
 }
 
@@ -14,13 +17,29 @@ const {
   groups,
   idPrefix,
   variant = "page",
+  totalCount,
+  currentPath = "",
   currentCategory = "",
   currentTag = "",
+  showAllLink = false,
   label = "Category menu"
 } = Astro.props as Props;
+
+const normalizedCurrentPath = currentPath.replace(/\/+$/, "") || "/";
+const showAllPostsLink = showAllLink && typeof totalCount === "number";
+const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentPath.startsWith("/blog/page");
 ---
 
 <nav class:list={["category-menu", `category-menu--${variant}`]} aria-label={label} data-category-menu>
+  {
+    showAllPostsLink && (
+      <a class:list={["category-menu__all", isAllPostsActive && "is-active"]} href="/blog/">
+        <span>전체 글</span>
+        <strong>({totalCount})</strong>
+      </a>
+    )
+  }
+
   {groups.map((group, index) => {
     const isActiveGroup =
       currentCategory === group.slug || group.children.some((child) => currentTag === child.slug);
@@ -34,7 +53,7 @@ const {
           <a class:list={["category-menu__toggle", "category-menu__toggle--link"]} href={group.href}>
             <span class="category-menu__title">{group.name}</span>
             <span class="category-menu__meta">
-              <span class="category-menu__count">{group.count}</span>
+              <span class="category-menu__count">({group.count})</span>
             </span>
           </a>
         ) : (
@@ -48,7 +67,7 @@ const {
             >
               <span class="category-menu__title">{group.name}</span>
               <span class="category-menu__meta">
-                <span class="category-menu__count">{group.count}</span>
+                <span class="category-menu__count">({group.count})</span>
                 <span class="category-menu__chevron" aria-hidden="true"></span>
               </span>
             </button>
@@ -57,14 +76,14 @@ const {
               {group.href && (
                 <a class:list={["category-menu__child", "category-menu__child--all", currentCategory === group.slug && "is-active"]} href={group.href}>
                   <span>전체 {group.name}</span>
-                  <strong>{group.count}</strong>
+                  <strong>({group.count})</strong>
                 </a>
               )}
 
               {group.children.map((child) => (
                 <a class:list={["category-menu__child", currentTag === child.slug && "is-active"]} href={child.href}>
                   <span>{child.name}</span>
-                  <strong>{child.count}</strong>
+                  <strong>({child.count})</strong>
                 </a>
               ))}
             </div>

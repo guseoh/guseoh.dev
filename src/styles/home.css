@@ -134,6 +134,17 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
 }
 
+@media (min-width: 861px) {
+  .home-topic-sidebar {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+}
+
 @media (max-width: 860px) {
   .home-content-grid {
     grid-template-columns: 1fr;

@@ -9,13 +9,17 @@ interface Props {
 const { currentPath } = Astro.props as Props;
 
 const headerLinks = [
+  { href: "/", label: "Home" },
   { href: "/blog", label: "Posts" },
   { href: "/categories", label: "Categories" },
-  { href: "/about", label: "About" }
+  { href: "/series", label: "Series" },
+  { href: "/search", label: "Search" }
 ];
 
 function isNavActive(href: string) {
-  const normalizedHref = href.replace(/\/+$/, "");
+  const normalizedHref = href === "/" ? "/" : href.replace(/\/+$/, "");
+  if (normalizedHref === "/") return currentPath === "/";
+
   return currentPath === normalizedHref || currentPath.startsWith(`${normalizedHref}/`);
 }
 ---

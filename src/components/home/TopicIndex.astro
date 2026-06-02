@@ -4,9 +4,10 @@ import CategoryMenu from "../CategoryMenu.astro";
 
 interface Props {
   categories: CategoryTreeGroup[];
+  totalCount: number;
 }
 
-const { categories } = Astro.props as Props;
+const { categories, totalCount } = Astro.props as Props;
 ---
 
 <section class="home-section home-topic-sidebar" aria-label="Categories">
@@ -18,7 +19,14 @@ const { categories } = Astro.props as Props;
   {categories.length === 0 ? (
     <p class="section-empty">카테고리가 없습니다.</p>
   ) : (
-    <CategoryMenu groups={categories} idPrefix="home-category" variant="home" label="Home category menu" />
+    <CategoryMenu
+      groups={categories}
+      idPrefix="home-category"
+      variant="home"
+      totalCount={totalCount}
+      showAllLink={true}
+      label="Home category menu"
+    />
   )}
 </section>
 

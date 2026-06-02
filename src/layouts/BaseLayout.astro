@@ -85,7 +85,7 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
     </script>
   </head>
   <body class:list={[minimalHome && "page-home-simple"]}>
-    <div class:list={["site-shell", !minimalHome && "sidebar-collapsed"]}>
+    <div class="site-shell">
       <Header currentPath={currentPath} />
 
       <div class:list={["site-layout", minimalHome && "site-layout--minimal"]}>
@@ -94,6 +94,7 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
             <Sidebar
               categoryHierarchy={categoryHierarchy}
               tagSummary={tagSummary}
+              totalPostCount={posts.length}
               currentCategory={currentCategory}
               currentTag={currentTag}
               currentPath={currentPath}
