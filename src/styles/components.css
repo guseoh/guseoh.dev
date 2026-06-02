@@ -352,6 +352,45 @@
   padding: 0.36rem 0.4rem 0.36rem 0.55rem;
 }
 
+.category-menu--home {
+  box-shadow: none;
+}
+
+.category-menu--home .category-menu__toggle {
+  min-height: 2.2rem;
+  padding: 0.5rem 0.58rem;
+  font-size: 0.76rem;
+}
+
+.category-menu--home .category-menu__meta {
+  gap: 0.34rem;
+}
+
+.category-menu--home .category-menu__count {
+  min-width: 1.35rem;
+  font-size: 0.62rem;
+  padding: 0.2rem 0.3rem;
+}
+
+.category-menu--home .category-menu__chevron {
+  width: 0.42rem;
+  height: 0.42rem;
+}
+
+.category-menu--home .category-menu__children {
+  gap: 0.06rem;
+  padding: 0.28rem 0.32rem 0.36rem 0.42rem;
+}
+
+.category-menu--home .category-menu__child {
+  font-size: 0.7rem;
+  padding: 0.28rem 0.32rem 0.28rem 0.48rem;
+}
+
+.category-menu--home .category-menu__child strong {
+  font-size: 0.62rem;
+}
+
 .category-tree {
   display: grid;
   gap: 0.85rem;

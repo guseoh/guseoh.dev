@@ -1,8 +1,8 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import PostMetaBadges from "../PostMetaBadges.astro";
-import { normalizeCategory } from "../../utils/categories";
-import { formatPostDate, getPostDescription, getReadingTime, HOME_POST_LIMIT } from "../../utils/posts";
+import PostCard from "../PostCard.astro";
+import PostViewSwitch from "../PostViewSwitch.astro";
+import { HOME_POST_LIMIT } from "../../utils/posts";
 
 interface Props {
   posts: CollectionEntry<"blog">[];
@@ -13,37 +13,28 @@ const { posts, limit = HOME_POST_LIMIT } = Astro.props as Props;
 const visiblePosts = posts.slice(0, limit);
 ---
 
-<section class="home-section" aria-label="Recent posts">
+<section class="home-section home-latest-posts" aria-label="Recent posts">
   <div class="home-section__head home-section__head--inline">
     <h2 class="home-section__title">최근 글</h2>
-    <a class="home-section__link" href="/blog/">전체 글</a>
+    <div class="home-section__actions">
+      <a class="home-section__link" href="/blog/">전체 글</a>
+      <PostViewSwitch
+        listId="home-latest-post-list"
+        storageKey="guseo:home-list-view"
+        ariaLabel="Toggle recent posts view"
+      />
+    </div>
   </div>
 
   {visiblePosts.length === 0 ? (
     <p class="section-empty">아직 공개된 글이 없습니다.</p>
   ) : (
-    <ul class="latest-list">
-      {visiblePosts.map((post) => {
-        const categoryName = post.data.category?.trim() || "미분류";
-        const readingTime = getReadingTime(post);
-        const description = getPostDescription(post);
-        return (
-          <li class="latest-item">
-            <article class="latest-item__article">
-              <a class="latest-item__title" href={`/blog/${post.id}/`}>{post.data.title}</a>
-              <p class="latest-item__meta">
-                <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
-                <span aria-hidden="true">·</span>
-                <a href={`/categories/${normalizeCategory(categoryName)}/`}>{categoryName}</a>
-                <span aria-hidden="true">·</span>
-                <span>{readingTime}</span>
-              </p>
-              <p class="latest-item__summary">{description}</p>
-              <PostMetaBadges category={categoryName} tags={post.data.tags} maxTags={3} />
-            </article>
-          </li>
-        );
-      })}
+    <ul id="home-latest-post-list" class="post-list post-list--switch home-post-list" data-post-list>
+      {visiblePosts.map((post) => (
+        <li>
+          <PostCard post={post} variant="latest" />
+        </li>
+      ))}
     </ul>
   )}
 </section>

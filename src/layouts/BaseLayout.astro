@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { getCollection } from "astro:content";
 import Header from "../components/layout/Header.astro";
+import Footer from "../components/layout/Footer.astro";
 import Sidebar from "../components/layout/Sidebar.astro";
 import LayoutScripts from "../components/layout/LayoutScripts.astro";
 import { buildCategoryHierarchy } from "../utils/categories";
@@ -106,6 +107,8 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
           </main>
         </div>
       </div>
+
+      <Footer />
     </div>
 
     <LayoutScripts />
