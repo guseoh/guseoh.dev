@@ -1,20 +1,28 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import CategoryMenu from "../../components/CategoryMenu.astro";
-import { buildCategoryHierarchy } from "../../utils/categories";
+import { buildCategorySummary } from "../../utils/categories";
 import { SITE_DESCRIPTION } from "../../utils/posts";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
-const categoryHierarchy = buildCategoryHierarchy(posts);
+const categorySummary = buildCategorySummary(posts);
 ---
 
 <BaseLayout title="devjune.dev | Categories" description={SITE_DESCRIPTION}>
   <section class="hero">
     <h1>Categories</h1>
-    <p>Project, Spring, JPA, Database, DevOps, Git 중심으로 학습/개선 기록을 묶어둔 공간입니다.</p>
+    <p>게시글에 지정된 카테고리 기준으로 학습/개선 기록을 묶어둔 공간입니다.</p>
   </section>
 
-  <CategoryMenu groups={categoryHierarchy} idPrefix="categories-page" variant="page" label="Category index menu" />
+  <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
+    {categorySummary.map(({ slug, name, count }) => (
+      <li class="card category-card-row">
+        <a class="badge badge--topic" href={`/categories/${slug}/`}>
+          <span>{name}</span>
+          <strong>{count}</strong>
+        </a>
+      </li>
+    ))}
+  </ul>
 </BaseLayout>
 

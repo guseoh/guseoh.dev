@@ -58,7 +58,7 @@
 
 .home-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.65fr) minmax(18rem, 1fr);
+  grid-template-columns: minmax(18rem, 1fr) minmax(0, 1.65fr);
   gap: 1.2rem;
   align-items: start;
 }

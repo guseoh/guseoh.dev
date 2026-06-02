@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { normalizeCategory } from "../../utils/categories";
+import { getSeriesContinuationMessage } from "../../utils/series";
 import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
   DETAIL_TAG_LIMIT,
@@ -48,6 +49,7 @@ const seriesPosts = seriesName
       .filter((entry) => entry.data.series?.trim() === seriesName)
       .sort((a, b) => (a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER) - (b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER))
   : [];
+const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
 ---
 
 <BaseLayout
@@ -117,7 +119,7 @@ const seriesPosts = seriesName
                 ))}
               </ol>
             ) : (
-              <p class="post-series__empty">다음 성능 개선 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다.</p>
+              <p class="post-series__empty">{seriesContinuationMessage}</p>
             )}
           </section>
         )}

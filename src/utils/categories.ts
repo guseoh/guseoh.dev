@@ -50,6 +50,8 @@ export const RECOMMENDED_CATEGORIES = [
   "Troubleshooting"
 ];
 
+const RECOMMENDED_CATEGORY_SLUGS = RECOMMENDED_CATEGORIES.map((category) => normalizeCategory(category));
+
 export const CATEGORY_TREE: CategoryTreeGroupConfig[] = [
   {
     name: "Project",
@@ -166,8 +168,8 @@ export function buildCategorySummary(posts: CollectionEntry<"blog">[]): Category
   }
 
   return Array.from(counts.values()).sort((a, b) => {
-    const orderA = RECOMMENDED_CATEGORIES.indexOf(a.name);
-    const orderB = RECOMMENDED_CATEGORIES.indexOf(b.name);
+    const orderA = RECOMMENDED_CATEGORY_SLUGS.indexOf(a.slug);
+    const orderB = RECOMMENDED_CATEGORY_SLUGS.indexOf(b.slug);
     const rankA = orderA === -1 ? Number.MAX_SAFE_INTEGER : orderA;
     const rankB = orderB === -1 ? Number.MAX_SAFE_INTEGER : orderB;
 
@@ -194,7 +196,10 @@ function postMatchesChild(post: CollectionEntry<"blog">, child: CategoryTreeChil
 }
 
 export function buildCategoryHierarchy(posts: CollectionEntry<"blog">[]): CategoryTreeGroup[] {
-  return CATEGORY_TREE.map((group) => {
+  const categorySummary = buildCategorySummary(posts);
+  const configuredGroupSlugs = new Set(CATEGORY_TREE.map((group) => group.slug));
+
+  const configuredGroups = CATEGORY_TREE.map((group) => {
     const groupPostIds = new Set<string>();
     const directCategoryCount = posts.filter((post) => getCategorySlug(post) === group.slug).length;
 
@@ -229,5 +234,17 @@ export function buildCategoryHierarchy(posts: CollectionEntry<"blog">[]): Catego
       children
     };
   }).filter((group) => group.count > 0 || group.children.length > 0);
+
+  const dynamicCategoryGroups = categorySummary
+    .filter(({ slug }) => !configuredGroupSlugs.has(slug))
+    .map(({ slug, name, count }) => ({
+      name,
+      slug,
+      href: `/categories/${slug}/`,
+      count,
+      children: []
+    }));
+
+  return [...configuredGroups, ...dynamicCategoryGroups];
 }
 

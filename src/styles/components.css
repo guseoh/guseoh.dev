@@ -241,6 +241,7 @@
   line-height: 1.25;
   padding: 0.82rem 0.9rem;
   text-align: left;
+  text-decoration: none;
 }
 
 .category-menu__toggle:hover,

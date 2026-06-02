@@ -22,8 +22,9 @@
   --tag-bg: #edf8f7;
   --tag-border: #b9d9d5;
   --tag-text: #245b58;
-  --code-inline-bg: #f3eff8;
-  --code-inline-border: #ded2ea;
+  --code-inline-bg: #f1f3f5;
+  --code-inline-border: #d7dde4;
+  --code-inline-text: #2f3744;
   --code-card-header-bg: #eef3f8;
   --code-block-bg: #ffffff;
   --code-block-border: #d4dde8;
@@ -63,6 +64,7 @@ html[data-theme="dark"] {
   --tag-text: #d4f3f6;
   --code-inline-bg: rgba(221, 199, 245, 0.13);
   --code-inline-border: rgba(221, 199, 245, 0.24);
+  --code-inline-text: var(--heading);
   --code-card-header-bg: #2a3038;
   --code-block-bg: #14171b;
   --code-block-border: #3b444f;

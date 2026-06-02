@@ -25,39 +25,51 @@ const {
     const isActiveGroup =
       currentCategory === group.slug || group.children.some((child) => currentTag === child.slug);
     const isExpanded = isActiveGroup || index === 0;
+    const isLeafLink = group.href && group.children.length === 0;
     const panelId = `${idPrefix}-${group.slug}-panel`;
 
     return (
       <div class:list={["category-menu__group", isActiveGroup && "is-active"]}>
-        <button
-          class="category-menu__toggle"
-          type="button"
-          aria-expanded={isExpanded ? "true" : "false"}
-          aria-controls={panelId}
-          data-category-toggle
-        >
-          <span class="category-menu__title">{group.name}</span>
-          <span class="category-menu__meta">
-            <span class="category-menu__count">{group.count}</span>
-            <span class="category-menu__chevron" aria-hidden="true"></span>
-          </span>
-        </button>
+        {isLeafLink ? (
+          <a class:list={["category-menu__toggle", "category-menu__toggle--link"]} href={group.href}>
+            <span class="category-menu__title">{group.name}</span>
+            <span class="category-menu__meta">
+              <span class="category-menu__count">{group.count}</span>
+            </span>
+          </a>
+        ) : (
+          <>
+            <button
+              class="category-menu__toggle"
+              type="button"
+              aria-expanded={isExpanded ? "true" : "false"}
+              aria-controls={panelId}
+              data-category-toggle
+            >
+              <span class="category-menu__title">{group.name}</span>
+              <span class="category-menu__meta">
+                <span class="category-menu__count">{group.count}</span>
+                <span class="category-menu__chevron" aria-hidden="true"></span>
+              </span>
+            </button>
 
-        <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
-          {group.href && (
-            <a class:list={["category-menu__child", "category-menu__child--all", currentCategory === group.slug && "is-active"]} href={group.href}>
-              <span>전체 {group.name}</span>
-              <strong>{group.count}</strong>
-            </a>
-          )}
+            <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
+              {group.href && (
+                <a class:list={["category-menu__child", "category-menu__child--all", currentCategory === group.slug && "is-active"]} href={group.href}>
+                  <span>전체 {group.name}</span>
+                  <strong>{group.count}</strong>
+                </a>
+              )}
 
-          {group.children.map((child) => (
-            <a class:list={["category-menu__child", currentTag === child.slug && "is-active"]} href={child.href}>
-              <span>{child.name}</span>
-              <strong>{child.count}</strong>
-            </a>
-          ))}
-        </div>
+              {group.children.map((child) => (
+                <a class:list={["category-menu__child", currentTag === child.slug && "is-active"]} href={child.href}>
+                  <span>{child.name}</span>
+                  <strong>{child.count}</strong>
+                </a>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     );
   })}
