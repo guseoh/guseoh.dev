@@ -1,0 +1,37 @@
+---
+interface Props {
+  username?: string;
+}
+
+const { username = "guseoh" } = Astro.props as Props;
+
+/*
+ * GitHub activity is currently rendered with the external SVG service below.
+ * Future token-backed GitHub GraphQL API work should run at build time in
+ * GitHub Actions, write public JSON, and never expose a GitHub token to the browser.
+ */
+const chartUrl = `https://ghchart.rshah.org/${username}`;
+const profileUrl = `https://github.com/${username}`;
+---
+
+<section class="activity-card github-grass" aria-labelledby="github-grass-title">
+  <div class="activity-card__head">
+    <div>
+      <p class="activity-card__eyebrow">GitHub Activity</p>
+      <h2 id="github-grass-title" class="activity-card__title">GitHub 활동</h2>
+    </div>
+    <a class="activity-card__link" href={profileUrl} target="_blank" rel="noreferrer">프로필 보기</a>
+  </div>
+
+  <p class="activity-card__description">코드 작성과 프로젝트 개선 기록</p>
+
+  <div class="github-grass__frame">
+    <img
+      class="github-grass__image"
+      src={chartUrl}
+      alt={`${username} GitHub contribution graph`}
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+</section>

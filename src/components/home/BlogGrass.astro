@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { BLOG_GRASS_WEEKDAY_LABELS, buildBlogActivityStats } from "../../utils/blogStats";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+}
+
+const { posts } = Astro.props as Props;
+const stats = buildBlogActivityStats(posts);
+const numberFormatter = new Intl.NumberFormat("ko-KR");
+
+const statItems = [
+  { label: "전체 글", value: stats.totalPosts, suffix: "개" },
+  { label: "올해", value: stats.yearPosts, suffix: "개" },
+  { label: "이번 달", value: stats.monthPosts, suffix: "개" },
+  { label: "현재 연속", value: stats.currentStreak, suffix: "일" },
+  { label: "최장 연속", value: stats.longestStreak, suffix: "일" }
+];
+---
+
+<section class="activity-card blog-grass" aria-labelledby="blog-grass-title">
+  <div class="activity-card__head">
+    <div>
+      <p class="activity-card__eyebrow">Writing Activity</p>
+      <h2 id="blog-grass-title" class="activity-card__title">블로그 작성 잔디</h2>
+    </div>
+    <p class="activity-card__range">{stats.rangeStart} ~ {stats.rangeEnd}</p>
+  </div>
+
+  <dl class="activity-stats" aria-label="블로그 작성 통계">
+    {statItems.map((item) => (
+      <div class="activity-stats__item">
+        <dt>{item.label}</dt>
+        <dd>{numberFormatter.format(item.value)}{item.suffix}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <div class="grass-chart" style={`--grass-weeks: ${stats.weeks.length}`}>
+    <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 블로그 작성 잔디">
+      <div class="grass-chart__months" aria-hidden="true">
+        {stats.weeks.map((week) => <span>{week.monthLabel}</span>)}
+      </div>
+
+      <div class="grass-chart__body">
+        <div class="grass-chart__weekdays" aria-hidden="true">
+          {BLOG_GRASS_WEEKDAY_LABELS.map((label, index) => (
+            <span>{index % 2 === 0 ? label : ""}</span>
+          ))}
+        </div>
+
+        <div class="grass-chart__grid" role="grid" aria-label="날짜별 블로그 작성 개수">
+          {stats.weeks.map((week) => (
+            week.days.map((day) => (
+              <span
+                class:list={["grass-cell", day.isToday && "grass-cell--today", day.isOutsideRange && "grass-cell--muted"]}
+                data-level={day.level}
+                role="gridcell"
+                aria-label={day.label}
+                title={day.label}
+              />
+            ))
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grass-legend" aria-label="작성 개수 농도 범례">
+    <span>적음</span>
+    <span class="grass-cell" data-level="0" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="1" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="2" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="3" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="4" aria-hidden="true"></span>
+    <span>많음</span>
+    <span class="grass-legend__note">한 칸은 하루, 숫자는 공개 글 작성 수 기준입니다.</span>
+  </div>
+</section>
