@@ -43,15 +43,17 @@ export function getPostDescription(post: CollectionEntry<"blog">) {
 
 export function getReadingTime(post: CollectionEntry<"blog">) {
   const source = post.body ?? "";
+  const codeBlocks = source.match(/```[\s\S]*?```/g) ?? [];
+  const codeWeightedWords = codeBlocks.reduce((total, block) => total + block.length / 220, 0);
   const plainText = source
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/<[^>]+>/g, " ");
   const latinWords = plainText.match(/[A-Za-z0-9_]+/g)?.length ?? 0;
-  const koreanCharacters = plainText.match(/[가-힣]/g)?.length ?? 0;
+  const koreanCharacters = plainText.match(/[\u3131-\u318E\uAC00-\uD7A3]/g)?.length ?? 0;
   const cjkCharacters = plainText.match(/[\u3040-\u30ff\u3400-\u9fff]/g)?.length ?? 0;
-  const estimatedWords = latinWords + koreanCharacters / 3.2 + cjkCharacters / 2.4;
-  const minutes = Math.max(1, Math.ceil(estimatedWords / 230));
+  const estimatedWords = latinWords + koreanCharacters / 3.1 + cjkCharacters / 2.4 + codeWeightedWords;
+  const minutes = Math.max(1, Math.ceil(estimatedWords / 240));
 
   return `${minutes}분 읽기`;
 }

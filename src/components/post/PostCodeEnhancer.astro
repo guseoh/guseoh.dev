@@ -1,0 +1,111 @@
+---
+---
+
+<script is:inline>
+  (() => {
+    const blocks = Array.from(document.querySelectorAll(".post pre"));
+    if (blocks.length === 0) return;
+
+    const languageLabels = new Map([
+      ["java", "Java"],
+      ["js", "JavaScript"],
+      ["javascript", "JavaScript"],
+      ["ts", "TypeScript"],
+      ["typescript", "TypeScript"],
+      ["sql", "SQL"],
+      ["bash", "Bash"],
+      ["sh", "Bash"],
+      ["yaml", "YAML"],
+      ["yml", "YAML"],
+      ["html", "HTML"],
+      ["css", "CSS"],
+      ["json", "JSON"],
+      ["xml", "XML"],
+      ["properties", "Properties"],
+      ["text", "Code"],
+      ["plaintext", "Code"]
+    ]);
+
+    const getLanguageKey = (pre) => {
+      const fromData = pre.dataset.language || "";
+      if (fromData.trim().length > 0) return fromData;
+
+      const code = pre.querySelector("code");
+      const className = `${pre.className} ${code?.className ?? ""}`;
+      const match = className.match(/language-([A-Za-z0-9_-]+)/);
+      return match?.[1] ?? "";
+    };
+
+    const getLanguageLabel = (pre) => {
+      const key = getLanguageKey(pre).trim().toLowerCase();
+      return languageLabels.get(key) ?? (key.length > 0 ? key[0].toUpperCase() + key.slice(1) : "Code");
+    };
+
+    for (const pre of blocks) {
+      if (!(pre instanceof HTMLPreElement) || pre.parentElement?.classList.contains("code-block")) continue;
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "code-block";
+      pre.parentNode?.insertBefore(wrapper, pre);
+
+      const header = document.createElement("div");
+      header.className = "code-block__header";
+
+      const language = document.createElement("span");
+      language.className = "code-block__language";
+      language.textContent = getLanguageLabel(pre);
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "code-copy-button";
+      button.textContent = "Copy";
+      button.setAttribute("aria-label", "Copy code block");
+
+      header.append(language, button);
+      wrapper.append(header, pre);
+
+      const copyText = async (text) => {
+        if (window.navigator?.clipboard && window.isSecureContext) {
+          await window.navigator.clipboard.writeText(text);
+          return "copied";
+        }
+
+        if (typeof document.createElement !== "function") {
+          return "selected";
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "true");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-1000px";
+        textarea.style.left = "-1000px";
+        document.body.append(textarea);
+        textarea.select();
+
+        const execCopy = document["exec" + "Command"];
+        const copied = typeof execCopy === "function" && execCopy.call(document, "copy");
+        textarea.remove();
+
+        return copied ? "copied" : "selected";
+      };
+
+      button.addEventListener("click", async () => {
+        const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
+
+        try {
+          const result = await copyText(code);
+          button.textContent = result === "copied" ? "Copied" : "Selected";
+          window.setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1400);
+        } catch {
+          button.textContent = "Selected";
+          window.setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1400);
+        }
+      });
+    }
+  })();
+</script>

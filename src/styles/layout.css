@@ -23,6 +23,7 @@
   margin-inline: auto;
 }
 
+/* Wide pages keep room for the post body's inner article + TOC grid. */
 .site-layout--wide {
   width: min(1760px, calc(100vw - 1.5rem));
 }
@@ -130,11 +131,15 @@
   display: block;
 }
 
+/* Outer shell: left navigation + page content. Post body/TOC columns live in post.css. */
 .site-layout {
+  --site-sidebar-width: minmax(220px, 250px);
+  --site-sidebar-collapsed-width: 2.75rem;
+  --site-layout-gap: 1.25rem;
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
+  gap: var(--site-layout-gap);
   align-items: start;
   padding: 1.25rem 0 2.5rem;
   transition: grid-template-columns 180ms ease, gap 180ms ease;
@@ -145,8 +150,8 @@
 }
 
 .site-layout--wide:not(.site-layout--minimal) {
-  grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
-  gap: clamp(1.25rem, 1.6vw, 2rem);
+  --site-layout-gap: clamp(1.25rem, 1.6vw, 2rem);
+  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
 }
 
 .site-layout:not(.site-layout--minimal) > .site-sidebar {
@@ -161,7 +166,7 @@
 
 html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal),
 .site-shell.sidebar-collapsed .site-layout:not(.site-layout--minimal) {
-  grid-template-columns: 2.75rem minmax(0, 1fr);
+  grid-template-columns: var(--site-sidebar-collapsed-width) minmax(0, 1fr);
   gap: 1rem;
 }
 

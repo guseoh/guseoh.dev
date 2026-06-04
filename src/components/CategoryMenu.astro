@@ -62,7 +62,9 @@ const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentP
               class="category-menu__toggle"
               type="button"
               aria-expanded={isExpanded ? "true" : "false"}
+              aria-label={`${group.name} 하위 태그 ${isExpanded ? "접기" : "펼치기"}`}
               aria-controls={panelId}
+              data-category-name={group.name}
               data-category-toggle
             >
               <span class="category-menu__title">{group.name}</span>
@@ -115,8 +117,12 @@ const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentP
         if (!(panel instanceof HTMLElement)) return;
 
         const isExpanded = button.getAttribute("aria-expanded") === "true";
-        button.setAttribute("aria-expanded", isExpanded ? "false" : "true");
-        panel.hidden = isExpanded;
+        const nextExpanded = !isExpanded;
+        const categoryName = button.dataset.categoryName ?? button.textContent?.trim() ?? "카테고리";
+
+        button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
+        button.setAttribute("aria-label", `${categoryName} 하위 태그 ${nextExpanded ? "접기" : "펼치기"}`);
+        panel.hidden = !nextExpanded;
       });
     }
   })();

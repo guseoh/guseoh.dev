@@ -1,5 +1,6 @@
 import { getCollection } from "astro:content";
 import { buildCategorySummary } from "../utils/categories";
+import { buildSeriesSummary } from "../utils/series";
 import { buildTagSummary } from "../utils/tags";
 import { POSTS_PER_PAGE, SITE_URL, sortPostsByDate } from "../utils/posts";
 
@@ -19,19 +20,21 @@ function buildUrl(path: string) {
 export async function GET() {
   const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
   const categories = buildCategorySummary(posts);
+  const series = buildSeriesSummary(posts);
   const tags = buildTagSummary(posts);
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
 
-  const staticPaths = ["/", "/about/", "/blog/", "/categories/", "/tags/", "/search/"];
+  const staticPaths = ["/", "/about/", "/blog/", "/categories/", "/tags/", "/series/", "/search/"];
   const pagePaths = totalPages > 1
     ? Array.from({ length: totalPages - 1 }, (_, index) => `/blog/page/${index + 2}/`)
     : [];
   const postPaths = posts.map((post) => `/blog/${post.id}/`);
   const categoryPaths = categories.map((category) => `/categories/${category.slug}/`);
   const tagPaths = tags.map((tag) => `/tags/${tag.tag}/`);
+  const seriesPaths = series.map((entry) => `/series/${entry.slug}/`);
   const today = new Date().toISOString().slice(0, 10);
 
-  const urls = [...staticPaths, ...pagePaths, ...postPaths, ...categoryPaths, ...tagPaths]
+  const urls = [...staticPaths, ...pagePaths, ...postPaths, ...categoryPaths, ...tagPaths, ...seriesPaths]
     .map((path) => {
       const post = posts.find((entry) => path === `/blog/${entry.id}/`);
       const lastmod = post ? (post.data.updated ?? post.data.date).toISOString().slice(0, 10) : today;

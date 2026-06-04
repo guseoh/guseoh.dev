@@ -1,4 +1,5 @@
 .post-view {
+  /* Desktop post grid: readable article width + right sticky TOC with a visible gutter. */
   --post-body-max: clamp(860px, 56vw, 960px);
   --post-toc-width: clamp(12rem, 12vw, 15rem);
   --post-toc-gap: clamp(2.5rem, 3.5vw, 4.75rem);
@@ -30,6 +31,7 @@
 
 html.left-sidebar-collapsed .post-view,
 .site-shell.sidebar-collapsed .post-view {
+  /* Collapsing the left nav lets the article claim more width while keeping TOC outside it. */
   --post-body-max: clamp(880px, 58vw, 980px);
   --post-toc-width: clamp(12rem, 12vw, 15rem);
   --post-toc-gap: clamp(2.5rem, 3.6vw, 5rem);
@@ -647,6 +649,7 @@ html[data-theme="dark"] .astro-code span {
 }
 
 @media (max-width: 1439px) {
+  /* With the left nav open, hide the right TOC before the three columns get cramped. */
   html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-view,
   html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-view--single {
     width: min(100%, var(--post-body-max));
@@ -663,6 +666,7 @@ html[data-theme="dark"] .astro-code span {
 }
 
 @media (min-width: 1280px) and (max-width: 1439px) {
+  /* Collapsed-nav desktops still have enough room for a compact sticky TOC. */
   html.left-sidebar-collapsed .post-view,
   .site-shell.sidebar-collapsed .post-view {
     --post-body-max: clamp(840px, 66vw, 900px);
@@ -688,6 +692,7 @@ html[data-theme="dark"] .astro-code span {
 }
 
 @media (max-width: 1279px) {
+  /* Tablet and mobile prioritize the article and avoid horizontal overflow. */
   .post-view,
   .post-view--single,
   html.left-sidebar-collapsed .post-view,

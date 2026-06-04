@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -40,9 +40,14 @@ try {
 } catch (error) {
   console.warn(`Could not fetch GitHub contributions: ${error.message}`);
 
-  const fallback = buildEmptyData();
-  await writeContributionData(fallback);
-  console.warn(`Wrote empty GitHub contribution data to ${OUTPUT_PATH}`);
+  const existingData = await readExistingContributionData();
+  if (existingData) {
+    console.warn(`Keeping existing GitHub contribution data at ${OUTPUT_PATH}`);
+  } else {
+    const fallback = buildEmptyData();
+    await writeContributionData(fallback);
+    console.warn(`Wrote empty GitHub contribution data to ${OUTPUT_PATH}`);
+  }
 }
 
 async function fetchFromGraphQLWithFallback() {
@@ -199,6 +204,16 @@ function filterDays(days) {
 async function writeContributionData(data) {
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(`${OUTPUT_PATH}`, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+
+async function readExistingContributionData() {
+  try {
+    const existing = JSON.parse(await readFile(OUTPUT_PATH, "utf8"));
+
+    return existing?.days?.length ? existing : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function mapContributionLevel(level) {

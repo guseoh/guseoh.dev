@@ -1,0 +1,48 @@
+---
+const highlights = [
+  {
+    title: "Board 프로젝트 개선 기록",
+    description: "게시글 정책, 삭제 흐름, 서비스 책임을 정리한 실전 개선 기록입니다.",
+    href: "/blog/board/spring-delete-policy/",
+    meta: "Spring Boot · JPA"
+  },
+  {
+    title: "Thymeleaf에서 React 전환",
+    description: "서버 렌더링 중심 화면을 React 기반 구조로 옮긴 과정을 정리했습니다.",
+    href: "/blog/board/react01/",
+    meta: "React · Frontend"
+  },
+  {
+    title: "성능 개선 기록",
+    description: "Actuator와 지표 확인을 바탕으로 병목을 추적하는 흐름을 담았습니다.",
+    href: "/blog/actuator/",
+    meta: "Monitoring · Performance"
+  },
+  {
+    title: "JPA/쿼리 최적화 기반",
+    description: "컬렉션과 자료구조 학습을 프로젝트 성능 사고와 연결한 기록입니다.",
+    href: "/blog/java/collectionframework/",
+    meta: "Java · Data Structure"
+  }
+];
+---
+
+<section class="portfolio-cta" aria-labelledby="portfolio-cta-title">
+  <div class="portfolio-cta__head">
+    <p class="portfolio-cta__eyebrow">Portfolio track</p>
+    <h2 id="portfolio-cta-title">Board 프로젝트를 중심으로 쌓은 개선 기록</h2>
+    <p>
+      블로그 글이 단순 학습 노트에 머물지 않도록, 구현 변경과 성능 점검, 화면 전환 기록을 프로젝트 흐름에 맞춰 모았습니다.
+    </p>
+  </div>
+
+  <div class="portfolio-cta__grid">
+    {highlights.map((item) => (
+      <a class="portfolio-cta__card" href={item.href}>
+        <span>{item.meta}</span>
+        <strong>{item.title}</strong>
+        <p>{item.description}</p>
+      </a>
+    ))}
+  </div>
+</section>

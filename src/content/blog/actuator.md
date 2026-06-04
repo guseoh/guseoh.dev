@@ -3,7 +3,7 @@ title: "[Board 프로젝트] 게시글 상세 조회 성능 측정 - 개선 전 
 description: "Actuator와 P6Spy를 사용해 게시글 상세 조회 API의 응답 시간과 SQL 실행 흐름을 분석한 기록"
 date: 2026-04-27
 updated: 2026-04-27
-category: Project
+category: Board
 tags: ["Board", "Spring Boot", "JPA", "Database", "SQL", "Performance", "Monitoring", "P6Spy", "Actuator"]
 series: "Board 프로젝트 성능 개선"
 seriesOrder: 1

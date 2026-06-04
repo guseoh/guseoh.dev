@@ -10,7 +10,7 @@ seriesOrder: 1
 draft: false
 ---
 
-# 회원 탈퇴 시 연관 게시글/댓글 처리 정책 설계 고민
+## 회원 탈퇴 시 연관 게시글/댓글 처리 정책 설계 고민
 
 현재 Board 프로젝트에서 회원 삭제 기능을 구현하면서 단순히 `memberRepository.delete(member)`만 호출하면 되는 문제가 아니라는 것을 알게 되었다.
 

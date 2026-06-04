@@ -9,11 +9,11 @@
     "github:contributions": "node scripts/fetch-github-contributions.mjs",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "smoke": "node scripts/smoke-test.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/sitemap": "^3.7.2",
     "astro": "^6.3.3",
     "remark-github-blockquote-alert": "^2.1.0"
   },

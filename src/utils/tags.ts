@@ -1,4 +1,13 @@
 import type { CollectionEntry } from "astro:content";
+import tagMetadata from "../data/tags.json";
+
+export type TagType = "tech" | "topic" | "post" | "project";
+
+export type TagMetadata = {
+  slug: string;
+  name: string;
+  type: TagType;
+};
 
 export function normalizeTag(tag: string): string {
   return tag
@@ -8,43 +17,22 @@ export function normalizeTag(tag: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-const TAG_LABELS: Record<string, string> = {
-  actuator: "Actuator",
-  "aws-ec2": "AWS EC2",
-  board: "Board",
-  "branch-strategy": "Branch Strategy",
-  "ci-cd": "CI/CD",
-  database: "Database",
-  docker: "Docker",
-  git: "Git",
-  "github-actions": "GitHub Actions",
-  java: "Java",
-  jpa: "JPA",
-  learning: "Learning",
-  monitoring: "Monitoring",
-  mysql: "MySQL",
-  oauth2: "OAuth2",
-  p6spy: "P6Spy",
-  performance: "Performance",
-  querydsl: "QueryDSL",
-  security: "Security",
-  "spring-boot": "Spring Boot",
-  sql: "SQL",
-  troubleshooting: "Troubleshooting"
-};
+const TAG_METADATA = new Map((tagMetadata as TagMetadata[]).map((metadata) => [metadata.slug, metadata]));
 
 export type TagSummary = {
   tag: string;
   slug: string;
   name: string;
+  type: TagType;
   count: number;
 };
 
 export function formatTagName(tag: string): string {
   const trimmed = tag.trim();
   const slug = normalizeTag(trimmed);
+  const metadata = TAG_METADATA.get(slug);
 
-  if (TAG_LABELS[slug]) return TAG_LABELS[slug];
+  if (metadata) return metadata.name;
   if (trimmed.length > 0 && trimmed !== slug) return trimmed;
 
   return slug
@@ -52,6 +40,10 @@ export function formatTagName(tag: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function getTagType(tag: string): TagType {
+  return TAG_METADATA.get(normalizeTag(tag))?.type ?? "topic";
 }
 
 export function buildTagSummary(posts: CollectionEntry<"blog">[]) {
@@ -71,6 +63,7 @@ export function buildTagSummary(posts: CollectionEntry<"blog">[]) {
         tag,
         slug: tag,
         name: formatTagName(rawTag),
+        type: getTagType(rawTag),
         count: 1
       });
     }

@@ -6,6 +6,15 @@ import { SITE_DESCRIPTION } from "../../utils/posts";
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
 const tagSummary = buildTagSummary(posts);
+const tagGroups = [
+  { type: "tech", title: "기술 태그", description: "Java, Spring, JPA처럼 구현 기술을 기준으로 찾습니다." },
+  { type: "topic", title: "주제 태그", description: "Performance, Monitoring처럼 개선 주제를 기준으로 찾습니다." },
+  { type: "project", title: "프로젝트 태그", description: "Board처럼 특정 프로젝트 흐름을 기준으로 찾습니다." },
+  { type: "post", title: "글 성격 태그", description: "Project, Troubleshooting처럼 글의 성격을 기준으로 찾습니다." }
+].map((group) => ({
+  ...group,
+  tags: tagSummary.filter((tag) => tag.type === group.type)
+}));
 ---
 
 <BaseLayout title="devjune.dev | Tags" description={SITE_DESCRIPTION}>
@@ -14,15 +23,23 @@ const tagSummary = buildTagSummary(posts);
     <p>Spring, JPA, Docker, Monitoring처럼 백엔드 학습 기록을 관심 분야별로 찾아보실 수 있습니다.</p>
   </section>
 
-  <ul class="post-list archive-pill-list" style="margin-top: 1rem;">
-    {tagSummary.map(({ tag, name, count }) => (
-      <li class="card category-card-row">
-        <a class="badge badge--topic badge--topic-tag" href={`/tags/${tag}/`}>
-          <span>#{name}</span>
-          <strong>{count}</strong>
-        </a>
-      </li>
+  <div class="tag-type-grid">
+    {tagGroups.filter((group) => group.tags.length > 0).map((group) => (
+      <section class="card tag-type-card" aria-labelledby={`tag-type-${group.type}`}>
+        <h2 id={`tag-type-${group.type}`}>{group.title}</h2>
+        <p>{group.description}</p>
+        <ul class="archive-pill-list">
+          {group.tags.map(({ tag, name, count }) => (
+            <li class="category-card-row">
+              <a class="badge badge--topic badge--topic-tag" href={`/tags/${tag}/`}>
+                <span>#{name}</span>
+                <strong>{count}</strong>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
     ))}
-  </ul>
+  </div>
 </BaseLayout>
 

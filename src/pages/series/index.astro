@@ -20,7 +20,6 @@ const seriesSummary = buildSeriesSummary(posts);
     ) : (
       <ul class="post-list series-list" style="margin-top: 1rem;">
         {seriesSummary.map((series) => {
-          const firstPost = series.posts[0]!;
           const previewPosts = series.posts.slice(0, 4);
           const hiddenPostCount = Math.max(0, series.posts.length - previewPosts.length);
 
@@ -31,10 +30,14 @@ const seriesSummary = buildSeriesSummary(posts);
                   <div>
                     <p class="series-card__eyebrow">Series</p>
                     <h2>
-                      <a href={`/blog/${firstPost.id}/`}>{series.name}</a>
+                      <a href={`/series/${series.slug}/`}>{series.name}</a>
                     </h2>
+                    <p class="series-card__description">{series.description}</p>
                   </div>
-                  <span class="series-card__count">{series.count} posts</span>
+                  <div class="series-card__meta">
+                    <span class="series-card__status">{series.status}</span>
+                    <span class="series-card__count">{series.count} posts</span>
+                  </div>
                 </div>
 
                 <ol class="series-card__posts">

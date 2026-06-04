@@ -7,6 +7,7 @@ import ArchiveHero from "../components/home/ArchiveHero.astro";
 import BlogGrass from "../components/home/BlogGrass.astro";
 import GitHubGrass from "../components/home/GitHubGrass.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
+import PortfolioCta from "../components/home/PortfolioCta.astro";
 import TopicIndex from "../components/home/TopicIndex.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
@@ -19,6 +20,7 @@ const categoryHierarchy = buildCategoryHierarchy(posts);
   minimalHome={true}
 >
   <ArchiveHero />
+  <PortfolioCta />
   <BlogGrass posts={posts} />
   <GitHubGrass username="guseoh" />
   <div class="home-content-grid">

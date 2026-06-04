@@ -2,7 +2,11 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCodeEnhancer from "../../components/post/PostCodeEnhancer.astro";
+import PostToc from "../../components/post/PostToc.astro";
 import { normalizeCategory } from "../../utils/categories";
+import { getAdjacentPosts, getSeriesPosts } from "../../utils/postNavigation";
+import { buildPostTocHeadings } from "../../utils/postToc";
 import { getSeriesContinuationMessage } from "../../utils/series";
 import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
@@ -29,27 +33,15 @@ const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
 const postTitle = post.data.title.trim();
-const tocHeadings = headings
-  .filter((heading) => heading.depth >= 1 && heading.depth <= 3)
-  .filter((heading) => !(heading.depth === 1 && heading.text.trim() === postTitle))
-  .map((heading) => ({
-    ...heading,
-    depth: heading.depth === 1 ? 2 : heading.depth
-  }));
+const tocHeadings = buildPostTocHeadings(headings, postTitle);
 const readingTime = getReadingTime(post);
 const description = getPostDescription(post);
 const visibleTags = post.data.tags.slice(0, DETAIL_TAG_LIMIT);
 const hiddenTagCount = Math.max(0, post.data.tags.length - visibleTags.length);
-const currentIndex = allPosts.findIndex((entry) => entry.id === post.id);
-const newerPost = currentIndex > 0 ? allPosts[currentIndex - 1] : undefined;
-const olderPost = currentIndex >= 0 && currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : undefined;
 const seriesName = post.data.series?.trim();
-const seriesPosts = seriesName
-  ? allPosts
-      .filter((entry) => entry.data.series?.trim() === seriesName)
-      .sort((a, b) => (a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER) - (b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER))
-  : [];
+const seriesPosts = getSeriesPosts(allPosts, seriesName);
 const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
+const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
 ---
 
 <BaseLayout
@@ -147,175 +139,8 @@ const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seri
       </footer>
     </article>
 
-    {
-      tocHeadings.length > 0 && (
-        <>
-          <aside class="post-toc" aria-label="Document table of contents">
-            <p class="post-toc__title">ON THIS PAGE</p>
-            <ul class="post-toc__list">
-              {tocHeadings.map((heading) => (
-                <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
-                  <a href={`#${heading.slug}`}>{heading.text}</a>
-                </li>
-              ))}
-            </ul>
-          </aside>
-
-          <script is:inline>
-            (() => {
-              const links = Array.from(document.querySelectorAll(".post-toc__item a"));
-              if (links.length === 0) return;
-
-              const entries = links
-                .map((link) => {
-                  if (!(link instanceof HTMLAnchorElement)) return null;
-
-                  const href = link.getAttribute("href") || "";
-                  if (!href.startsWith("#")) return null;
-
-                  const id = decodeURIComponent(href.slice(1));
-                  const section = document.getElementById(id);
-                  if (!(section instanceof HTMLElement)) return null;
-
-                  return { link, section };
-                })
-                .filter((entry) => entry !== null);
-
-              if (entries.length === 0) return;
-
-              const applyActive = () => {
-                const currentY = window.scrollY + 150;
-                let active = entries[0];
-
-                for (const entry of entries) {
-                  if (entry.section.offsetTop <= currentY) {
-                    active = entry;
-                  } else {
-                    break;
-                  }
-                }
-
-                for (const entry of entries) {
-                  entry.link.classList.toggle("is-active", entry === active);
-                }
-              };
-
-              applyActive();
-              window.addEventListener("scroll", applyActive, { passive: true });
-              window.addEventListener("resize", applyActive);
-            })();
-          </script>
-        </>
-      )
-    }
+    <PostToc headings={tocHeadings} />
   </div>
 
-  <script is:inline>
-    (() => {
-      const blocks = Array.from(document.querySelectorAll(".post pre"));
-      if (blocks.length === 0) return;
-
-      const languageLabels = new Map([
-        ["java", "Java"],
-        ["js", "JavaScript"],
-        ["javascript", "JavaScript"],
-        ["ts", "TypeScript"],
-        ["typescript", "TypeScript"],
-        ["sql", "SQL"],
-        ["bash", "Bash"],
-        ["sh", "Bash"],
-        ["yaml", "YAML"],
-        ["yml", "YAML"],
-        ["html", "HTML"],
-        ["css", "CSS"],
-        ["json", "JSON"],
-        ["xml", "XML"],
-        ["properties", "Properties"],
-        ["text", "Code"],
-        ["plaintext", "Code"]
-      ]);
-
-      const getLanguageKey = (pre) => {
-        const fromData = pre.dataset.language || "";
-        if (fromData.trim().length > 0) return fromData;
-
-        const code = pre.querySelector("code");
-        const className = `${pre.className} ${code?.className ?? ""}`;
-        const match = className.match(/language-([A-Za-z0-9_-]+)/);
-        return match?.[1] ?? "";
-      };
-
-      const getLanguageLabel = (pre) => {
-        const key = getLanguageKey(pre).trim().toLowerCase();
-        return languageLabels.get(key) ?? (key.length > 0 ? key[0].toUpperCase() + key.slice(1) : "Code");
-      };
-
-      for (const pre of blocks) {
-        if (!(pre instanceof HTMLPreElement) || pre.parentElement?.classList.contains("code-block")) continue;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "code-block";
-        pre.parentNode?.insertBefore(wrapper, pre);
-
-        const header = document.createElement("div");
-        header.className = "code-block__header";
-
-        const language = document.createElement("span");
-        language.className = "code-block__language";
-        language.textContent = getLanguageLabel(pre);
-
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "code-copy-button";
-        button.textContent = "Copy";
-        button.setAttribute("aria-label", "Copy code block");
-
-        header.append(language, button);
-        wrapper.append(header, pre);
-
-        const copyText = async (text) => {
-          if (window.navigator?.clipboard && window.isSecureContext) {
-            await window.navigator.clipboard.writeText(text);
-            return "copied";
-          }
-
-          if (typeof document.createElement !== "function") {
-            return "selected";
-          }
-
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          textarea.setAttribute("readonly", "true");
-          textarea.style.position = "fixed";
-          textarea.style.top = "-1000px";
-          textarea.style.left = "-1000px";
-          document.body.append(textarea);
-          textarea.select();
-
-          const execCopy = document["exec" + "Command"];
-          const copied = typeof execCopy === "function" && execCopy.call(document, "copy");
-          textarea.remove();
-
-          return copied ? "copied" : "selected";
-        };
-
-        button.addEventListener("click", async () => {
-          const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
-
-          try {
-            const result = await copyText(code);
-            button.textContent = result === "copied" ? "Copied" : "Selected";
-            window.setTimeout(() => {
-              button.textContent = "Copy";
-            }, 1400);
-          } catch {
-            button.textContent = "Selected";
-            window.setTimeout(() => {
-              button.textContent = "Copy";
-            }, 1400);
-          }
-        });
-      }
-    })();
-  </script>
+  <PostCodeEnhancer />
 </BaseLayout>

@@ -55,3 +55,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Checkout smoke test scripts
+        uses: actions/checkout@v4
+
+      - name: Setup Node for smoke test
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Smoke test deployed site
+        run: npm run smoke
+        env:
+          SMOKE_BASE_URL: ${{ steps.deployment.outputs.page_url }}
+          SMOKE_RETRIES: 8
+          SMOKE_RETRY_DELAY_MS: 10000

@@ -1,19 +1,30 @@
 import type { CollectionEntry } from "astro:content";
+import seriesMetadata from "../data/series.json";
 
-const SERIES_CONTINUATION_MESSAGES = new Map([
-  ["board-프로젝트-성능-개선", "다음 성능 개선 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다."],
-  ["board-프로젝트-개선-기록", "다음 성능 개선 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다."],
-  ["data-structure", "다음 자료구조 학습 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다."],
-  ["아주-쉬운-세가지-이야기", "다음 운영체제 학습 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다."]
-]);
+export type SeriesStatus = "planned" | "ongoing" | "completed";
+
+export type SeriesMetadata = {
+  slug: string;
+  title: string;
+  description: string;
+  order: number;
+  status: SeriesStatus;
+  featured: boolean;
+};
 
 export type SeriesSummary = {
   slug: string;
   name: string;
+  description: string;
+  order: number;
+  status: SeriesStatus;
+  featured: boolean;
   count: number;
   latestDate: Date;
   posts: CollectionEntry<"blog">[];
 };
+
+const SERIES_METADATA = new Map((seriesMetadata as SeriesMetadata[]).map((metadata) => [metadata.slug, metadata]));
 
 export function normalizeSeriesName(seriesName: string) {
   return seriesName
@@ -25,11 +36,17 @@ export function normalizeSeriesName(seriesName: string) {
 
 export function getSeriesContinuationMessage(seriesName: string) {
   const normalizedName = normalizeSeriesName(seriesName);
-  const metadataMessage = SERIES_CONTINUATION_MESSAGES.get(normalizedName);
+  const metadata = SERIES_METADATA.get(normalizedName);
 
-  if (metadataMessage) return metadataMessage;
+  if (metadata) {
+    return `${metadata.description} 다음 글이 발행되면 이 시리즈에 이어서 연결됩니다.`;
+  }
 
   return `다음 ${seriesName} 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다.`;
+}
+
+export function getSeriesMetadata(seriesName: string): SeriesMetadata | undefined {
+  return SERIES_METADATA.get(normalizeSeriesName(seriesName));
 }
 
 export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSummary[] {
@@ -40,6 +57,7 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
     if (!name) continue;
 
     const slug = normalizeSeriesName(name);
+    const metadata = SERIES_METADATA.get(slug);
     const entry = seriesMap.get(slug);
 
     if (entry) {
@@ -53,7 +71,11 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
 
     seriesMap.set(slug, {
       slug,
-      name,
+      name: metadata?.title ?? name,
+      description: metadata?.description ?? `${name} 시리즈 글을 모아둔 목록입니다.`,
+      order: metadata?.order ?? Number.MAX_SAFE_INTEGER,
+      status: metadata?.status ?? "ongoing",
+      featured: metadata?.featured ?? false,
       count: 1,
       latestDate: post.data.date,
       posts: [post]
@@ -72,6 +94,7 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
       })
     }))
     .sort((a, b) => {
+      if (a.order !== b.order) return a.order - b.order;
       if (a.latestDate.valueOf() !== b.latestDate.valueOf()) {
         return b.latestDate.valueOf() - a.latestDate.valueOf();
       }

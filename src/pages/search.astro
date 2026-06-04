@@ -1,67 +1,182 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PostCard from "../components/PostCard.astro";
-import { getCollection } from "astro:content";
-import { SITE_DESCRIPTION, sortPostsByDate } from "../utils/posts";
-
-const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
-
-const searchablePosts = posts.map((post) => ({
-  post,
-  searchText: [post.data.title, post.data.description, post.data.category, ...post.data.tags]
-    .join(" ")
-    .toLowerCase()
-}));
+import { SITE_DESCRIPTION } from "../utils/posts";
 ---
 
-<BaseLayout title="devjune.dev | Search" description={`검색 결과 - ${SITE_DESCRIPTION}`}>
-  <section class="hero">
+<BaseLayout title="devjune.dev | Search" description={`검색과 필터 - ${SITE_DESCRIPTION}`}>
+  <section class="hero search-hero">
     <h1>Search</h1>
-    <p id="search-status">검색어를 입력하면 결과가 표시됩니다.</p>
-    <form class="search-page-form" action="/search/" method="get" role="search">
+    <p id="search-status" aria-live="polite">검색어를 입력하면 결과가 표시됩니다.</p>
+
+    <form class="search-page-form" action="/search/" method="get" role="search" data-search-form>
       <label class="sr-only" for="search-page-input">검색어</label>
-      <input id="search-page-input" name="q" type="search" placeholder="Spring, OS, Board" />
+      <input id="search-page-input" name="q" type="search" placeholder="Spring, OS, Board" autocomplete="off" />
+
+      <label class="sr-only" for="search-category-filter">카테고리</label>
+      <select id="search-category-filter" name="category" data-search-category>
+        <option value="">전체 카테고리</option>
+      </select>
+
+      <label class="sr-only" for="search-tag-filter">태그</label>
+      <select id="search-tag-filter" name="tag" data-search-tag>
+        <option value="">전체 태그</option>
+      </select>
+
       <button type="submit">Search</button>
+      <a class="search-reset-link" href="/search/">Reset</a>
     </form>
   </section>
 
-  <ul class="post-list search-results" data-search-list style="margin-top: 1rem;">
-    {searchablePosts.map(({ post, searchText }) => (
-      <li data-search-item data-search-text={searchText}>
-        <PostCard post={post} />
-      </li>
-    ))}
-  </ul>
+  <div class="search-results-meta" data-search-meta hidden></div>
+  <ul class="post-list search-results" data-search-list aria-live="polite"></ul>
+  <p class="section-empty search-empty" data-search-empty hidden>조건에 맞는 글이 없습니다.</p>
 
   <script is:inline>
     (() => {
-      const params = new URLSearchParams(window.location.search);
-      const query = (params.get("q") ?? "").trim().toLowerCase();
+      const form = document.querySelector("[data-search-form]");
       const input = document.getElementById("search-page-input");
-      const searchItems = Array.from(document.querySelectorAll("[data-search-item]"));
+      const categorySelect = document.querySelector("[data-search-category]");
+      const tagSelect = document.querySelector("[data-search-tag]");
+      const list = document.querySelector("[data-search-list]");
+      const meta = document.querySelector("[data-search-meta]");
+      const empty = document.querySelector("[data-search-empty]");
       const status = document.getElementById("search-status");
+      const params = new URLSearchParams(window.location.search);
+      const collator = new Intl.Collator("ko-KR");
+      const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
 
-      if (input instanceof HTMLInputElement) {
-        input.value = params.get("q") ?? "";
+      if (
+        !(form instanceof HTMLFormElement) ||
+        !(input instanceof HTMLInputElement) ||
+        !(categorySelect instanceof HTMLSelectElement) ||
+        !(tagSelect instanceof HTMLSelectElement) ||
+        !(list instanceof HTMLElement) ||
+        !(meta instanceof HTMLElement) ||
+        !(empty instanceof HTMLElement)
+      ) {
+        return;
       }
 
-      let visibleCount = 0;
-      for (const item of searchItems) {
-        if (!(item instanceof HTMLElement)) continue;
-        const text = item.dataset.searchText ?? "";
-        const isVisible = query.length === 0 ? true : text.includes(query);
-        item.hidden = !isVisible;
-        if (isVisible) visibleCount += 1;
-      }
+      input.value = params.get("q") ?? "";
+      categorySelect.value = params.get("category") ?? "";
+      tagSelect.value = params.get("tag") ?? "";
 
-      if (status) {
-        if (query.length === 0) {
-          status.textContent = `전체 ${searchItems.length}개의 검색 결과를 찾았습니다.`;
-        } else {
-          status.textContent = `"${query}" 검색 결과 ${visibleCount}개`;
+      const normalize = (value) => value.trim().toLowerCase();
+      const escapeHtml = (value) =>
+        value.replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#39;"
+        })[character]);
+
+      const uniqueSorted = (items) => Array.from(new Set(items.filter(Boolean))).sort(collator.compare);
+
+      const fillSelect = (select, values, selectedValue, allLabel) => {
+        select.replaceChildren(new Option(allLabel, ""));
+        for (const value of values) {
+          select.append(new Option(value, value));
         }
-      }
+        select.value = values.includes(selectedValue) ? selectedValue : "";
+      };
+
+      const renderPost = (post) => {
+        const dateLabel = dateFormatter.format(new Date(post.date));
+        const tags = post.tags.slice(0, 4).map((tag) => (
+          `<a class="badge" href="/tags/${encodeURIComponent(normalize(tag).replaceAll(" ", "-"))}/">#${escapeHtml(tag)}</a>`
+        )).join("");
+
+        return `
+          <li>
+            <article class="card post-card" data-post-slug="${escapeHtml(post.slug)}">
+              <header class="post-card__header">
+                <h2><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h2>
+              </header>
+              <p class="post-card__description">${escapeHtml(post.description || post.excerpt)}</p>
+              <div class="post-card__footer">
+                <div class="post-card__meta">
+                  <span>작성</span>
+                  <time datetime="${escapeHtml(post.date)}">${dateLabel}</time>
+                  <span aria-hidden="true">·</span>
+                  <span>${escapeHtml(post.readingTime)}</span>
+                </div>
+                <div class="badge-group">
+                  <a class="badge badge--category" href="/categories/${encodeURIComponent(normalize(post.category).replaceAll(" ", "-"))}/">${escapeHtml(post.category)}</a>
+                  ${tags}
+                </div>
+              </div>
+            </article>
+          </li>
+        `;
+      };
+
+      const updateUrl = () => {
+        const nextParams = new URLSearchParams();
+        const query = input.value.trim();
+
+        if (query) nextParams.set("q", query);
+        if (categorySelect.value) nextParams.set("category", categorySelect.value);
+        if (tagSelect.value) nextParams.set("tag", tagSelect.value);
+
+        const nextUrl = `${window.location.pathname}${nextParams.toString() ? `?${nextParams}` : ""}`;
+        window.history.replaceState(null, "", nextUrl);
+      };
+
+      const render = (posts) => {
+        const query = normalize(input.value);
+        const category = categorySelect.value;
+        const tag = tagSelect.value;
+        const filtered = posts.filter((post) => {
+          const matchesQuery = query.length === 0 || post.searchText.includes(query);
+          const matchesCategory = !category || post.category === category;
+          const matchesTag = !tag || post.tags.includes(tag);
+
+          return matchesQuery && matchesCategory && matchesTag;
+        });
+
+        list.innerHTML = filtered.map(renderPost).join("");
+        empty.hidden = filtered.length > 0;
+        meta.hidden = false;
+        meta.textContent = `총 ${filtered.length}개 결과`;
+
+        if (status) {
+          status.textContent = query || category || tag
+            ? `검색 조건에 맞는 글 ${filtered.length}개를 찾았습니다.`
+            : `전체 ${posts.length}개의 글을 검색할 수 있습니다.`;
+        }
+
+        updateUrl();
+      };
+
+      fetch("/search-index.json")
+        .then((response) => {
+          if (!response.ok) throw new Error(`Search index request failed: ${response.status}`);
+          return response.json();
+        })
+        .then((posts) => {
+          fillSelect(categorySelect, uniqueSorted(posts.map((post) => post.category)), categorySelect.value, "전체 카테고리");
+          fillSelect(tagSelect, uniqueSorted(posts.flatMap((post) => post.tags)), tagSelect.value, "전체 태그");
+
+          form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            render(posts);
+          });
+          input.addEventListener("input", () => render(posts));
+          categorySelect.addEventListener("change", () => render(posts));
+          tagSelect.addEventListener("change", () => render(posts));
+
+          render(posts);
+        })
+        .catch(() => {
+          meta.hidden = false;
+          meta.textContent = "검색 인덱스를 불러오지 못했습니다.";
+          empty.hidden = false;
+        });
     })();
   </script>
 </BaseLayout>
-

@@ -14,6 +14,7 @@ const { username = "guseoh" } = Astro.props as Props;
 const stats = buildGitHubActivityStats(contributionData as GitHubContributionData);
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 const profileUrl = `https://github.com/${username}`;
+const isFallbackData = stats.source === "empty";
 const sourceLabels = {
   graphql: "GitHub GraphQL API",
   "public-html": "GitHub 공개 contribution HTML",
@@ -41,6 +42,14 @@ const statItems = [
   <p class="activity-card__description">
     코드 작성과 프로젝트 개선 기록입니다. 빌드 시점에 생성된 공개 JSON을 직접 렌더링합니다.
   </p>
+
+  {
+    isFallbackData && (
+      <p class="activity-card__notice">
+        GitHub contribution 데이터를 가져오지 못해 빈 잔디를 표시합니다. 빌드는 계속 진행되며 다음 갱신에서 다시 시도합니다.
+      </p>
+    )
+  }
 
   <dl class="activity-stats" aria-label="GitHub contribution 통계">
     {statItems.map((item) => (

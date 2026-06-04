@@ -1,0 +1,46 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { buildSeriesSummary } from "../../utils/series";
+import { SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
+
+export async function getStaticPaths() {
+  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const seriesSummary = buildSeriesSummary(posts);
+
+  return seriesSummary.map((series) => ({
+    params: { series: series.slug },
+    props: {
+      seriesName: series.name,
+      description: series.description,
+      status: series.status,
+      posts: series.posts
+    }
+  }));
+}
+
+const { seriesName, description, status, posts } = Astro.props as {
+  seriesName: string;
+  description: string;
+  status: string;
+  posts: CollectionEntry<"blog">[];
+};
+---
+
+<BaseLayout title={`devjune.dev | ${seriesName}`} description={`${description} - ${SITE_DESCRIPTION}`}>
+  <section class="hero">
+    <h1>{seriesName}</h1>
+    <p>{description}</p>
+    <p class="series-page-meta">{status} · {posts.length}개의 글이 이 시리즈에 연결되어 있습니다.</p>
+  </section>
+
+  <ul class="post-list" style="margin-top: 1rem;">
+    {posts.map((post) => (
+      <li>
+        <PostCard post={post} />
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

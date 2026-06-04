@@ -10,7 +10,7 @@ seriesOrder: 1
 draft: false
 ---
 
-# 들어가기 전
+## 들어가기 전
 
 알고리즘 공부를 다시 준비하면서, 먼저 자료구조의 기초부터 다시 정리해 보려고 한다.
 
@@ -24,7 +24,7 @@ draft: false
 - https://st-lab.tistory.com/142
 - [자바의 정석](https://www.yes24.com/product/goods/147977536)
 
-# 자료구조의 분류
+## 자료구조의 분류
 
 자료구조는 크게 **선형 구조(Linear Data Structure)** 와 **비선형 구조(Nonlinear Data Structure)** 로 나눌 수 있다.
 
@@ -32,7 +32,7 @@ draft: false
 
 **비선형 구조(Nonlinear Data Structure)** 는 선형 구조의 반대로, 데이터가 일렬로 나열된 것이 아니라 각 요소가 여러 개의 요소와 연결될 수 있는 형태를 의미한다. 대표적으로 그래프(Graph)와 트리(Tree)가 있다.
 
-# 자바 컬렉션 프레임워크(Java Collections Framework)
+## 자바 컬렉션 프레임워크(Java Collections Framework)
 
 컬렉션 프레임워크는 **데이터 군(群)을 저장하는 클래스들을 표준화한 설계**를 뜻한다. 즉, 일정한 타입의 데이터를 모아 저장하고 쉽게 가공할 수 있도록 지원하는 **자료구조의 뼈대**라고 볼 수 있다.
 
@@ -50,7 +50,7 @@ JDK 1.2 이전까지는 `Vector`, `Hashtable`, `Properties`와 같은 컬렉션 
 >
 > 하지만 `Map`은 구조상 키(key)에 대응되는 값(value)을 저장한다는 특징이 있다. 따라서 반복자로 순회할 때 `key`를 기준으로 할지, `value`를 기준으로 할지, 또는 `key-value` 쌍을 기준으로 할지 문제가 발생한다.
 
-# List [리스트]
+## List [리스트]
 
 `List` 인터페이스는 대표적인 선형 자료구조로, 주로 순서가 있는 데이터를 목록 형태로 다루기 위해 만들어진 인터페이스이다.
 
@@ -121,7 +121,7 @@ Vector<T> vector1 = new Stack<>();
 
 `T`는 특정 타입이 아니라, **타입이 들어갈 자리**를 의미한다. 실제 사용할 때는 `Integer`, `String`, `Member` 같은 구체적인 타입으로 지정한다.
 
-# Queue [큐]
+## Queue [큐]
 
 `Queue` 인터페이스는 선형 자료구조 중 하나로, 주로 **선입선출(FIFO: First In First Out)** 구조를 표현하기 위해 만들어진 인터페이스이다.
 
@@ -189,7 +189,7 @@ Queue<T> linkedListDeque2 = new LinkedList<>();
 Queue<T> priorityQueue2 = new PriorityQueue<>();
 ```
 
-# Set [셋 / 세트]
+## Set [셋 / 세트]
 
 `Set`은 말 그대로 **집합**이다. `Set`의 가장 큰 특징은 두 가지이다.
 
@@ -288,7 +288,7 @@ Set<T> treeset1 = new TreeSet<>();
 ```
 
 
-# 참고 자료
+## 참고 자료
 
 - https://st-lab.tistory.com/142
 - https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html
