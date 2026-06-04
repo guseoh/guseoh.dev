@@ -35,6 +35,7 @@
     const shell = document.querySelector(".site-shell");
     const sidebar = document.getElementById("site-sidebar");
     const sidebarOpenButton = document.getElementById("sidebar-open");
+    const sidebarCollapseButton = document.getElementById("sidebar-collapse-toggle");
     const sidebarCloseButton = document.getElementById("sidebar-close");
     const sidebarBackdrop = document.getElementById("sidebar-backdrop");
 
@@ -42,31 +43,64 @@
       shell instanceof HTMLElement &&
       sidebar instanceof HTMLElement &&
       sidebarOpenButton instanceof HTMLButtonElement &&
+      sidebarCollapseButton instanceof HTMLButtonElement &&
       sidebarCloseButton instanceof HTMLButtonElement
     ) {
+      const storageKey = "blog-left-sidebar-collapsed";
       const media = window.matchMedia("(max-width: 980px)");
       const isNarrow = () => media.matches;
 
-      const applySidebarState = (collapsed) => {
+      const getStoredCollapsed = () => {
+        try {
+          return localStorage.getItem(storageKey) === "true";
+        } catch {
+          return false;
+        }
+      };
+
+      const setStoredCollapsed = (collapsed) => {
+        try {
+          localStorage.setItem(storageKey, collapsed ? "true" : "false");
+        } catch {
+        }
+      };
+
+      const applySidebarState = (collapsed, persist = false) => {
         const narrow = isNarrow();
-        const shouldCollapse = narrow ? collapsed : false;
+        const shouldCollapse = Boolean(collapsed);
+        const openLabel = narrow ? "사이드바 열기" : "탐색 펼치기";
 
         shell.classList.toggle("sidebar-collapsed", shouldCollapse);
+        document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
         document.body.classList.toggle("has-sidebar-open", narrow && !shouldCollapse);
-        sidebar.setAttribute("aria-hidden", narrow && shouldCollapse ? "true" : "false");
-        sidebarOpenButton.hidden = !narrow || !shouldCollapse;
+        sidebar.setAttribute("aria-hidden", shouldCollapse ? "true" : "false");
+        sidebarOpenButton.hidden = !shouldCollapse;
+        sidebarOpenButton.setAttribute("aria-label", openLabel);
         sidebarOpenButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
+        sidebarOpenButton.title = openLabel;
+        sidebarCollapseButton.hidden = narrow || shouldCollapse;
+        sidebarCollapseButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
+        sidebarCollapseButton.setAttribute("aria-label", "탐색 접기");
         sidebarCloseButton.hidden = !narrow;
 
         if (sidebarBackdrop instanceof HTMLButtonElement) {
           sidebarBackdrop.hidden = shouldCollapse || !narrow;
         }
+
+        if (!narrow && persist) {
+          setStoredCollapsed(shouldCollapse);
+        }
       };
 
-      applySidebarState(isNarrow());
+      applySidebarState(isNarrow() ? true : getStoredCollapsed());
 
       sidebarOpenButton.addEventListener("click", () => {
-        applySidebarState(false);
+        applySidebarState(false, !isNarrow());
+      });
+
+      sidebarCollapseButton.addEventListener("click", () => {
+        applySidebarState(true, true);
+        sidebarOpenButton.focus();
       });
 
       sidebarCloseButton.addEventListener("click", () => {
@@ -87,7 +121,7 @@
       });
 
       media.addEventListener("change", () => {
-        applySidebarState(isNarrow());
+        applySidebarState(isNarrow() ? true : getStoredCollapsed());
       });
     }
 

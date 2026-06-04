@@ -21,6 +21,7 @@ interface Props {
   description?: string;
   image?: string;
   minimalHome?: boolean;
+  wideContent?: boolean;
   publishedTime?: string;
   updatedTime?: string;
   type?: "website" | "article";
@@ -31,6 +32,7 @@ const {
   description = SITE_DESCRIPTION,
   image = SITE_OG_IMAGE,
   minimalHome = false,
+  wideContent = false,
   publishedTime,
   updatedTime,
   type = "website"
@@ -83,12 +85,26 @@ const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] 
         document.documentElement.setAttribute("data-theme", theme);
       })();
     </script>
+    <script is:inline>
+      (() => {
+        try {
+          const desktop = window.matchMedia("(min-width: 981px)").matches;
+          const collapsed = localStorage.getItem("blog-left-sidebar-collapsed") === "true";
+
+          if (desktop && collapsed) {
+            document.documentElement.classList.add("left-sidebar-collapsed");
+          }
+        } catch {
+          document.documentElement.classList.remove("left-sidebar-collapsed");
+        }
+      })();
+    </script>
   </head>
   <body class:list={[minimalHome && "page-home-simple"]}>
-    <div class="site-shell">
+    <div class:list={["site-shell", wideContent && "site-shell--wide"]}>
       <Header currentPath={currentPath} />
 
-      <div class:list={["site-layout", minimalHome && "site-layout--minimal"]}>
+      <div class:list={["site-layout", minimalHome && "site-layout--minimal", wideContent && "site-layout--wide"]}>
         {
           !minimalHome && (
             <Sidebar

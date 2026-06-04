@@ -15,16 +15,23 @@ interface Props {
 const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentTag, currentPath } = Astro.props as Props;
 ---
 
-<button id="sidebar-open" class="sidebar-open" type="button" aria-label="사이드바 열기" aria-controls="site-sidebar" aria-expanded="false">
-  <span></span>
-  <span></span>
-  <span></span>
+<button id="sidebar-open" class="sidebar-open" type="button" aria-label="탐색 펼치기" aria-controls="site-sidebar" aria-expanded="false">
+  <span class="sidebar-open__line"></span>
+  <span class="sidebar-open__line"></span>
+  <span class="sidebar-open__line"></span>
 </button>
 
 <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="사이드바 닫기" hidden></button>
 
 <aside id="site-sidebar" class="site-sidebar" aria-label="Category sidebar" aria-hidden="false">
   <section class="sidebar-close-section" aria-label="Sidebar controls">
+    <button id="sidebar-collapse-toggle" class="sidebar-collapse-toggle" type="button" aria-label="탐색 접기" aria-controls="site-sidebar" aria-expanded="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="m15 6-6 6 6 6"></path>
+      </svg>
+      <span>탐색 접기</span>
+    </button>
+
     <button id="sidebar-close" class="sidebar-close" type="button" aria-label="사이드바 닫기" aria-controls="site-sidebar">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M6 6l12 12M18 6 6 18"></path>
