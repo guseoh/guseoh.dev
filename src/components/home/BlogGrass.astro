@@ -12,8 +12,8 @@ const numberFormatter = new Intl.NumberFormat("ko-KR");
 
 const statItems = [
   { label: "전체 글", value: stats.totalPosts, suffix: "개" },
-  { label: "올해", value: stats.yearPosts, suffix: "개" },
-  { label: "이번 달", value: stats.monthPosts, suffix: "개" },
+  { label: "올해 활동", value: stats.yearActivities, suffix: "건" },
+  { label: "이번 달 활동", value: stats.monthActivities, suffix: "건" },
   { label: "현재 연속", value: stats.currentStreak, suffix: "일" },
   { label: "최장 연속", value: stats.longestStreak, suffix: "일" }
 ];
@@ -22,13 +22,15 @@ const statItems = [
 <section class="activity-card blog-grass" aria-labelledby="blog-grass-title">
   <div class="activity-card__head">
     <div>
-      <p class="activity-card__eyebrow">Writing Activity</p>
-      <h2 id="blog-grass-title" class="activity-card__title">블로그 작성 잔디</h2>
+      <p class="activity-card__eyebrow">Blog Activity</p>
+      <h2 id="blog-grass-title" class="activity-card__title">블로그 활동 잔디</h2>
     </div>
     <p class="activity-card__range">{stats.rangeStart} ~ {stats.rangeEnd}</p>
   </div>
 
-  <dl class="activity-stats" aria-label="블로그 작성 통계">
+  <p class="activity-card__description">공개 글의 작성일 또는 최근 수정일 기준 활동 기록입니다.</p>
+
+  <dl class="activity-stats" aria-label="블로그 활동 통계">
     {statItems.map((item) => (
       <div class="activity-stats__item">
         <dt>{item.label}</dt>
@@ -38,7 +40,7 @@ const statItems = [
   </dl>
 
   <div class="grass-chart" style={`--grass-weeks: ${stats.weeks.length}`}>
-    <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 블로그 작성 잔디">
+    <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 블로그 활동 잔디">
       <div class="grass-chart__months" aria-hidden="true">
         {stats.weeks.map((week) => <span>{week.monthLabel}</span>)}
       </div>
@@ -50,7 +52,7 @@ const statItems = [
           ))}
         </div>
 
-        <div class="grass-chart__grid" role="grid" aria-label="날짜별 블로그 작성 개수">
+        <div class="grass-chart__grid" role="grid" aria-label="날짜별 블로그 활동 개수">
           {stats.weeks.map((week) => (
             week.days.map((day) => (
               <span
@@ -67,7 +69,7 @@ const statItems = [
     </div>
   </div>
 
-  <div class="grass-legend" aria-label="작성 개수 농도 범례">
+  <div class="grass-legend" aria-label="블로그 활동 개수 농도 범례">
     <span>적음</span>
     <span class="grass-cell" data-level="0" aria-hidden="true"></span>
     <span class="grass-cell" data-level="1" aria-hidden="true"></span>
@@ -75,6 +77,6 @@ const statItems = [
     <span class="grass-cell" data-level="3" aria-hidden="true"></span>
     <span class="grass-cell" data-level="4" aria-hidden="true"></span>
     <span>많음</span>
-    <span class="grass-legend__note">한 칸은 하루, 숫자는 공개 글 작성 수 기준입니다.</span>
+    <span class="grass-legend__note">한 칸은 하루, 숫자는 공개 글의 작성/수정 활동 수 기준입니다.</span>
   </div>
 </section>

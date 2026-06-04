@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "github:contributions": "node scripts/fetch-github-contributions.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check"

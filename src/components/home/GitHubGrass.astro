@@ -1,17 +1,32 @@
 ---
+import contributionData from "../../../public/data/github-contributions.json";
+import { BLOG_GRASS_WEEKDAY_LABELS } from "../../utils/blogStats";
+import {
+  buildGitHubActivityStats,
+  type GitHubContributionData
+} from "../../utils/githubStats";
+
 interface Props {
   username?: string;
 }
 
 const { username = "guseoh" } = Astro.props as Props;
-
-/*
- * GitHub activity is currently rendered with the external SVG service below.
- * Future token-backed GitHub GraphQL API work should run at build time in
- * GitHub Actions, write public JSON, and never expose a GitHub token to the browser.
- */
-const chartUrl = `https://ghchart.rshah.org/${username}`;
+const stats = buildGitHubActivityStats(contributionData as GitHubContributionData);
+const numberFormatter = new Intl.NumberFormat("ko-KR");
 const profileUrl = `https://github.com/${username}`;
+const sourceLabels = {
+  graphql: "GitHub GraphQL API",
+  "public-html": "GitHub 공개 contribution HTML",
+  empty: "기본 빈 데이터"
+};
+
+const statItems = [
+  { label: "최근 1년", value: stats.totalContributions, suffix: "개" },
+  { label: "올해", value: stats.yearContributions, suffix: "개" },
+  { label: "이번 달", value: stats.monthContributions, suffix: "개" },
+  { label: "현재 연속", value: stats.currentStreak, suffix: "일" },
+  { label: "최장 연속", value: stats.longestStreak, suffix: "일" }
+];
 ---
 
 <section class="activity-card github-grass" aria-labelledby="github-grass-title">
@@ -23,15 +38,60 @@ const profileUrl = `https://github.com/${username}`;
     <a class="activity-card__link" href={profileUrl} target="_blank" rel="noreferrer">프로필 보기</a>
   </div>
 
-  <p class="activity-card__description">코드 작성과 프로젝트 개선 기록</p>
+  <p class="activity-card__description">
+    코드 작성과 프로젝트 개선 기록입니다. 빌드 시점에 생성된 공개 JSON을 직접 렌더링합니다.
+  </p>
 
-  <div class="github-grass__frame">
-    <img
-      class="github-grass__image"
-      src={chartUrl}
-      alt={`${username} GitHub contribution graph`}
-      loading="lazy"
-      decoding="async"
-    />
+  <dl class="activity-stats" aria-label="GitHub contribution 통계">
+    {statItems.map((item) => (
+      <div class="activity-stats__item">
+        <dt>{item.label}</dt>
+        <dd>{numberFormatter.format(item.value)}{item.suffix}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <div class="grass-chart github-grass__chart" style={`--grass-weeks: ${stats.weeks.length}`}>
+    <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 GitHub contribution 잔디">
+      <div class="grass-chart__months" aria-hidden="true">
+        {stats.weeks.map((week) => <span>{week.monthLabel}</span>)}
+      </div>
+
+      <div class="grass-chart__body">
+        <div class="grass-chart__weekdays" aria-hidden="true">
+          {BLOG_GRASS_WEEKDAY_LABELS.map((label, index) => (
+            <span>{index % 2 === 0 ? label : ""}</span>
+          ))}
+        </div>
+
+        <div class="grass-chart__grid" role="grid" aria-label="날짜별 GitHub contribution 개수">
+          {stats.weeks.map((week) => (
+            week.days.map((day) => (
+              <span
+                class:list={["grass-cell", day.isToday && "grass-cell--today", day.isOutsideRange && "grass-cell--muted"]}
+                data-level={day.level}
+                role="gridcell"
+                aria-label={day.label}
+                title={day.label}
+              />
+            ))
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grass-legend" aria-label="GitHub contribution 개수 농도 범례">
+    <span>적음</span>
+    <span class="grass-cell" data-level="0" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="1" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="2" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="3" aria-hidden="true"></span>
+    <span class="grass-cell" data-level="4" aria-hidden="true"></span>
+    <span>많음</span>
+    <span class="grass-legend__note">
+      한 칸은 하루 contribution 수 기준입니다. 데이터 출처: {sourceLabels[stats.source]}, 갱신:
+      <time datetime={stats.generatedAt}>{stats.generatedAt.slice(0, 10)}</time>
+    </span>
   </div>
 </section>

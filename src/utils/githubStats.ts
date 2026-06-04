@@ -1,11 +1,25 @@
-import type { CollectionEntry } from "astro:content";
+import { BLOG_GRASS_WEEKDAY_LABELS } from "./blogStats";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const ROLLING_DAY_COUNT = 365;
 
-export const BLOG_GRASS_WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"] as const;
+export interface GitHubContributionDayData {
+  date: string;
+  count: number;
+  level?: number;
+  color?: string;
+}
 
-export interface BlogGrassDay {
+export interface GitHubContributionData {
+  username: string;
+  generatedAt: string;
+  source: "graphql" | "public-html" | "empty";
+  from: string;
+  to: string;
+  totalContributions: number;
+  days: GitHubContributionDayData[];
+}
+
+export interface GitHubGrassDay {
   date: string;
   count: number;
   level: 0 | 1 | 2 | 3 | 4;
@@ -14,49 +28,48 @@ export interface BlogGrassDay {
   isOutsideRange: boolean;
 }
 
-export interface BlogGrassWeek {
-  days: BlogGrassDay[];
+export interface GitHubGrassWeek {
+  days: GitHubGrassDay[];
   monthLabel: string;
 }
 
-export interface BlogActivityStats {
-  totalPosts: number;
-  yearActivities: number;
-  monthActivities: number;
+export interface GitHubActivityStats {
+  totalContributions: number;
+  yearContributions: number;
+  monthContributions: number;
   currentStreak: number;
   longestStreak: number;
-  activityDateCounts: Record<string, number>;
-  weeks: BlogGrassWeek[];
+  weeks: GitHubGrassWeek[];
   rangeStart: string;
   rangeEnd: string;
+  generatedAt: string;
+  source: GitHubContributionData["source"];
 }
 
-export function buildBlogActivityStats(
-  posts: CollectionEntry<"blog">[],
-  today = new Date()
-): BlogActivityStats {
+export function buildGitHubActivityStats(data: GitHubContributionData, today = new Date()) {
   const todayUtc = startOfUtcDay(today);
-  const rangeStart = addUtcDays(todayUtc, -(ROLLING_DAY_COUNT - 1));
+  const rangeStart = startOfUtcDay(data.from);
+  const rangeEnd = startOfUtcDay(data.to);
   const graphStart = getMondayStart(rangeStart);
-  const graphEnd = addUtcDays(getMondayStart(todayUtc), 6);
-  const activityDateCounts = buildActivityDateCounts(posts);
+  const graphEnd = addUtcDays(getMondayStart(rangeEnd), 6);
+  const contributionMap = buildContributionMap(data.days);
   const currentYear = todayUtc.getUTCFullYear();
   const currentMonth = todayUtc.getUTCMonth();
-
-  const weeks: BlogGrassWeek[] = [];
+  const weeks: GitHubGrassWeek[] = [];
 
   for (let weekStart = graphStart; weekStart <= graphEnd; weekStart = addUtcDays(weekStart, 7)) {
     const days = BLOG_GRASS_WEEKDAY_LABELS.map((_, dayIndex) => {
       const date = addUtcDays(weekStart, dayIndex);
       const dateKey = toDateKey(date);
-      const count = activityDateCounts[dateKey] ?? 0;
-      const isOutsideRange = date < rangeStart || date > todayUtc;
+      const contribution = contributionMap[dateKey];
+      const count = contribution?.count ?? 0;
+      const isOutsideRange = date < rangeStart || date > rangeEnd;
 
       return {
         date: dateKey,
         count,
-        level: isOutsideRange ? 0 : getActivityLevel(count),
-        label: formatActivityLabel(date, count, isOutsideRange),
+        level: isOutsideRange ? 0 : getActivityLevel(count, contribution?.level),
+        label: formatContributionLabel(date, count, isOutsideRange),
         isToday: dateKey === toDateKey(todayUtc),
         isOutsideRange
       };
@@ -69,55 +82,54 @@ export function buildBlogActivityStats(
   }
 
   return {
-    totalPosts: posts.filter((post) => !post.data.draft).length,
-    yearActivities: sumCounts(activityDateCounts, (date) => date.getUTCFullYear() === currentYear),
-    monthActivities: sumCounts(
-      activityDateCounts,
+    totalContributions: data.totalContributions,
+    yearContributions: sumContributions(contributionMap, (date) => date.getUTCFullYear() === currentYear),
+    monthContributions: sumContributions(
+      contributionMap,
       (date) => date.getUTCFullYear() === currentYear && date.getUTCMonth() === currentMonth
     ),
-    currentStreak: calculateCurrentStreak(activityDateCounts, todayUtc),
-    longestStreak: calculateLongestStreak(activityDateCounts, todayUtc),
-    activityDateCounts,
+    currentStreak: calculateCurrentStreak(contributionMap, todayUtc),
+    longestStreak: calculateLongestStreak(contributionMap, rangeEnd),
     weeks,
     rangeStart: toDateKey(rangeStart),
-    rangeEnd: toDateKey(todayUtc)
-  };
+    rangeEnd: toDateKey(rangeEnd),
+    generatedAt: data.generatedAt,
+    source: data.source
+  } satisfies GitHubActivityStats;
 }
 
-function buildActivityDateCounts(posts: CollectionEntry<"blog">[]) {
-  return posts.reduce<Record<string, number>>((counts, post) => {
-    if (post.data.draft) {
-      return counts;
-    }
+function buildContributionMap(days: GitHubContributionDayData[]) {
+  return days.reduce<Record<string, GitHubContributionDayData>>((map, day) => {
+    map[day.date] = day;
 
-    const dateKey = toDateKey(post.data.updated ?? post.data.date);
-    counts[dateKey] = (counts[dateKey] ?? 0) + 1;
-
-    return counts;
+    return map;
   }, {});
 }
 
-function sumCounts(dateCounts: Record<string, number>, predicate: (date: Date) => boolean) {
-  return Object.entries(dateCounts).reduce((total, [dateKey, count]) => {
+function sumContributions(
+  contributionMap: Record<string, GitHubContributionDayData>,
+  predicate: (date: Date) => boolean
+) {
+  return Object.entries(contributionMap).reduce((total, [dateKey, day]) => {
     const date = parseDateKey(dateKey);
 
-    return predicate(date) ? total + count : total;
+    return predicate(date) ? total + day.count : total;
   }, 0);
 }
 
-function calculateCurrentStreak(dateCounts: Record<string, number>, today: Date) {
+function calculateCurrentStreak(contributionMap: Record<string, GitHubContributionDayData>, today: Date) {
   let streak = 0;
 
-  for (let date = today; dateCounts[toDateKey(date)] > 0; date = addUtcDays(date, -1)) {
+  for (let date = today; (contributionMap[toDateKey(date)]?.count ?? 0) > 0; date = addUtcDays(date, -1)) {
     streak += 1;
   }
 
   return streak;
 }
 
-function calculateLongestStreak(dateCounts: Record<string, number>, today: Date) {
-  const activeDates = Object.keys(dateCounts)
-    .filter((dateKey) => dateCounts[dateKey] > 0 && parseDateKey(dateKey) <= today)
+function calculateLongestStreak(contributionMap: Record<string, GitHubContributionDayData>, rangeEnd: Date) {
+  const activeDates = Object.keys(contributionMap)
+    .filter((dateKey) => (contributionMap[dateKey]?.count ?? 0) > 0 && parseDateKey(dateKey) <= rangeEnd)
     .sort();
 
   if (activeDates.length === 0) {
@@ -138,16 +150,20 @@ function calculateLongestStreak(dateCounts: Record<string, number>, today: Date)
   return longest;
 }
 
-function getActivityLevel(count: number): BlogGrassDay["level"] {
+function getActivityLevel(count: number, rawLevel?: number): GitHubGrassDay["level"] {
+  if (rawLevel === 0 || rawLevel === 1 || rawLevel === 2 || rawLevel === 3 || rawLevel === 4) {
+    return rawLevel;
+  }
+
   if (count <= 0) return 0;
-  if (count === 1) return 1;
-  if (count === 2) return 2;
-  if (count === 3) return 3;
+  if (count <= 3) return 1;
+  if (count <= 6) return 2;
+  if (count <= 10) return 3;
 
   return 4;
 }
 
-function getMonthLabel(days: BlogGrassDay[], isFirstWeek: boolean) {
+function getMonthLabel(days: GitHubGrassDay[], isFirstWeek: boolean) {
   const firstVisibleDay = days.find((day) => !day.isOutsideRange);
 
   if (!firstVisibleDay) {
@@ -167,7 +183,7 @@ function getMonthLabel(days: BlogGrassDay[], isFirstWeek: boolean) {
   return `${date.getUTCMonth() + 1}월`;
 }
 
-function formatActivityLabel(date: Date, count: number, isOutsideRange: boolean) {
+function formatContributionLabel(date: Date, count: number, isOutsideRange: boolean) {
   const dateLabel = new Intl.DateTimeFormat("ko-KR", {
     timeZone: "UTC",
     year: "numeric",
@@ -180,7 +196,7 @@ function formatActivityLabel(date: Date, count: number, isOutsideRange: boolean)
     return `${dateLabel}: 표시 범위 밖`;
   }
 
-  return `${dateLabel}: 블로그 활동 ${count}건`;
+  return `${dateLabel}: GitHub contribution ${count}개`;
 }
 
 function getMondayStart(date: Date) {

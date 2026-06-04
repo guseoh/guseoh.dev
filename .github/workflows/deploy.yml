@@ -31,6 +31,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Fetch GitHub contributions
+        run: npm run github:contributions
+        env:
+          GH_CONTRIBUTIONS_TOKEN: ${{ secrets.GH_CONTRIBUTIONS_TOKEN }}
+          GITHUB_CONTRIBUTIONS_USERNAME: guseoh
+
       - name: Build with Astro
         run: npm run build
 
