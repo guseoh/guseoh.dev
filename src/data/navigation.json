@@ -93,6 +93,12 @@
         "description": "운영체제와 컴퓨터 구조 학습"
       },
       {
+        "title": "Network",
+        "slug": "network",
+        "type": "category",
+        "description": "네트워크와 웹 동작 원리 학습"
+      },
+      {
         "title": "Java",
         "slug": "java",
         "type": "category",
