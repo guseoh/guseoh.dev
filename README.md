@@ -74,6 +74,10 @@ draft: true
 - 주제 태그: Performance, Monitoring, Refactoring, Deployment처럼 개선 주제를 나타냅니다.
 - 글 성격 태그: Project, Troubleshooting, Review처럼 글의 성격을 나타냅니다.
 - 태그 표시명과 타입은 `src/data/tags.json`에서 관리합니다.
+- 왼쪽 사이드바의 대분류/중분류 탐색은 `src/data/navigation.json`에서 관리합니다.
+- 대분류는 Project, Backend, CS, DevOps 같은 탐색 묶음이고, 클릭 시 `/search/?group=...`로 해당 묶음의 글 목록을 보여줍니다.
+- 중분류는 실제 category 또는 tag URL로 연결합니다. 예를 들어 Board는 `/categories/board/`, JPA는 `/tags/jpa/`로 이동합니다.
+- Board 글에는 `category: Board`를 쓰고, Spring/JPA/Performance/P6Spy 같은 세부 기술과 주제는 `tags`에 작성합니다.
 
 ## 시리즈 운영 규칙
 
@@ -107,6 +111,8 @@ draft: true
 - 읽는 시간은 한국어/영문/CJK 텍스트와 코드블록 가중치를 함께 반영해 추정합니다.
 
 ## GitHub Contributions Fallback
+
+GitHub Activity 잔디의 갱신 방식, 자동화 범위, fallback 정책은 `docs/github-activity-report.md`에 정리되어 있습니다.
 
 `npm run github:contributions`는 GitHub GraphQL API 또는 공개 contribution HTML을 기반으로 `public/data/github-contributions.json`을 갱신합니다.
 
@@ -162,7 +168,7 @@ src/
     layout/     Header, Sidebar, ThemeToggle, client scripts
     post/       상세 글 TOC와 코드블록 enhancement
   content/blog/ Markdown 글 데이터
-  data/         series, tags 운영 메타데이터
+  data/         navigation, series, tags 운영 메타데이터
   layouts/      BaseLayout
   pages/        Astro 라우트
   styles/       base, theme, layout, components, home, post CSS

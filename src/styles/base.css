@@ -95,6 +95,12 @@ p {
   margin: 0;
 }
 
+strong,
+b {
+  color: var(--strong-text);
+  font-weight: 800;
+}
+
 ul,
 ol,
 dl {

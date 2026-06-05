@@ -7,6 +7,8 @@
   --surface-hover: #eef8f7;
   --ink: #1e2632;
   --heading: #111923;
+  --strong-text: #0f172a;
+  --strong-bg: rgba(10, 113, 133, 0.08);
   --muted: #667085;
   --muted-readable: #4e5969;
   --accent: #0a7185;
@@ -47,6 +49,8 @@ html[data-theme="dark"] {
   --surface-hover: #26343a;
   --ink: #e4e8ee;
   --heading: #f7f8fa;
+  --strong-text: #ffffff;
+  --strong-bg: rgba(105, 200, 213, 0.16);
   --muted: #a8b0bc;
   --muted-readable: #c0c7d0;
   --accent: #69c8d5;

@@ -25,9 +25,12 @@ const {
   label = "Category menu"
 } = Astro.props as Props;
 
-const normalizedCurrentPath = currentPath.replace(/\/+$/, "") || "/";
+const normalizePath = (path: string) => path.replace(/\/+$/, "") || "/";
+const normalizedCurrentPath = normalizePath(currentPath);
 const showAllPostsLink = showAllLink && typeof totalCount === "number";
 const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentPath.startsWith("/blog/page");
+const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
+  currentCategory === child.slug || currentTag === child.slug || normalizePath(child.href) === normalizedCurrentPath;
 ---
 
 <nav class:list={["category-menu", `category-menu--${variant}`]} aria-label={label} data-category-menu>
@@ -41,55 +44,44 @@ const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentP
   }
 
   {groups.map((group, index) => {
-    const isActiveGroup =
-      currentCategory === group.slug || group.children.some((child) => currentTag === child.slug);
+    const hasChildren = group.children.length > 0;
+    const isGroupPathActive = group.href ? normalizePath(group.href) === normalizedCurrentPath : false;
+    const isActiveGroup = currentCategory === group.slug || currentTag === group.slug || isGroupPathActive || group.children.some(isChildActive);
     const isExpanded = isActiveGroup || (variant !== "home" && index === 0);
-    const isLeafLink = group.href && group.children.length === 0;
     const panelId = `${idPrefix}-${group.slug}-panel`;
 
     return (
       <div class:list={["category-menu__group", isActiveGroup && "is-active"]}>
-        {isLeafLink ? (
-          <a class:list={["category-menu__toggle", "category-menu__toggle--link"]} href={group.href}>
+        <div class:list={["category-menu__parent", !hasChildren && "category-menu__parent--leaf"]}>
+          <a class="category-menu__parent-link" href={group.href}>
             <span class="category-menu__title">{group.name}</span>
-            <span class="category-menu__meta">
-              <span class="category-menu__count">({group.count})</span>
-            </span>
+            <span class="category-menu__count">({group.count})</span>
           </a>
-        ) : (
-          <>
+
+          {hasChildren && (
             <button
               class="category-menu__toggle"
               type="button"
               aria-expanded={isExpanded ? "true" : "false"}
-              aria-label={`${group.name} 하위 태그 ${isExpanded ? "접기" : "펼치기"}`}
+              aria-label={`${group.name} 하위 항목 ${isExpanded ? "접기" : "펼치기"}`}
               aria-controls={panelId}
               data-category-name={group.name}
               data-category-toggle
             >
-              <span class="category-menu__title">{group.name}</span>
-              <span class="category-menu__meta">
-                <span class="category-menu__count">({group.count})</span>
-                <span class="category-menu__chevron" aria-hidden="true"></span>
-              </span>
+              <span class="category-menu__chevron" aria-hidden="true"></span>
             </button>
+          )}
+        </div>
 
-            <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
-              {group.href && (
-                <a class:list={["category-menu__child", "category-menu__child--all", currentCategory === group.slug && "is-active"]} href={group.href}>
-                  <span>전체 {group.name}</span>
-                  <strong>({group.count})</strong>
-                </a>
-              )}
-
-              {group.children.map((child) => (
-                <a class:list={["category-menu__child", currentTag === child.slug && "is-active"]} href={child.href}>
-                  <span>{child.name}</span>
-                  <strong>({child.count})</strong>
-                </a>
-              ))}
-            </div>
-          </>
+        {hasChildren && (
+          <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
+            {group.children.map((child) => (
+              <a class:list={["category-menu__child", isChildActive(child) && "is-active"]} href={child.href}>
+                <span>{child.name}</span>
+                <strong>({child.count})</strong>
+              </a>
+            ))}
+          </div>
         )}
       </div>
     );
@@ -121,7 +113,7 @@ const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentP
         const categoryName = button.dataset.categoryName ?? button.textContent?.trim() ?? "카테고리";
 
         button.setAttribute("aria-expanded", nextExpanded ? "true" : "false");
-        button.setAttribute("aria-label", `${categoryName} 하위 태그 ${nextExpanded ? "접기" : "펼치기"}`);
+        button.setAttribute("aria-label", `${categoryName} 하위 항목 ${nextExpanded ? "접기" : "펼치기"}`);
         panel.hidden = !nextExpanded;
       });
     }

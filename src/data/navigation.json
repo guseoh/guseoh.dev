@@ -1,0 +1,39 @@
+[
+  {
+    "title": "Project",
+    "slug": "project",
+    "items": [
+      { "title": "Board", "slug": "board", "type": "category" },
+      { "title": "Performance", "slug": "performance", "type": "tag" },
+      { "title": "Monitoring", "slug": "monitoring", "type": "tag" }
+    ]
+  },
+  {
+    "title": "Backend",
+    "slug": "backend",
+    "items": [
+      { "title": "Spring", "slug": "spring", "type": "tag" },
+      { "title": "Spring Boot", "slug": "spring-boot", "type": "tag" },
+      { "title": "JPA", "slug": "jpa", "type": "tag" },
+      { "title": "Database", "slug": "database", "type": "tag" },
+      { "title": "SQL", "slug": "sql", "type": "tag" }
+    ]
+  },
+  {
+    "title": "CS",
+    "slug": "cs",
+    "items": [
+      { "title": "OS", "slug": "os", "type": "category" },
+      { "title": "Java", "slug": "java", "type": "category" },
+      { "title": "Data Structure", "slug": "자료구조", "type": "tag" }
+    ]
+  },
+  {
+    "title": "DevOps",
+    "slug": "devops",
+    "items": [
+      { "title": "Git", "slug": "git", "type": "category" },
+      { "title": "Branch Strategy", "slug": "branch-strategy", "type": "tag" }
+    ]
+  }
+]

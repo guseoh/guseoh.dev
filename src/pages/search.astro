@@ -1,6 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION } from "../utils/posts";
+import navigationData from "../data/navigation.json";
+
+const navigationGroupsJson = JSON.stringify(navigationData);
 ---
 
 <BaseLayout title="devjune.dev | Search" description={`검색과 필터 - ${SITE_DESCRIPTION}`}>
@@ -30,6 +33,7 @@ import { SITE_DESCRIPTION } from "../utils/posts";
   <div class="search-results-meta" data-search-meta hidden></div>
   <ul class="post-list search-results" data-search-list aria-live="polite"></ul>
   <p class="section-empty search-empty" data-search-empty hidden>조건에 맞는 글이 없습니다.</p>
+  <script is:inline id="search-navigation-groups" type="application/json" set:html={navigationGroupsJson}></script>
 
   <script is:inline>
     (() => {
@@ -41,7 +45,9 @@ import { SITE_DESCRIPTION } from "../utils/posts";
       const meta = document.querySelector("[data-search-meta]");
       const empty = document.querySelector("[data-search-empty]");
       const status = document.getElementById("search-status");
+      const navigationGroupsElement = document.getElementById("search-navigation-groups");
       const params = new URLSearchParams(window.location.search);
+      const activeGroup = params.get("group") ?? "";
       const collator = new Intl.Collator("ko-KR");
       const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
         year: "numeric",
@@ -61,6 +67,9 @@ import { SITE_DESCRIPTION } from "../utils/posts";
         return;
       }
 
+      const navigationGroups = navigationGroupsElement?.textContent
+        ? JSON.parse(navigationGroupsElement.textContent)
+        : [];
       input.value = params.get("q") ?? "";
       categorySelect.value = params.get("category") ?? "";
       tagSelect.value = params.get("tag") ?? "";
@@ -119,6 +128,7 @@ import { SITE_DESCRIPTION } from "../utils/posts";
         const nextParams = new URLSearchParams();
         const query = input.value.trim();
 
+        if (activeGroup) nextParams.set("group", activeGroup);
         if (query) nextParams.set("q", query);
         if (categorySelect.value) nextParams.set("category", categorySelect.value);
         if (tagSelect.value) nextParams.set("tag", tagSelect.value);
@@ -131,21 +141,27 @@ import { SITE_DESCRIPTION } from "../utils/posts";
         const query = normalize(input.value);
         const category = categorySelect.value;
         const tag = tagSelect.value;
+        const group = navigationGroups.find((entry) => entry.slug === activeGroup);
         const filtered = posts.filter((post) => {
           const matchesQuery = query.length === 0 || post.searchText.includes(query);
           const matchesCategory = !category || post.category === category;
           const matchesTag = !tag || post.tags.includes(tag);
+          const matchesGroup = !group || group.items.some((item) => {
+            if (item.type === "category") return normalize(post.category).replaceAll(" ", "-") === item.slug;
 
-          return matchesQuery && matchesCategory && matchesTag;
+            return post.tags.some((postTag) => normalize(postTag).replaceAll(" ", "-") === item.slug);
+          });
+
+          return matchesQuery && matchesCategory && matchesTag && matchesGroup;
         });
 
         list.innerHTML = filtered.map(renderPost).join("");
         empty.hidden = filtered.length > 0;
         meta.hidden = false;
-        meta.textContent = `총 ${filtered.length}개 결과`;
+        meta.textContent = group ? `${group.title} 그룹 · 총 ${filtered.length}개 결과` : `총 ${filtered.length}개 결과`;
 
         if (status) {
-          status.textContent = query || category || tag
+          status.textContent = query || category || tag || group
             ? `검색 조건에 맞는 글 ${filtered.length}개를 찾았습니다.`
             : `전체 ${posts.length}개의 글을 검색할 수 있습니다.`;
         }
