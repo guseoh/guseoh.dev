@@ -5,6 +5,7 @@ import {
   buildGitHubActivityStats,
   type GitHubContributionData
 } from "../../utils/githubStats";
+import { getKoreaDateKey } from "../../utils/koreaDate";
 
 interface Props {
   username?: string;
@@ -12,6 +13,7 @@ interface Props {
 
 const { username = "guseoh" } = Astro.props as Props;
 const stats = buildGitHubActivityStats(contributionData as GitHubContributionData);
+const generatedDateKey = getKoreaDateKey(stats.generatedAt);
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 const profileUrl = `https://github.com/${username}`;
 const isFallbackData = stats.source === "empty";
@@ -100,7 +102,7 @@ const statItems = [
     <span>많음</span>
     <span class="grass-legend__note">
       한 칸은 하루 contribution 수 기준입니다. 데이터 출처: {sourceLabels[stats.source]}, 갱신:
-      <time datetime={stats.generatedAt}>{stats.generatedAt.slice(0, 10)}</time>
+      <time datetime={stats.generatedAt}>{generatedDateKey}</time>
     </span>
   </div>
 </section>

@@ -1,16 +1,19 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  addDateKeyDays,
+  getKoreaDateKey,
+  getKoreaDayUtcRange
+} from "./korea-date.mjs";
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const USERNAME = process.env.GITHUB_CONTRIBUTIONS_USERNAME ?? "guseoh";
 const TOKEN = process.env.GH_CONTRIBUTIONS_TOKEN;
 const OUTPUT_PATH =
   process.env.GITHUB_CONTRIBUTIONS_OUTPUT ??
   path.join(process.cwd(), "public", "data", "github-contributions.json");
 
-const today = startOfUtcDay(new Date());
-const from = addUtcDays(today, -364);
-const to = today;
+const toDateKey = getKoreaDateKey(new Date());
+const fromDateKey = addDateKeyDays(toDateKey, -364);
 
 const GRAPHQL_QUERY = `
   query($userName: String!, $from: DateTime!, $to: DateTime!) {
@@ -66,6 +69,8 @@ async function fetchFromGraphQLWithFallback() {
 }
 
 async function fetchFromGraphQL() {
+  const fromRange = getKoreaDayUtcRange(fromDateKey);
+  const toRange = getKoreaDayUtcRange(toDateKey);
   const response = await fetch("https://api.github.com/graphql", {
     method: "POST",
     headers: {
@@ -77,8 +82,8 @@ async function fetchFromGraphQL() {
       query: GRAPHQL_QUERY,
       variables: {
         userName: USERNAME,
-        from: `${toDateKey(from)}T00:00:00Z`,
-        to: `${toDateKey(to)}T23:59:59Z`
+        from: fromRange.start.toISOString(),
+        to: toRange.end.toISOString()
       }
     })
   });
@@ -99,22 +104,22 @@ async function fetchFromGraphQL() {
     throw new Error(`No contribution calendar returned for ${USERNAME}`);
   }
 
-  const days = sortDays(filterDays(calendar.weeks.flatMap((week) =>
+  const days = fillDateRange(sortDays(filterDays(calendar.weeks.flatMap((week) =>
     week.contributionDays.map((day) => ({
       date: day.date,
       count: day.contributionCount,
       level: mapContributionLevel(day.contributionLevel),
       color: day.color
     }))
-  )));
+  ))));
 
   return {
     username: USERNAME,
     generatedAt: new Date().toISOString(),
     source: "graphql",
-    from: toDateKey(from),
-    to: toDateKey(to),
-    totalContributions: calendar.totalContributions,
+    from: fromDateKey,
+    to: toDateKey,
+    totalContributions: sumContributions(days),
     days
   };
 }
@@ -132,19 +137,21 @@ async function fetchFromPublicHtml() {
   }
 
   const html = await response.text();
-  const days = sortDays(parseContributionHtml(html));
+  const parsedDays = sortDays(parseContributionHtml(html));
 
-  if (days.length === 0) {
+  if (parsedDays.length === 0) {
     throw new Error(`No public contribution days found for ${USERNAME}`);
   }
+
+  const days = fillDateRange(parsedDays);
 
   return {
     username: USERNAME,
     generatedAt: new Date().toISOString(),
     source: "public-html",
-    from: toDateKey(from),
-    to: toDateKey(to),
-    totalContributions: days.reduce((total, day) => total + day.count, 0),
+    from: fromDateKey,
+    to: toDateKey,
+    totalContributions: sumContributions(days),
     days
   };
 }
@@ -177,22 +184,14 @@ function parseContributionHtml(html) {
 }
 
 function buildEmptyData() {
-  const days = [];
-
-  for (let date = from; date <= to; date = addUtcDays(date, 1)) {
-    days.push({
-      date: toDateKey(date),
-      count: 0,
-      level: 0
-    });
-  }
+  const days = fillDateRange([]);
 
   return {
     username: USERNAME,
     generatedAt: new Date().toISOString(),
     source: "empty",
-    from: toDateKey(from),
-    to: toDateKey(to),
+    from: fromDateKey,
+    to: toDateKey,
     totalContributions: 0,
     days
   };
@@ -202,8 +201,31 @@ function sortDays(days) {
   return [...days].sort((a, b) => a.date.localeCompare(b.date));
 }
 
+function fillDateRange(days) {
+  const dayMap = new Map(days.map((day) => [day.date, day]));
+  const normalizedDays = [];
+
+  for (
+    let dateKey = fromDateKey;
+    dateKey <= toDateKey;
+    dateKey = addDateKeyDays(dateKey, 1)
+  ) {
+    normalizedDays.push(dayMap.get(dateKey) ?? {
+      date: dateKey,
+      count: 0,
+      level: 0
+    });
+  }
+
+  return normalizedDays;
+}
+
+function sumContributions(days) {
+  return days.reduce((total, day) => total + day.count, 0);
+}
+
 function filterDays(days) {
-  return days.filter((day) => day.date >= toDateKey(from) && day.date <= toDateKey(to));
+  return days.filter((day) => day.date >= fromDateKey && day.date <= toDateKey);
 }
 
 async function writeContributionData(data) {
@@ -276,16 +298,4 @@ function decodeHtml(value) {
     .replaceAll("&gt;", ">")
     .replaceAll("&quot;", "\"")
     .replaceAll("&#39;", "'");
-}
-
-function startOfUtcDay(date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
-}
-
-function addUtcDays(date, days) {
-  return new Date(date.valueOf() + days * DAY_IN_MS);
-}
-
-function toDateKey(date) {
-  return startOfUtcDay(date).toISOString().slice(0, 10);
 }

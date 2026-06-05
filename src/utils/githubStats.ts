@@ -1,4 +1,5 @@
 import { BLOG_GRASS_WEEKDAY_LABELS } from "./blogStats";
+import { getKoreaDateKey } from "./koreaDate";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -47,7 +48,7 @@ export interface GitHubActivityStats {
 }
 
 export function buildGitHubActivityStats(data: GitHubContributionData, today = new Date()) {
-  const todayUtc = startOfUtcDay(today);
+  const todayUtc = parseDateKey(getKoreaDateKey(today));
   const rangeStart = startOfUtcDay(data.from);
   const rangeEnd = startOfUtcDay(data.to);
   const graphStart = getMondayStart(rangeStart);

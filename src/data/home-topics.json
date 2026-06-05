@@ -1,0 +1,53 @@
+[
+  {
+    "title": "Project",
+    "description": "Board 프로젝트의 구현과 개선 기록",
+    "href": "/search/?group=project",
+    "selectors": [
+      { "type": "category", "slug": "board" },
+      { "type": "tag", "slug": "project" }
+    ]
+  },
+  {
+    "title": "Spring",
+    "description": "Spring, JPA, 데이터 접근과 성능 개선",
+    "href": "/search/?group=backend",
+    "selectors": [
+      { "type": "tag", "slug": "spring" },
+      { "type": "tag", "slug": "spring-boot" },
+      { "type": "tag", "slug": "jpa" },
+      { "type": "tag", "slug": "database" },
+      { "type": "tag", "slug": "sql" }
+    ]
+  },
+  {
+    "title": "Java",
+    "description": "Java 언어, 컬렉션과 자료구조 학습",
+    "href": "/categories/java/",
+    "selectors": [
+      { "type": "category", "slug": "java" },
+      { "type": "tag", "slug": "java" },
+      { "type": "tag", "slug": "자료구조" }
+    ]
+  },
+  {
+    "title": "CS",
+    "description": "운영체제와 네트워크 기초 학습 기록",
+    "href": "/categories/",
+    "selectors": [
+      { "type": "category", "slug": "os" },
+      { "type": "tag", "slug": "os" },
+      { "type": "category", "slug": "network" },
+      { "type": "tag", "slug": "network" }
+    ]
+  },
+  {
+    "title": "Git",
+    "description": "Git 사용법과 브랜치 운영 전략",
+    "href": "/categories/git/",
+    "selectors": [
+      { "type": "category", "slug": "git" },
+      { "type": "tag", "slug": "branch-strategy" }
+    ]
+  }
+]

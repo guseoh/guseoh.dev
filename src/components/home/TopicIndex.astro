@@ -1,8 +1,8 @@
 ---
-import type { NavigationGroupView } from "../../utils/navigation";
+import type { HomeTopicView } from "../../utils/navigation";
 
 interface Props {
-  groups: NavigationGroupView[];
+  groups: HomeTopicView[];
 }
 
 const { groups } = Astro.props as Props;
@@ -22,39 +22,13 @@ const { groups } = Astro.props as Props;
   ) : (
     <div class="topic-index-grid">
       {groups.map((group) => (
-        <article class="topic-index-group">
-          <div class="topic-index-group__head">
-            <div>
-              <h3><a href={group.href}>{group.title}</a></h3>
-              <p>{group.description}</p>
-            </div>
+        <a class="topic-index-group" href={group.href}>
+          <span class="topic-index-group__head">
+            <strong>{group.title}</strong>
             <span class="topic-index-group__count">{group.count}개 글</span>
-          </div>
-
-          <ul class="topic-index-list">
-            {group.items.map((item) => (
-              <li>
-                {item.href ? (
-                  <a class="topic-index-item" href={item.href}>
-                    <span>
-                      <strong>{item.title}</strong>
-                      {item.description && <small>{item.description}</small>}
-                    </span>
-                    <span class="topic-index-item__count">{item.count}</span>
-                  </a>
-                ) : (
-                  <span class="topic-index-item topic-index-item--planned" aria-disabled="true">
-                    <span>
-                      <strong>{item.title}</strong>
-                      {item.description && <small>{item.description}</small>}
-                    </span>
-                    <span class="topic-index-item__status">준비 중</span>
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </article>
+          </span>
+          <span class="topic-index-group__description">{group.description}</span>
+        </a>
       ))}
     </div>
   )}
