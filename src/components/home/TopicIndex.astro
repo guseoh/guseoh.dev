@@ -1,32 +1,62 @@
 ---
-import type { CategoryTreeGroup } from "../../utils/categories";
-import CategoryMenu from "../CategoryMenu.astro";
+import type { NavigationGroupView } from "../../utils/navigation";
 
 interface Props {
-  categories: CategoryTreeGroup[];
-  totalCount: number;
+  groups: NavigationGroupView[];
 }
 
-const { categories, totalCount } = Astro.props as Props;
+const { groups } = Astro.props as Props;
 ---
 
-<section class="home-section home-topic-sidebar" aria-label="Categories">
+<section class="home-section home-topic-index" aria-labelledby="home-topic-index-title">
   <div class="home-section__head home-section__head--inline">
-    <h2 class="home-section__title">주요 학습/프로젝트 카테고리</h2>
+    <div>
+      <p class="home-section__eyebrow">Topic Index</p>
+      <h2 id="home-topic-index-title" class="home-section__title">학습과 프로젝트 탐색</h2>
+    </div>
     <a class="home-section__link" href="/categories/">전체 카테고리</a>
   </div>
 
-  {categories.length === 0 ? (
+  {groups.length === 0 ? (
     <p class="section-empty">카테고리가 없습니다.</p>
   ) : (
-    <CategoryMenu
-      groups={categories}
-      idPrefix="home-category"
-      variant="home"
-      totalCount={totalCount}
-      showAllLink={true}
-      label="Home category menu"
-    />
+    <div class="topic-index-grid">
+      {groups.map((group) => (
+        <article class="topic-index-group">
+          <div class="topic-index-group__head">
+            <div>
+              <h3><a href={group.href}>{group.title}</a></h3>
+              <p>{group.description}</p>
+            </div>
+            <span class="topic-index-group__count">{group.count}개 글</span>
+          </div>
+
+          <ul class="topic-index-list">
+            {group.items.map((item) => (
+              <li>
+                {item.href ? (
+                  <a class="topic-index-item" href={item.href}>
+                    <span>
+                      <strong>{item.title}</strong>
+                      {item.description && <small>{item.description}</small>}
+                    </span>
+                    <span class="topic-index-item__count">{item.count}</span>
+                  </a>
+                ) : (
+                  <span class="topic-index-item topic-index-item--planned" aria-disabled="true">
+                    <span>
+                      <strong>{item.title}</strong>
+                      {item.description && <small>{item.description}</small>}
+                    </span>
+                    <span class="topic-index-item__status">준비 중</span>
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
+    </div>
   )}
 </section>
 

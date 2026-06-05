@@ -1,33 +1,57 @@
 ---
-title: ""
-description: ""
-date: 2026-04-27
-updated: 2026-04-27
-category: Board
-tags: []
-series:
-seriesOrder:
+title: "글 제목"
+description: "검색 결과와 OG 메타에 사용될 한두 문장 요약"
+date: 2026-06-05
+updated: 2026-06-05
+category: "Board"
+tags:
+  - Spring
+  - JPA
+  - Performance
+series: "Board 프로젝트 개선 기록"
+seriesOrder: 1
+heroImage: "/og-image.svg"
 draft: true
 ---
 
 <!--
 작성 규칙
-- title은 페이지 h1로 렌더링됩니다.
-- 본문 heading은 SEO/접근성을 위해 ##부터 시작합니다.
-- description, category, tags는 목록/RSS/SEO에 사용되므로 가능한 한 구체적으로 작성합니다.
-- Board 프로젝트 글은 category: Board를 우선 사용하고, 다른 프로젝트를 포괄할 때만 Project를 사용합니다.
+- title: 상세 페이지의 유일한 h1입니다.
+- description: 검색 결과와 OG 메타에 사용할 문제/결과 중심 요약을 작성합니다.
+- category: 글의 큰 소속 하나만 선택합니다. Board, OS, Java, Git 등이 현재 사용 중입니다.
+- tags: 기술, 주제, 글 성격을 나타내는 태그를 3~7개 정도 작성합니다.
+- series/seriesOrder: 연재 글일 때만 사용하고, 단독 글이면 두 필드를 삭제합니다.
+- heroImage: public 기준 절대 경로를 사용합니다. 전용 이미지가 없으면 /og-image.svg를 사용합니다.
+- draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.
+- 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
 -->
 
-## 1. 문제 상황
+> 페이지의 `h1`은 글 제목이 담당하므로 본문은 `##`부터 시작합니다.
 
-## 2. 기존 코드 또는 구조
+## 들어가기 전
 
-## 3. 원인 분석
+이 글을 작성하게 된 배경과 목표를 적습니다.
 
-## 4. 해결 방법
+## 문제 상황
 
-## 5. 개선 전/후 비교
+어떤 문제가 있었고 사용자나 시스템에 어떤 영향을 주었는지 설명합니다.
 
-## 6. 배운 점
+## 원인 분석
 
-## 7. 다음 개선 방향
+로그, 코드, 실행 결과, 설계 관점에서 원인을 분석합니다.
+
+## 해결 방법
+
+적용한 해결 방법과 선택 이유를 단계적으로 정리합니다.
+
+## 코드 변경
+
+핵심 코드, 설정, 구조 변경을 설명합니다.
+
+## 검증 결과
+
+실행한 명령, 테스트, 화면 확인 결과를 정리합니다.
+
+## 배운 점
+
+이번 작업에서 배운 점과 다음 개선 방향을 정리합니다.

@@ -6,6 +6,7 @@ export type SearchIndexItem = {
   description: string;
   category: string;
   tags: string[];
+  series: string;
   date: string;
   slug: string;
   url: string;
@@ -20,12 +21,14 @@ export function buildSearchIndex(posts: CollectionEntry<"blog">[]): SearchIndexI
   return posts.map((post) => {
     const description = getPostDescription(post);
     const category = post.data.category?.trim() || "Uncategorized";
+    const series = post.data.series?.trim() || "";
     const contentText = stripMarkdown(post.body ?? "");
     const excerpt = truncateText(contentText || description, MAX_EXCERPT_LENGTH);
     const searchText = [
       post.data.title,
       description,
       category,
+      series,
       ...post.data.tags,
       excerpt,
       contentText
@@ -38,6 +41,7 @@ export function buildSearchIndex(posts: CollectionEntry<"blog">[]): SearchIndexI
       description,
       category,
       tags: post.data.tags,
+      series,
       date: post.data.date.toISOString(),
       slug: post.id,
       url: `/blog/${post.id}/`,

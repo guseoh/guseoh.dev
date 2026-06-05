@@ -35,8 +35,13 @@ const GRAPHQL_QUERY = `
 
 try {
   const data = TOKEN ? await fetchFromGraphQLWithFallback() : await fetchFromPublicHtml();
-  await writeContributionData(data);
-  console.log(`Wrote GitHub contributions from ${data.source} to ${OUTPUT_PATH}`);
+  const changed = await writeContributionDataIfChanged(data);
+
+  if (changed) {
+    console.log(`Wrote GitHub contributions from ${data.source} to ${OUTPUT_PATH}`);
+  } else {
+    console.log(`GitHub contribution data is already up to date at ${OUTPUT_PATH}`);
+  }
 } catch (error) {
   console.warn(`Could not fetch GitHub contributions: ${error.message}`);
 
@@ -206,6 +211,18 @@ async function writeContributionData(data) {
   await writeFile(`${OUTPUT_PATH}`, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 
+async function writeContributionDataIfChanged(data) {
+  const existingData = await readExistingContributionData();
+
+  if (existingData && isSameContributionData(existingData, data)) {
+    return false;
+  }
+
+  await writeContributionData(data);
+
+  return true;
+}
+
 async function readExistingContributionData() {
   try {
     const existing = JSON.parse(await readFile(OUTPUT_PATH, "utf8"));
@@ -214,6 +231,13 @@ async function readExistingContributionData() {
   } catch {
     return undefined;
   }
+}
+
+function isSameContributionData(existingData, nextData) {
+  const { generatedAt: existingGeneratedAt, ...existingComparable } = existingData;
+  const { generatedAt: nextGeneratedAt, ...nextComparable } = nextData;
+
+  return JSON.stringify(existingComparable) === JSON.stringify(nextComparable);
 }
 
 function mapContributionLevel(level) {

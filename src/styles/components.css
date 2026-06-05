@@ -375,6 +375,24 @@
   color: var(--link-hover);
 }
 
+.category-menu__child--planned {
+  cursor: default;
+  opacity: 0.68;
+}
+
+.category-menu__child--planned small {
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.category-menu__child--planned:hover {
+  border-left-color: color-mix(in srgb, var(--border) 78%, transparent);
+  background: transparent;
+  color: var(--muted-readable);
+}
+
 .category-menu--sidebar .category-menu__parent {
   grid-template-columns: minmax(0, 1fr) 2.25rem;
 }

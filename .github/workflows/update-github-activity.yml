@@ -1,0 +1,64 @@
+name: Update GitHub Activity
+
+on:
+  schedule:
+    # Every day at 21:00 UTC, which is 06:00 KST on the following day.
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: update-github-activity
+  cancel-in-progress: false
+
+jobs:
+  update-github-activity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch GitHub contributions
+        run: npm run github:contributions
+        env:
+          GH_CONTRIBUTIONS_TOKEN: ${{ secrets.GH_CONTRIBUTIONS_TOKEN }}
+          GITHUB_CONTRIBUTIONS_USERNAME: guseoh
+
+      - name: Commit updated contribution data
+        id: commit_activity
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/github-contributions.json
+
+          if git diff --cached --quiet; then
+            echo "No GitHub Activity changes."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "chore: update github activity data"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy updated activity
+        if: steps.commit_activity.outputs.changed == 'true'
+        run: gh workflow run deploy.yml --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

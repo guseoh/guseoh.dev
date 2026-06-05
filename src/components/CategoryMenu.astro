@@ -30,7 +30,9 @@ const normalizedCurrentPath = normalizePath(currentPath);
 const showAllPostsLink = showAllLink && typeof totalCount === "number";
 const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentPath.startsWith("/blog/page");
 const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
-  currentCategory === child.slug || currentTag === child.slug || normalizePath(child.href) === normalizedCurrentPath;
+  currentCategory === child.slug ||
+  currentTag === child.slug ||
+  (child.href ? normalizePath(child.href) === normalizedCurrentPath : false);
 ---
 
 <nav class:list={["category-menu", `category-menu--${variant}`]} aria-label={label} data-category-menu>
@@ -76,10 +78,17 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
         {hasChildren && (
           <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
             {group.children.map((child) => (
-              <a class:list={["category-menu__child", isChildActive(child) && "is-active"]} href={child.href}>
-                <span>{child.name}</span>
-                <strong>({child.count})</strong>
-              </a>
+              child.href ? (
+                <a class:list={["category-menu__child", isChildActive(child) && "is-active"]} href={child.href}>
+                  <span>{child.name}</span>
+                  <strong>({child.count})</strong>
+                </a>
+              ) : (
+                <span class="category-menu__child category-menu__child--planned" aria-disabled="true">
+                  <span>{child.name}</span>
+                  <small>준비 중</small>
+                </span>
+              )
             ))}
           </div>
         )}

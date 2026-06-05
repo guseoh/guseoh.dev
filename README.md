@@ -66,6 +66,16 @@ draft: true
 - `description`은 목록, RSS, 검색 인덱스, SEO 설명에 사용하므로 문제와 개선 결과가 드러나게 작성합니다.
 - `draft: true`인 글은 목록, RSS, sitemap, 검색 인덱스, 상세 페이지 생성에서 제외됩니다.
 
+### 새 글 작성 순서
+
+1. `src/content/blog/_template.md`를 복사해 글 성격에 맞는 폴더와 파일명으로 저장합니다.
+2. `category`는 글의 큰 소속 하나만 선택합니다.
+3. `tags`는 기술, 주제, 글 성격을 나타내는 값 3~7개 정도를 작성합니다.
+4. 연재 글이면 `series`, `seriesOrder`를 작성하고 단독 글이면 해당 필드를 삭제합니다.
+5. 본문에서는 `#`을 사용하지 않고 `##`부터 heading을 시작합니다.
+6. 작성 중에는 `draft: true`를 유지하고 발행 전에 false로 변경하거나 필드를 삭제합니다.
+7. 발행 전 `npm run check`와 `npm run build`를 실행합니다.
+
 ## 분류 운영 규칙
 
 - `Board`: Board 프로젝트 전용 카테고리입니다. Board 구현, 성능, 화면 전환, 운영 기록은 이 카테고리를 우선 사용합니다.
@@ -75,8 +85,10 @@ draft: true
 - 글 성격 태그: Project, Troubleshooting, Review처럼 글의 성격을 나타냅니다.
 - 태그 표시명과 타입은 `src/data/tags.json`에서 관리합니다.
 - 왼쪽 사이드바의 대분류/중분류 탐색은 `src/data/navigation.json`에서 관리합니다.
+- 메인 Topic Index와 왼쪽 사이드바는 동일한 `src/data/navigation.json`을 사용합니다.
 - 대분류는 Project, Backend, CS, DevOps 같은 탐색 묶음이고, 클릭 시 `/search/?group=...`로 해당 묶음의 글 목록을 보여줍니다.
-- 중분류는 실제 category 또는 tag URL로 연결합니다. 예를 들어 Board는 `/categories/board/`, JPA는 `/tags/jpa/`로 이동합니다.
+- 중분류의 `type`은 `category`, `tag`, `series`, `search`, `url`을 지원합니다. 실제 글이 아직 없는 항목은 `planned: true`로 표시하고 링크를 만들지 않습니다.
+- 중분류는 실제 category, tag, series URL로 연결합니다. 예를 들어 Board는 `/categories/board/`, JPA는 `/tags/jpa/`로 이동합니다.
 - Board 글에는 `category: Board`를 쓰고, Spring/JPA/Performance/P6Spy 같은 세부 기술과 주제는 `tags`에 작성합니다.
 
 ## 시리즈 운영 규칙
@@ -116,6 +128,11 @@ GitHub Activity 잔디의 갱신 방식, 자동화 범위, fallback 정책은 `d
 
 `npm run github:contributions`는 GitHub GraphQL API 또는 공개 contribution HTML을 기반으로 `public/data/github-contributions.json`을 갱신합니다.
 
+- `.github/workflows/update-github-activity.yml`은 매일 21:00 UTC, 즉 다음 날 06:00 KST에 자동 실행됩니다.
+- Actions 탭의 `Update GitHub Activity` workflow에서 `Run workflow`를 선택하면 수동 갱신할 수 있습니다.
+- `GH_CONTRIBUTIONS_TOKEN` secret이 있으면 GraphQL API를 우선 사용하며, secret이 없어도 공개 contribution HTML fallback으로 동작합니다.
+- 같은 날짜와 contribution 데이터가 이미 저장되어 있으면 JSON을 다시 쓰지 않고 자동 커밋도 생성하지 않습니다.
+- JSON이 변경되면 bot 커밋을 push한 뒤 기존 `deploy.yml`을 수동 dispatch해 배포 사이트에도 반영합니다.
 - API와 공개 HTML fetch가 모두 실패하면 기존 JSON이 있을 때 기존 데이터를 유지합니다.
 - 기존 JSON도 없으면 빈 contribution 데이터를 생성해 빌드를 계속 진행합니다.
 - UI는 `empty` 데이터 출처일 때 fallback 안내 문구를 표시합니다.
@@ -182,4 +199,5 @@ scripts/
   smoke-test.mjs
 .github/workflows/
   deploy.yml
+  update-github-activity.yml
 ```

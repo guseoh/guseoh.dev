@@ -2,38 +2,148 @@
   {
     "title": "Project",
     "slug": "project",
+    "description": "포트폴리오 프로젝트와 개선 과정을 모아봅니다.",
     "items": [
-      { "title": "Board", "slug": "board", "type": "category" },
-      { "title": "Performance", "slug": "performance", "type": "tag" },
-      { "title": "Monitoring", "slug": "monitoring", "type": "tag" }
+      {
+        "title": "Board",
+        "slug": "board",
+        "type": "category",
+        "description": "Spring Boot 게시판 프로젝트 구현과 개선 기록"
+      },
+      {
+        "title": "Performance",
+        "slug": "performance",
+        "type": "tag",
+        "description": "성능 측정과 쿼리 최적화"
+      },
+      {
+        "title": "Monitoring",
+        "slug": "monitoring",
+        "type": "tag",
+        "description": "Actuator와 P6Spy를 활용한 관측성 개선"
+      },
+      {
+        "title": "Board 개선 시리즈",
+        "slug": "board-프로젝트-개선-기록",
+        "type": "series",
+        "description": "Board 프로젝트 개선 과정을 순서대로 읽기"
+      },
+      {
+        "title": "Deployment",
+        "slug": "deployment",
+        "type": "tag",
+        "description": "배포와 운영 자동화 기록",
+        "planned": true
+      }
     ]
   },
   {
     "title": "Backend",
     "slug": "backend",
+    "description": "Java와 Spring 백엔드의 핵심 구현 주제입니다.",
     "items": [
-      { "title": "Spring", "slug": "spring", "type": "tag" },
-      { "title": "Spring Boot", "slug": "spring-boot", "type": "tag" },
-      { "title": "JPA", "slug": "jpa", "type": "tag" },
-      { "title": "Database", "slug": "database", "type": "tag" },
-      { "title": "SQL", "slug": "sql", "type": "tag" }
+      {
+        "title": "Spring",
+        "slug": "spring",
+        "type": "tag",
+        "description": "Spring Framework 설계와 구현"
+      },
+      {
+        "title": "Spring Boot",
+        "slug": "spring-boot",
+        "type": "tag",
+        "description": "Spring Boot 기반 애플리케이션 개발"
+      },
+      {
+        "title": "Spring Data JPA",
+        "slug": "jpa",
+        "type": "tag",
+        "description": "엔티티 설계와 영속성 계층 개선"
+      },
+      {
+        "title": "Database",
+        "slug": "database",
+        "type": "tag",
+        "description": "데이터 모델링과 저장소 설계"
+      },
+      {
+        "title": "Query Optimization",
+        "slug": "sql",
+        "type": "tag",
+        "description": "SQL 분석과 조회 성능 개선"
+      },
+      {
+        "title": "Spring Security",
+        "slug": "security",
+        "type": "tag",
+        "description": "인증과 인가 구현 기록",
+        "planned": true
+      }
     ]
   },
   {
     "title": "CS",
     "slug": "cs",
+    "description": "컴퓨터 과학과 Java 기반 자료구조 학습 기록입니다.",
     "items": [
-      { "title": "OS", "slug": "os", "type": "category" },
-      { "title": "Java", "slug": "java", "type": "category" },
-      { "title": "Data Structure", "slug": "자료구조", "type": "tag" }
+      {
+        "title": "Operating System",
+        "slug": "os",
+        "type": "category",
+        "description": "운영체제와 컴퓨터 구조 학습"
+      },
+      {
+        "title": "Java",
+        "slug": "java",
+        "type": "category",
+        "description": "Java 언어와 컬렉션 학습"
+      },
+      {
+        "title": "Data Structure",
+        "slug": "자료구조",
+        "type": "tag",
+        "description": "자료구조의 원리와 구현"
+      }
     ]
   },
   {
     "title": "DevOps",
     "slug": "devops",
+    "description": "버전 관리, 배포, 인프라 자동화 기록입니다.",
     "items": [
-      { "title": "Git", "slug": "git", "type": "category" },
-      { "title": "Branch Strategy", "slug": "branch-strategy", "type": "tag" }
+      {
+        "title": "Git",
+        "slug": "git",
+        "type": "category",
+        "description": "Git 사용법과 협업 흐름"
+      },
+      {
+        "title": "Branch Strategy",
+        "slug": "branch-strategy",
+        "type": "tag",
+        "description": "브랜치 운영과 병합 전략"
+      },
+      {
+        "title": "GitHub Actions",
+        "slug": "github-actions",
+        "type": "tag",
+        "description": "CI/CD와 반복 작업 자동화",
+        "planned": true
+      },
+      {
+        "title": "Docker",
+        "slug": "docker",
+        "type": "tag",
+        "description": "컨테이너 기반 개발과 배포",
+        "planned": true
+      },
+      {
+        "title": "AWS",
+        "slug": "aws",
+        "type": "tag",
+        "description": "클라우드 인프라 운영 기록",
+        "planned": true
+      }
     ]
   }
 ]

@@ -10,8 +10,10 @@ export type CategorySummary = {
 export type CategoryTreeChild = {
   name: string;
   slug: string;
-  href: string;
+  href?: string;
   count: number;
+  description?: string;
+  planned?: boolean;
 };
 
 export type CategoryTreeGroup = {

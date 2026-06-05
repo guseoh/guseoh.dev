@@ -75,6 +75,9 @@ const navigationGroupsJson = JSON.stringify(navigationData);
       tagSelect.value = params.get("tag") ?? "";
 
       const normalize = (value) => value.trim().toLowerCase();
+      const normalizeSlug = (value) => normalize(value)
+        .replace(/[^a-z0-9가-힣]+/gi, "-")
+        .replace(/^-+|-+$/g, "");
       const escapeHtml = (value) =>
         value.replace(/[&<>"']/g, (character) => ({
           "&": "&amp;",
@@ -147,9 +150,13 @@ const navigationGroupsJson = JSON.stringify(navigationData);
           const matchesCategory = !category || post.category === category;
           const matchesTag = !tag || post.tags.includes(tag);
           const matchesGroup = !group || group.items.some((item) => {
-            if (item.type === "category") return normalize(post.category).replaceAll(" ", "-") === item.slug;
+            if (item.planned) return false;
+            if (item.type === "category") return normalizeSlug(post.category) === item.slug;
+            if (item.type === "tag") return post.tags.some((postTag) => normalizeSlug(postTag) === item.slug);
+            if (item.type === "series") return normalizeSlug(post.series || "") === item.slug;
+            if (item.type === "search") return post.searchText.includes(normalize(item.query || item.title));
 
-            return post.tags.some((postTag) => normalize(postTag).replaceAll(" ", "-") === item.slug);
+            return false;
           });
 
           return matchesQuery && matchesCategory && matchesTag && matchesGroup;

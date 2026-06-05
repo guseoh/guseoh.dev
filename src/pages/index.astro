@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
-import { buildCategoryHierarchy } from "../utils/categories";
+import { buildNavigationGroups } from "../utils/navigation";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
 import BlogGrass from "../components/home/BlogGrass.astro";
 import GitHubGrass from "../components/home/GitHubGrass.astro";
@@ -11,7 +11,7 @@ import PortfolioCta from "../components/home/PortfolioCta.astro";
 import TopicIndex from "../components/home/TopicIndex.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
-const categoryHierarchy = buildCategoryHierarchy(posts);
+const navigationGroups = buildNavigationGroups(posts);
 ---
 
 <BaseLayout
@@ -24,7 +24,7 @@ const categoryHierarchy = buildCategoryHierarchy(posts);
   <BlogGrass posts={posts} />
   <GitHubGrass username="guseoh" />
   <div class="home-content-grid">
-    <TopicIndex categories={categoryHierarchy} totalCount={posts.length} />
+    <TopicIndex groups={navigationGroups} />
     <LatestPosts posts={posts} />
   </div>
 </BaseLayout>
