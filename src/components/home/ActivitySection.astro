@@ -1,0 +1,201 @@
+---
+import type { CollectionEntry } from "astro:content";
+import contributionData from "../../../public/data/github-contributions.json";
+import { BLOG_GRASS_WEEKDAY_LABELS, buildBlogActivityStats } from "../../utils/blogStats";
+import {
+  buildGitHubActivityStats,
+  type GitHubContributionData
+} from "../../utils/githubStats";
+import { getKoreaDateKey } from "../../utils/koreaDate";
+
+interface Props {
+  posts: CollectionEntry<"blog">[];
+  username?: string;
+}
+
+const { posts, username = "guseoh" } = Astro.props as Props;
+const blogStats = buildBlogActivityStats(posts);
+const githubStats = buildGitHubActivityStats(contributionData as GitHubContributionData);
+const numberFormatter = new Intl.NumberFormat("ko-KR");
+const profileUrl = `https://github.com/${username}`;
+const generatedDateKey = getKoreaDateKey(githubStats.generatedAt);
+const isFallbackData = githubStats.source === "empty";
+const sourceLabels = {
+  graphql: "GitHub GraphQL API",
+  "public-html": "GitHub 공개 contribution HTML",
+  empty: "기본 빈 데이터"
+};
+
+const summaryItems = [
+  { label: "전체 공개 글", value: blogStats.totalPosts, suffix: "개" },
+  { label: "이번 달 블로그 활동", value: blogStats.monthActivities, suffix: "건" },
+  { label: "이번 달 GitHub contribution", value: githubStats.monthContributions, suffix: "개" }
+];
+
+const blogPanelStats = [
+  { label: "올해 활동", value: blogStats.yearActivities, suffix: "건" },
+  { label: "현재 연속", value: blogStats.currentStreak, suffix: "일" },
+  { label: "최장 연속", value: blogStats.longestStreak, suffix: "일" }
+];
+
+const githubPanelStats = [
+  { label: "올해 contribution", value: githubStats.yearContributions, suffix: "개" },
+  { label: "현재 연속", value: githubStats.currentStreak, suffix: "일" },
+  { label: "최근 1년", value: githubStats.totalContributions, suffix: "개" }
+];
+---
+
+<section class="activity-section" aria-labelledby="activity-section-title">
+  <div class="activity-section__head">
+    <div>
+      <p class="activity-section__eyebrow">Activity</p>
+      <h2 id="activity-section-title">학습과 개발 활동</h2>
+      <p class="activity-section__description">
+        최근 1년 동안의 블로그 작성·수정 기록과 GitHub contribution을 함께 보여줍니다.
+      </p>
+    </div>
+    <p class="activity-section__range">{blogStats.rangeStart} ~ {blogStats.rangeEnd}</p>
+  </div>
+
+  <dl class="activity-overview-stats" aria-label="활동 요약">
+    {summaryItems.map((item) => (
+      <div class="activity-overview-stats__item">
+        <dt>{item.label}</dt>
+        <dd>{numberFormatter.format(item.value)}{item.suffix}</dd>
+      </div>
+    ))}
+  </dl>
+
+  <div class="activity-section__panels">
+    <article class="activity-panel blog-grass" aria-labelledby="blog-activity-title">
+      <div class="activity-panel__head">
+        <div>
+          <p class="activity-panel__eyebrow">Blog Writing</p>
+          <h3 id="blog-activity-title">블로그 활동</h3>
+        </div>
+        <span class="activity-panel__meta">작성/수정 기록</span>
+      </div>
+
+      <dl class="activity-panel__stats" aria-label="블로그 활동 통계">
+        {blogPanelStats.map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>{numberFormatter.format(item.value)}{item.suffix}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="grass-chart" style={`--grass-weeks: ${blogStats.weeks.length}`}>
+        <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 블로그 활동 잔디">
+          <div class="grass-chart__months" aria-hidden="true">
+            {blogStats.weeks.map((week) => <span>{week.monthLabel}</span>)}
+          </div>
+
+          <div class="grass-chart__body">
+            <div class="grass-chart__weekdays" aria-hidden="true">
+              {BLOG_GRASS_WEEKDAY_LABELS.map((label, index) => (
+                <span>{index % 2 === 0 ? label : ""}</span>
+              ))}
+            </div>
+
+            <div class="grass-chart__grid" role="grid" aria-label="날짜별 블로그 활동 개수">
+              {blogStats.weeks.map((week) => (
+                week.days.map((day) => (
+                  <span
+                    class:list={["grass-cell", day.isToday && "grass-cell--today", day.isOutsideRange && "grass-cell--muted"]}
+                    data-level={day.level}
+                    role="gridcell"
+                    aria-label={day.label}
+                    title={day.label}
+                  />
+                ))
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grass-legend" aria-label="블로그 활동 개수 농도 범례">
+        <span>적음</span>
+        <span class="grass-cell" data-level="0" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="1" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="2" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="3" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="4" aria-hidden="true"></span>
+        <span>많음</span>
+        <span class="grass-legend__note">공개 글의 작성일 또는 최근 수정일 기준입니다.</span>
+      </div>
+    </article>
+
+    <article class="activity-panel github-grass" aria-labelledby="github-activity-title">
+      <div class="activity-panel__head">
+        <div>
+          <p class="activity-panel__eyebrow">GitHub Contributions</p>
+          <h3 id="github-activity-title">GitHub 활동</h3>
+        </div>
+        <a class="activity-panel__link" href={profileUrl} target="_blank" rel="noreferrer">프로필 보기</a>
+      </div>
+
+      {
+        isFallbackData && (
+          <p class="activity-panel__notice">
+            GitHub contribution 데이터를 가져오지 못해 빈 잔디를 표시합니다. 다음 갱신에서 다시 시도합니다.
+          </p>
+        )
+      }
+
+      <dl class="activity-panel__stats" aria-label="GitHub contribution 통계">
+        {githubPanelStats.map((item) => (
+          <div>
+            <dt>{item.label}</dt>
+            <dd>{numberFormatter.format(item.value)}{item.suffix}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div class="grass-chart" style={`--grass-weeks: ${githubStats.weeks.length}`}>
+        <div class="grass-chart__scroller" tabindex="0" aria-label="최근 1년 GitHub contribution 잔디">
+          <div class="grass-chart__months" aria-hidden="true">
+            {githubStats.weeks.map((week) => <span>{week.monthLabel}</span>)}
+          </div>
+
+          <div class="grass-chart__body">
+            <div class="grass-chart__weekdays" aria-hidden="true">
+              {BLOG_GRASS_WEEKDAY_LABELS.map((label, index) => (
+                <span>{index % 2 === 0 ? label : ""}</span>
+              ))}
+            </div>
+
+            <div class="grass-chart__grid" role="grid" aria-label="날짜별 GitHub contribution 개수">
+              {githubStats.weeks.map((week) => (
+                week.days.map((day) => (
+                  <span
+                    class:list={["grass-cell", day.isToday && "grass-cell--today", day.isOutsideRange && "grass-cell--muted"]}
+                    data-level={day.level}
+                    role="gridcell"
+                    aria-label={day.label}
+                    title={day.label}
+                  />
+                ))
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grass-legend" aria-label="GitHub contribution 개수 농도 범례">
+        <span>적음</span>
+        <span class="grass-cell" data-level="0" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="1" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="2" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="3" aria-hidden="true"></span>
+        <span class="grass-cell" data-level="4" aria-hidden="true"></span>
+        <span>많음</span>
+        <span class="grass-legend__note">
+          출처: {sourceLabels[githubStats.source]}, 갱신:
+          <time datetime={githubStats.generatedAt}>{generatedDateKey}</time>
+        </span>
+      </div>
+    </article>
+  </div>
+</section>

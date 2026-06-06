@@ -9,6 +9,7 @@
 - 별도 `Update GitHub Activity` workflow가 매일 15:10 UTC, 즉 다음 날 00:10 KST에 JSON을 갱신합니다.
 - 같은 데이터면 파일을 다시 쓰지 않으며, 실제 변경이 있을 때만 자동 커밋과 push가 실행됩니다.
 - JSON이 변경되면 schedule workflow가 기존 `deploy.yml`을 명시적으로 dispatch해 정적 사이트도 다시 배포합니다.
+- schedule workflow는 데이터 출처, fallback 여부, 변경 및 배포 결과를 Actions Summary와 Discord 알림으로 남깁니다.
 
 ## 2. 데이터 흐름
 
@@ -17,11 +18,12 @@
 3. 스크립트는 `GH_CONTRIBUTIONS_TOKEN`이 있으면 GitHub GraphQL API를 먼저 사용합니다.
 4. 토큰이 없거나 GraphQL 요청이 실패하면 GitHub 공개 contribution HTML을 fallback으로 파싱합니다.
 5. 결과는 `public/data/github-contributions.json`에 저장됩니다.
-6. `src/components/home/GitHubGrass.astro`가 이 JSON을 import합니다.
+6. `src/components/home/ActivitySection.astro`가 이 JSON을 import합니다.
 7. `src/utils/githubStats.ts`가 최근 1년 주간 배열, 올해 contribution 수, 연속 contribution 정보를 계산합니다.
 8. Astro 빌드 결과에 정적 HTML/CSS/JSON 기반 잔디가 포함됩니다.
 9. `.github/workflows/update-github-activity.yml`은 매일 갱신 결과에 실제 차이가 있을 때만 JSON을 커밋합니다.
 10. 자동 커밋 후 `deploy.yml`을 `workflow_dispatch`로 실행해 최신 JSON을 사이트에 반영합니다.
+11. 갱신 결과와 배포 dispatch 상태를 Actions Summary에 기록하고, `DISCORD_WEBHOOK_URL`이 있으면 Discord에도 알립니다.
 
 ## 3. 관련 파일
 
@@ -29,8 +31,9 @@
 - `.github/workflows/update-github-activity.yml`: 매일 00:10 KST 자동 갱신 및 수동 실행 지점입니다.
 - `package.json`: `github:contributions` 명령을 정의합니다.
 - `scripts/fetch-github-contributions.mjs`: GraphQL, 공개 HTML fallback, 빈 데이터 fallback을 처리합니다.
+- `scripts/notify-discord.mjs`: 갱신 및 배포 상태를 Discord webhook으로 전송합니다.
 - `public/data/github-contributions.json`: 빌드에서 사용하는 생성 데이터입니다.
-- `src/components/home/GitHubGrass.astro`: 홈 화면 GitHub Activity UI를 렌더링합니다.
+- `src/components/home/ActivitySection.astro`: 홈 화면의 Blog 및 GitHub Activity UI를 함께 렌더링합니다.
 - `src/utils/githubStats.ts`: 잔디 표시용 통계와 날짜 배열을 계산합니다.
 - `README.md`: fallback 정책과 배포 체크리스트를 요약합니다.
 
@@ -51,21 +54,41 @@
 - GraphQL과 공개 HTML이 모두 실패하고 기존 JSON이 있으면 기존 데이터를 유지합니다.
 - 기존 JSON도 없으면 contribution 수가 모두 0인 빈 데이터를 생성해 빌드 실패를 막습니다.
 - UI는 데이터 출처가 `empty`일 때 fallback 안내 문구를 표시합니다.
+- fallback으로 기존 JSON 또는 빈 데이터를 사용한 경우 workflow를 실패 처리해 갱신 장애가 숨겨지지 않게 합니다.
 
-## 6. 한계
+## 6. 상태 및 알림
+
+갱신 스크립트는 GitHub Actions output으로 `source`, `status`, `changed`, `detail`을 제공합니다.
+
+- `success`: GraphQL 또는 공개 HTML로 정상 갱신했습니다.
+- `fallback`: GraphQL에 실패했지만 공개 HTML로 갱신했습니다.
+- `degraded`: 원격 데이터를 가져오지 못해 기존 JSON을 유지하거나 빈 데이터를 생성했습니다.
+
+workflow는 실행 결과를 항상 Actions Summary에 기록합니다. `DISCORD_WEBHOOK_URL` repository secret이 설정되어 있으면 다음 경우 Discord 알림을 전송합니다.
+
+- 데이터 변경 및 자동 커밋 성공
+- 데이터 변경 없음
+- GraphQL 실패 후 공개 HTML fallback
+- 기존 JSON 유지 또는 빈 데이터 생성
+- deploy workflow dispatch 실패
+- 그 밖의 workflow 실패
+
+Discord secret이 없거나 webhook 전송이 실패해도 갱신 workflow 자체는 실패하지 않습니다. 반면 원격 데이터 갱신이 `degraded` 상태이거나 deploy dispatch가 실패하면 workflow는 최종적으로 실패 처리합니다.
+
+## 7. 한계
 
 - 배포 또는 명령 실행 시점의 데이터이므로 GitHub 프로필처럼 완전한 실시간 표시는 아닙니다.
 - 공개 HTML fallback은 GitHub 마크업 변경의 영향을 받을 수 있습니다.
 - 토큰이 없으면 비공개 contribution이 공개 프로필 설정에 따라 누락될 수 있습니다.
 - 데이터 갱신 실패 시 사이트는 안정적으로 빌드되지만, 잔디가 오래된 데이터로 보일 수 있습니다.
 
-## 7. 변경 감지
+## 8. 변경 감지
 
 - `generatedAt`만 달라지고 contribution 데이터가 같으면 파일을 다시 쓰지 않습니다.
 - workflow는 `git diff --cached --quiet`으로 실제 변경 여부를 확인합니다.
 - 변경이 없으면 `No GitHub Activity changes.`를 출력하고 커밋 없이 종료합니다.
 
-## 8. 추후 개선안
+## 9. 추후 개선안
 
-- fallback이 반복될 때 GitHub Actions summary나 Slack 알림으로 확인 가능하게 합니다.
+- 반복 fallback의 빈도와 최근 성공 시점을 별도 상태 데이터로 관리합니다.
 - JSON 생성 결과를 PR diff로 확인할 수 있는 별도 maintenance workflow를 둡니다.

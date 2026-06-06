@@ -3,9 +3,8 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
 import { buildHomeTopicGroups } from "../utils/navigation";
+import ActivitySection from "../components/home/ActivitySection.astro";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
-import BlogGrass from "../components/home/BlogGrass.astro";
-import GitHubGrass from "../components/home/GitHubGrass.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
 import TopicIndex from "../components/home/TopicIndex.astro";
 
@@ -19,8 +18,7 @@ const homeTopicGroups = buildHomeTopicGroups(posts);
   minimalHome={true}
 >
   <ArchiveHero />
-  <BlogGrass posts={posts} />
-  <GitHubGrass username="guseoh" />
+  <ActivitySection posts={posts} username="guseoh" />
   <div class="home-content-grid">
     <TopicIndex groups={homeTopicGroups} />
     <LatestPosts posts={posts} />

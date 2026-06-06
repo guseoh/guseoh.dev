@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   addDateKeyDays,
@@ -36,35 +36,80 @@ const GRAPHQL_QUERY = `
   }
 `;
 
-try {
-  const data = TOKEN ? await fetchFromGraphQLWithFallback() : await fetchFromPublicHtml();
-  const changed = await writeContributionDataIfChanged(data);
+const refreshResult = await refreshContributionData();
+await writeActionOutputs(refreshResult);
 
-  if (changed) {
-    console.log(`Wrote GitHub contributions from ${data.source} to ${OUTPUT_PATH}`);
-  } else {
-    console.log(`GitHub contribution data is already up to date at ${OUTPUT_PATH}`);
-  }
-} catch (error) {
-  console.warn(`Could not fetch GitHub contributions: ${error.message}`);
+if (refreshResult.changed) {
+  console.log(`Wrote GitHub contributions from ${refreshResult.source} to ${OUTPUT_PATH}`);
+} else {
+  console.log(`GitHub contribution data is unchanged at ${OUTPUT_PATH}`);
+}
 
-  const existingData = await readExistingContributionData();
-  if (existingData) {
-    console.warn(`Keeping existing GitHub contribution data at ${OUTPUT_PATH}`);
-  } else {
+if (refreshResult.detail) {
+  console.warn(refreshResult.detail);
+}
+
+async function refreshContributionData() {
+  try {
+    const fetched = TOKEN
+      ? await fetchFromGraphQLWithFallback()
+      : {
+          data: await fetchFromPublicHtml(),
+          status: "success",
+          detail: "GH_CONTRIBUTIONS_TOKEN is not configured; public HTML data was used."
+        };
+    const changed = await writeContributionDataIfChanged(fetched.data);
+
+    return {
+      source: fetched.data.source,
+      status: fetched.status,
+      changed,
+      detail: fetched.detail ?? ""
+    };
+  } catch (error) {
+    const detail = `GitHub contribution refresh failed: ${error.message}`;
+    const existingData = await readExistingContributionData();
+
+    if (existingData) {
+      return {
+        source: "existing",
+        status: "degraded",
+        changed: false,
+        detail: `${detail} Existing JSON was preserved.`
+      };
+    }
+
     const fallback = buildEmptyData();
-    await writeContributionData(fallback);
-    console.warn(`Wrote empty GitHub contribution data to ${OUTPUT_PATH}`);
+    const changed = await writeContributionDataIfChanged(fallback);
+
+    return {
+      source: "empty",
+      status: "degraded",
+      changed,
+      detail: `${detail} Empty contribution data was written.`
+    };
   }
 }
 
 async function fetchFromGraphQLWithFallback() {
   try {
-    return await fetchFromGraphQL();
-  } catch (error) {
-    console.warn(`GitHub GraphQL fetch failed: ${error.message}`);
-
-    return fetchFromPublicHtml();
+    return {
+      data: await fetchFromGraphQL(),
+      status: "success",
+      detail: ""
+    };
+  } catch (graphqlError) {
+    try {
+      return {
+        data: await fetchFromPublicHtml(),
+        status: "fallback",
+        detail: `GitHub GraphQL failed; public HTML fallback was used: ${graphqlError.message}`
+      };
+    } catch (htmlError) {
+      throw new Error(
+        `GraphQL failed (${graphqlError.message}); public HTML failed (${htmlError.message})`
+      );
+    }
   }
 }
 
@@ -243,6 +288,22 @@ async function writeContributionDataIfChanged(data) {
   await writeContributionData(data);
 
   return true;
+}
+
+async function writeActionOutputs(result) {
+  if (!process.env.GITHUB_OUTPUT) {
+    return;
+  }
+
+  const detail = result.detail.replace(/[\r\n]+/g, " ").trim();
+  const outputs = [
+    `source=${result.source}`,
+    `status=${result.status}`,
+    `changed=${result.changed}`,
+    `detail=${detail}`
+  ];
+
+  await appendFile(process.env.GITHUB_OUTPUT, `${outputs.join("\n")}\n`, "utf8");
 }
 
 async function readExistingContributionData() {

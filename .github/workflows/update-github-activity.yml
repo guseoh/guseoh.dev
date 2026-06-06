@@ -33,6 +33,7 @@ jobs:
         run: npm ci
 
       - name: Fetch GitHub contributions
+        id: fetch_activity
         run: npm run github:contributions
         env:
           GH_CONTRIBUTIONS_TOKEN: ${{ secrets.GH_CONTRIBUTIONS_TOKEN }}
@@ -42,13 +43,16 @@ jobs:
         id: commit_activity
         shell: bash
         run: |
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+          echo "committed=false" >> "$GITHUB_OUTPUT"
+          echo "commit_hash=" >> "$GITHUB_OUTPUT"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data/github-contributions.json
 
           if git diff --cached --quiet; then
             echo "No GitHub Activity changes."
-            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -56,9 +60,67 @@ jobs:
           git pull --rebase origin main
           git push origin HEAD:main
           echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+          echo "commit_hash=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Deploy updated activity
+        id: deploy_activity
         if: steps.commit_activity.outputs.changed == 'true'
+        continue-on-error: true
         run: gh workflow run deploy.yml --ref main
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Write activity refresh summary
+        if: always()
+        shell: bash
+        env:
+          REFRESH_STATUS: ${{ steps.fetch_activity.outputs.status || 'unknown' }}
+          REFRESH_SOURCE: ${{ steps.fetch_activity.outputs.source || 'unknown' }}
+          REFRESH_DETAIL: ${{ steps.fetch_activity.outputs.detail }}
+          DATA_CHANGED: ${{ steps.commit_activity.outputs.changed || 'false' }}
+          COMMITTED: ${{ steps.commit_activity.outputs.committed || 'false' }}
+          COMMIT_HASH: ${{ steps.commit_activity.outputs.commit_hash }}
+          DEPLOY_OUTCOME: ${{ steps.deploy_activity.outcome || 'skipped' }}
+        run: |
+          {
+            echo "## GitHub Activity refresh"
+            echo
+            echo "- Time: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M:%S KST')"
+            echo "- Status: \`$REFRESH_STATUS\`"
+            echo "- Source: \`$REFRESH_SOURCE\`"
+            echo "- Data changed: \`$DATA_CHANGED\`"
+            echo "- Committed: \`$COMMITTED\`"
+            echo "- Commit: \`${COMMIT_HASH:-none}\`"
+            echo "- Deploy dispatch: \`$DEPLOY_OUTCOME\`"
+            if [ -n "$REFRESH_DETAIL" ]; then
+              echo "- Detail: $REFRESH_DETAIL"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Notify Discord
+        if: always()
+        continue-on-error: true
+        run: node scripts/notify-discord.mjs
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: main
+          REFRESH_STATUS: ${{ steps.fetch_activity.outputs.status || 'unknown' }}
+          REFRESH_SOURCE: ${{ steps.fetch_activity.outputs.source || 'unknown' }}
+          REFRESH_DETAIL: ${{ steps.fetch_activity.outputs.detail }}
+          DATA_CHANGED: ${{ steps.commit_activity.outputs.changed || 'false' }}
+          COMMITTED: ${{ steps.commit_activity.outputs.committed || 'false' }}
+          COMMIT_HASH: ${{ steps.commit_activity.outputs.commit_hash }}
+          DEPLOY_OUTCOME: ${{ steps.deploy_activity.outcome || 'skipped' }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Fail degraded refresh or deploy dispatch
+        if: >-
+          always() &&
+          (steps.fetch_activity.outputs.status == 'degraded' ||
+          steps.deploy_activity.outcome == 'failure')
+        run: |
+          echo "GitHub Activity refresh or deploy dispatch degraded."
+          exit 1

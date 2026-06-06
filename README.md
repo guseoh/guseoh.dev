@@ -136,6 +136,9 @@ GitHub Activity 잔디의 갱신 방식, 자동화 범위, fallback 정책은 `d
 - API와 공개 HTML fetch가 모두 실패하면 기존 JSON이 있을 때 기존 데이터를 유지합니다.
 - 기존 JSON도 없으면 빈 contribution 데이터를 생성해 빌드를 계속 진행합니다.
 - UI는 `empty` 데이터 출처일 때 fallback 안내 문구를 표시합니다.
+- `DISCORD_WEBHOOK_URL` repository secret을 설정하면 변경, 무변경, fallback, 갱신 장애, 배포 dispatch 실패 상태를 Discord로 알립니다.
+- Discord secret이 없거나 webhook 전송이 실패해도 workflow는 계속 진행하지만, 실제 데이터 갱신 장애와 배포 dispatch 실패는 workflow 실패로 표시합니다.
+- 갱신 결과의 데이터 출처와 상태는 매 실행마다 GitHub Actions Summary에 기록됩니다.
 
 ## 배포와 Smoke Test
 
@@ -196,6 +199,7 @@ public/
   robots.txt
 scripts/
   fetch-github-contributions.mjs
+  notify-discord.mjs
   smoke-test.mjs
 .github/workflows/
   deploy.yml
