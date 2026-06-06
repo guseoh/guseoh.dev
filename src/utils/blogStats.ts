@@ -1,4 +1,5 @@
 import type { CollectionEntry } from "astro:content";
+import { getKoreaDateKey } from "./koreaDate";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const ROLLING_DAY_COUNT = 365;
@@ -35,7 +36,7 @@ export function buildBlogActivityStats(
   posts: CollectionEntry<"blog">[],
   today = new Date()
 ): BlogActivityStats {
-  const todayUtc = startOfUtcDay(today);
+  const todayUtc = parseDateKey(getKoreaDateKey(today));
   const rangeStart = addUtcDays(todayUtc, -(ROLLING_DAY_COUNT - 1));
   const graphStart = getMondayStart(rangeStart);
   const graphEnd = addUtcDays(getMondayStart(todayUtc), 6);

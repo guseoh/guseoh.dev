@@ -6,7 +6,7 @@
 
 - 로컬에서는 `npm run github:contributions`를 직접 실행해야 갱신됩니다.
 - 배포에서는 `main` 브랜치 push 시 빌드 직전에 갱신을 시도합니다.
-- 별도 `Update GitHub Activity` workflow가 매일 21:00 UTC, 즉 다음 날 06:00 KST에 JSON을 갱신합니다.
+- 별도 `Update GitHub Activity` workflow가 매일 15:10 UTC, 즉 다음 날 00:10 KST에 JSON을 갱신합니다.
 - 같은 데이터면 파일을 다시 쓰지 않으며, 실제 변경이 있을 때만 자동 커밋과 push가 실행됩니다.
 - JSON이 변경되면 schedule workflow가 기존 `deploy.yml`을 명시적으로 dispatch해 정적 사이트도 다시 배포합니다.
 
@@ -26,7 +26,7 @@
 ## 3. 관련 파일
 
 - `.github/workflows/deploy.yml`: 배포 중 contribution 데이터를 갱신하는 자동 실행 지점입니다.
-- `.github/workflows/update-github-activity.yml`: 매일 06:00 KST 자동 갱신 및 수동 실행 지점입니다.
+- `.github/workflows/update-github-activity.yml`: 매일 00:10 KST 자동 갱신 및 수동 실행 지점입니다.
 - `package.json`: `github:contributions` 명령을 정의합니다.
 - `scripts/fetch-github-contributions.mjs`: GraphQL, 공개 HTML fallback, 빈 데이터 fallback을 처리합니다.
 - `public/data/github-contributions.json`: 빌드에서 사용하는 생성 데이터입니다.
@@ -37,7 +37,7 @@
 ## 4. 자동 갱신 범위
 
 - `main`에 push하면 GitHub Pages 배포 workflow가 실행되고, 빌드 전에 contribution JSON 갱신을 시도합니다.
-- 매일 21:00 UTC에 schedule workflow가 실행됩니다. 한국 시간으로는 다음 날 06:00입니다.
+- 매일 15:10 UTC에 schedule workflow가 실행됩니다. 한국 시간으로는 다음 날 00:10입니다.
 - Actions 탭에서 `Update GitHub Activity`를 선택해 `workflow_dispatch`로 수동 갱신할 수 있습니다.
 - schedule workflow가 JSON을 커밋한 뒤 기존 Pages 배포 workflow인 `deploy.yml`을 명시적으로 dispatch합니다.
 - GitHub Actions bot의 일반 push는 다른 workflow를 자동 실행하지 않으므로 이 명시적 dispatch 단계가 필요합니다.

@@ -51,82 +51,6 @@
   font-size: 1rem;
 }
 
-.portfolio-cta {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
-  gap: 1rem;
-  align-items: stretch;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card-bg);
-  box-shadow: 0 18px 34px -30px var(--shadow);
-  padding: 1rem;
-}
-
-.portfolio-cta__head {
-  min-width: 0;
-  display: grid;
-  align-content: start;
-  gap: 0.48rem;
-}
-
-.portfolio-cta__eyebrow,
-.portfolio-cta__card span {
-  color: var(--link);
-  font-size: 0.72rem;
-  font-weight: 850;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.portfolio-cta h2 {
-  font-size: 1.32rem;
-  line-height: 1.28;
-}
-
-.portfolio-cta__head p:last-child {
-  color: var(--muted-readable);
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.portfolio-cta__grid {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.72rem;
-}
-
-.portfolio-cta__card {
-  min-width: 0;
-  display: grid;
-  gap: 0.36rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 76%, var(--bg));
-  color: var(--muted-readable);
-  padding: 0.82rem;
-  text-decoration: none;
-}
-
-.portfolio-cta__card strong {
-  color: var(--heading);
-  font-size: 0.96rem;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-.portfolio-cta__card p {
-  font-size: 0.8rem;
-  line-height: 1.55;
-}
-
-.portfolio-cta__card:hover,
-.portfolio-cta__card:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 54%, var(--border));
-  background: var(--surface-hover);
-}
-
 .home-section {
   display: grid;
   gap: 0.82rem;
@@ -498,10 +422,6 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .portfolio-cta {
-    grid-template-columns: 1fr;
-  }
-
   .topic-index-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -538,10 +458,6 @@
 
   .activity-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .portfolio-cta__grid {
-    grid-template-columns: 1fr;
   }
 
   .home-section__head {

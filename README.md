@@ -128,7 +128,7 @@ GitHub Activity 잔디의 갱신 방식, 자동화 범위, fallback 정책은 `d
 
 `npm run github:contributions`는 GitHub GraphQL API 또는 공개 contribution HTML을 기반으로 `public/data/github-contributions.json`을 갱신합니다.
 
-- `.github/workflows/update-github-activity.yml`은 매일 21:00 UTC, 즉 다음 날 06:00 KST에 자동 실행됩니다.
+- `.github/workflows/update-github-activity.yml`은 매일 15:10 UTC, 즉 다음 날 00:10 KST에 자동 실행됩니다.
 - Actions 탭의 `Update GitHub Activity` workflow에서 `Run workflow`를 선택하면 수동 갱신할 수 있습니다.
 - `GH_CONTRIBUTIONS_TOKEN` secret이 있으면 GraphQL API를 우선 사용하며, secret이 없어도 공개 contribution HTML fallback으로 동작합니다.
 - 같은 날짜와 contribution 데이터가 이미 저장되어 있으면 JSON을 다시 쓰지 않고 자동 커밋도 생성하지 않습니다.

@@ -2,8 +2,8 @@ name: Update GitHub Activity
 
 on:
   schedule:
-    # Every day at 21:00 UTC, which is 06:00 KST on the following day.
-    - cron: "0 21 * * *"
+    # Every day at 15:10 UTC, which is 00:10 KST on the following day.
+    - cron: "10 15 * * *"
   workflow_dispatch:
 
 permissions:
