@@ -2,7 +2,6 @@ import type { CollectionEntry } from "astro:content";
 import { getKoreaDateKey } from "./koreaDate";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-const ROLLING_DAY_COUNT = 365;
 
 export const BLOG_GRASS_WEEKDAY_LABELS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
@@ -37,11 +36,11 @@ export function buildBlogActivityStats(
   today = new Date()
 ): BlogActivityStats {
   const todayUtc = parseDateKey(getKoreaDateKey(today));
-  const rangeStart = addUtcDays(todayUtc, -(ROLLING_DAY_COUNT - 1));
+  const currentYear = todayUtc.getUTCFullYear();
+  const rangeStart = parseDateKey(`${currentYear}-01-01`);
   const graphStart = getMondayStart(rangeStart);
   const graphEnd = addUtcDays(getMondayStart(todayUtc), 6);
   const activityDateCounts = buildActivityDateCounts(posts);
-  const currentYear = todayUtc.getUTCFullYear();
   const currentMonth = todayUtc.getUTCMonth();
 
   const weeks: BlogGrassWeek[] = [];
@@ -71,10 +70,16 @@ export function buildBlogActivityStats(
 
   return {
     totalPosts: posts.filter((post) => !post.data.draft).length,
-    yearActivities: sumCounts(activityDateCounts, (date) => date.getUTCFullYear() === currentYear),
+    yearActivities: sumCounts(
+      activityDateCounts,
+      (date) => date >= rangeStart && date <= todayUtc
+    ),
     monthActivities: sumCounts(
       activityDateCounts,
-      (date) => date.getUTCFullYear() === currentYear && date.getUTCMonth() === currentMonth
+      (date) =>
+        date >= rangeStart &&
+        date <= todayUtc &&
+        date.getUTCMonth() === currentMonth
     ),
     currentStreak: calculateCurrentStreak(activityDateCounts, todayUtc),
     longestStreak: calculateLongestStreak(activityDateCounts, todayUtc),

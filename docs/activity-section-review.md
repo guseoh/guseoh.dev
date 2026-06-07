@@ -77,7 +77,7 @@
 
 권장 정보 구조:
 
-- 공통 헤더: `Activity`, 최근 1년 범위
+- 공통 헤더: `Activity`, Asia/Seoul 기준 올해 1월 1일부터 오늘까지의 범위
 - 공통 요약: 전체 글, 이번 달 블로그 활동, 이번 달 GitHub contribution
 - 왼쪽: Blog Writing Activity heatmap, 현재/최장 streak
 - 오른쪽: GitHub Activity heatmap, 현재 streak, 프로필 링크
@@ -103,7 +103,7 @@
 
 Activity 통합 UI를 실제 홈 화면에 적용했다. `docs/images/activity-section-concept.png`는 구현 방향을 정할 때 사용한 참고 목업으로 유지한다.
 
-- 공통 Activity 헤더와 최근 1년 범위를 한 번만 표시한다.
+- 공통 Activity 헤더와 올해 1월 1일부터 오늘까지의 범위를 한 번만 표시한다.
 - Blog와 GitHub heatmap은 독립적으로 렌더링해 각 활동의 농도 의미를 보존한다.
 - 각 날짜 cell의 hover 설명과 스크린 리더용 레이블을 유지한다.
 - 좁은 화면에서는 패널을 세로로 쌓고 각 heatmap 영역에서만 가로 스크롤한다.

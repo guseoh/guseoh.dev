@@ -296,6 +296,11 @@
   box-shadow: inset 0 0 0 0.5px color-mix(in srgb, #ffffff 12%, transparent);
 }
 
+.grass-placeholder {
+  width: var(--grass-cell-size);
+  height: var(--grass-cell-size);
+}
+
 .grass-cell[data-level="1"] {
   background: var(--grass-level-1);
 }
@@ -315,10 +320,6 @@
 .grass-cell--today {
   outline: 2px solid color-mix(in srgb, var(--link) 72%, transparent);
   outline-offset: 1px;
-}
-
-.grass-cell--muted {
-  opacity: 0.42;
 }
 
 .grass-legend {

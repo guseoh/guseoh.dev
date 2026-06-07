@@ -49,12 +49,12 @@ export interface GitHubActivityStats {
 
 export function buildGitHubActivityStats(data: GitHubContributionData, today = new Date()) {
   const todayUtc = parseDateKey(getKoreaDateKey(today));
-  const rangeStart = startOfUtcDay(data.from);
-  const rangeEnd = startOfUtcDay(data.to);
+  const currentYear = todayUtc.getUTCFullYear();
+  const rangeStart = parseDateKey(`${currentYear}-01-01`);
+  const rangeEnd = todayUtc;
   const graphStart = getMondayStart(rangeStart);
   const graphEnd = addUtcDays(getMondayStart(rangeEnd), 6);
   const contributionMap = buildContributionMap(data.days);
-  const currentYear = todayUtc.getUTCFullYear();
   const currentMonth = todayUtc.getUTCMonth();
   const weeks: GitHubGrassWeek[] = [];
 
@@ -84,10 +84,16 @@ export function buildGitHubActivityStats(data: GitHubContributionData, today = n
 
   return {
     totalContributions: data.totalContributions,
-    yearContributions: sumContributions(contributionMap, (date) => date.getUTCFullYear() === currentYear),
+    yearContributions: sumContributions(
+      contributionMap,
+      (date) => date >= rangeStart && date <= rangeEnd
+    ),
     monthContributions: sumContributions(
       contributionMap,
-      (date) => date.getUTCFullYear() === currentYear && date.getUTCMonth() === currentMonth
+      (date) =>
+        date >= rangeStart &&
+        date <= rangeEnd &&
+        date.getUTCMonth() === currentMonth
     ),
     currentStreak: calculateCurrentStreak(contributionMap, todayUtc),
     longestStreak: calculateLongestStreak(contributionMap, rangeEnd),

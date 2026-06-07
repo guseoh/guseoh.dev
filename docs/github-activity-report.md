@@ -19,7 +19,7 @@
 4. 토큰이 없거나 GraphQL 요청이 실패하면 GitHub 공개 contribution HTML을 fallback으로 파싱합니다.
 5. 결과는 `public/data/github-contributions.json`에 저장됩니다.
 6. `src/components/home/ActivitySection.astro`가 이 JSON을 import합니다.
-7. `src/utils/githubStats.ts`가 최근 1년 주간 배열, 올해 contribution 수, 연속 contribution 정보를 계산합니다.
+7. `src/utils/githubStats.ts`가 Asia/Seoul 기준 올해 주간 배열, 올해 contribution 수, 연속 contribution 정보를 계산합니다.
 8. Astro 빌드 결과에 정적 HTML/CSS/JSON 기반 잔디가 포함됩니다.
 9. `.github/workflows/update-github-activity.yml`은 매일 갱신 결과에 실제 차이가 있을 때만 JSON을 커밋합니다.
 10. 자동 커밋 후 `deploy.yml`을 `workflow_dispatch`로 실행해 최신 JSON을 사이트에 반영합니다.
