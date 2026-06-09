@@ -1,5 +1,5 @@
 ﻿import { defineConfig } from "astro/config";
-import { remarkAlert } from "remark-github-blockquote-alert";
+import { remarkCallout } from "./src/plugins/remark-callout.mjs";
 
 function remarkDemoteContentH1() {
   return (tree) => {
@@ -22,7 +22,7 @@ function remarkDemoteContentH1() {
 export default defineConfig({
   site: "https://guseoh.github.io",
   markdown: {
-    remarkPlugins: [remarkDemoteContentH1, remarkAlert],
+    remarkPlugins: [remarkDemoteContentH1, remarkCallout],
     syntaxHighlight: {
       type: "shiki",
       excludeLangs: ["math"]
