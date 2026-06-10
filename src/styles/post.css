@@ -183,6 +183,15 @@ html.left-sidebar-collapsed .post-view--single > .post,
   font-weight: 600;
 }
 
+html[data-theme="dark"] .post :where(p, li, td, th, blockquote) > :where(strong, b):not(:has(code)),
+html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
+  border-radius: 4px;
+  background: var(--strong-bg);
+  box-shadow: 0 0 0 1px var(--strong-outline);
+  box-decoration-break: clone;
+  padding: 0.02em 0.16em;
+}
+
 .post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
   font-weight: var(--post-body-weight);
 }

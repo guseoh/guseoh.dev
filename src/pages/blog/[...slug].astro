@@ -8,7 +8,7 @@ import PostToc from "../../components/post/PostToc.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { getAdjacentPosts, getSeriesPosts } from "../../utils/postNavigation";
 import { buildPostTocHeadings } from "../../utils/postToc";
-import { getSeriesContinuationMessage } from "../../utils/series";
+import { getSeriesContinuationMessage, getSeriesMetadata } from "../../utils/series";
 import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
   DETAIL_TAG_LIMIT,
@@ -40,6 +40,8 @@ const description = getPostDescription(post);
 const visibleTags = post.data.tags.slice(0, DETAIL_TAG_LIMIT);
 const hiddenTagCount = Math.max(0, post.data.tags.length - visibleTags.length);
 const seriesName = post.data.series?.trim();
+const seriesMetadata = seriesName ? getSeriesMetadata(seriesName) : undefined;
+const seriesTitle = seriesMetadata?.title ?? seriesName;
 const seriesPosts = getSeriesPosts(allPosts, seriesName);
 const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
 const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
@@ -96,10 +98,12 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
       <Content />
 
       <footer class="post-footer">
-        {seriesName && (
+        {seriesName && seriesTitle && (
           <section class="post-series" aria-label="Post series">
             <p class="post-series__label">Series</p>
-            <h2>{seriesName}</h2>
+            <h2>
+              {seriesMetadata ? <a href={`/series/${seriesMetadata.id}/`}>{seriesTitle}</a> : seriesTitle}
+            </h2>
             {seriesPosts.length > 1 ? (
               <ol class="post-series__list">
                 {seriesPosts.map((seriesPost) => (

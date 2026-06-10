@@ -8,6 +8,8 @@ tags:
   - Network
   - Web
   - HTTP
+book: "network-and-web"
+chapter: 1
 heroImage: "/og-image.svg"
 draft: false
 ---

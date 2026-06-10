@@ -3,7 +3,7 @@ import homeTopicsData from "../data/home-topics.json";
 import navigationData from "../data/navigation.json";
 import type { CategoryTreeGroup } from "./categories";
 import { getCategorySlug } from "./categories";
-import { normalizeSeriesName } from "./series";
+import { resolveSeriesId } from "./series";
 import { normalizeTag } from "./tags";
 
 export type NavigationItemType = "category" | "tag" | "series" | "url" | "search";
@@ -121,7 +121,7 @@ function filterPostsByNavigationItem(posts: CollectionEntry<"blog">[], item: Nav
 
   if (item.type === "series") {
     return posts.filter((post) =>
-      post.data.series ? normalizeSeriesName(post.data.series) === item.slug : false
+      post.data.series ? resolveSeriesId(post.data.series) === item.slug : false
     );
   }
 

@@ -11,9 +11,9 @@ export async function getStaticPaths() {
   const seriesSummary = buildSeriesSummary(posts);
 
   return seriesSummary.map((series) => ({
-    params: { series: series.slug },
+    params: { series: series.id },
     props: {
-      seriesName: series.name,
+      seriesName: series.title,
       description: series.description,
       status: series.status,
       category: series.category,

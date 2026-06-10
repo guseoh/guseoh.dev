@@ -28,13 +28,13 @@ const seriesSummary = buildSeriesSummary(posts);
               <li>
                 <article class="library-series-card">
                   <div class="library-series-card__cover">
-                    <span class="library-series-card__mark" aria-hidden="true">{series.name.replace(/\s+/g, "").slice(0, 2)}</span>
+                    <span class="library-series-card__mark" aria-hidden="true">{series.title}</span>
                     <span class="library-series-card__category">{series.category}</span>
                   </div>
 
                   <div class="library-series-card__body">
                     <p class="library-hero__eyebrow">Series</p>
-                    <h2><a href={`/series/${series.slug}/`}>{series.name}</a></h2>
+                    <h2><a href={`/series/${series.id}/`}>{series.title}</a></h2>
                     <p class="library-series-card__description">{series.description}</p>
                     <div class="library-series-card__stats">
                       <span>{series.count} posts</span>
@@ -49,7 +49,7 @@ const seriesSummary = buildSeriesSummary(posts);
 
                     <div class="library-series-card__footer">
                       <span>{series.status}</span>
-                      <a href={`/series/${series.slug}/`}>시리즈 전체 보기</a>
+                      <a href={`/series/${series.id}/`}>시리즈 전체 보기</a>
                     </div>
                   </div>
                 </article>

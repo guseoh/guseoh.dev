@@ -32,9 +32,9 @@ export async function GET() {
     : [];
   const postPaths = posts.map((post) => `/blog/${post.id}/`);
   const categoryPaths = categories.map((category) => `/categories/${category.slug}/`);
-  const bookPaths = books.map((book) => `/books/${book.slug}/`);
+  const bookPaths = books.map((book) => `/books/${book.id}/`);
   const tagPaths = tags.map((tag) => `/tags/${tag.tag}/`);
-  const seriesPaths = series.map((entry) => `/series/${entry.slug}/`);
+  const seriesPaths = series.map((entry) => `/series/${entry.id}/`);
   const today = new Date().toISOString().slice(0, 10);
 
   const urls = [...staticPaths, ...pagePaths, ...postPaths, ...bookPaths, ...categoryPaths, ...tagPaths, ...seriesPaths]

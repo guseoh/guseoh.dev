@@ -5,8 +5,9 @@ date: 2026-06-04
 updated: 2026-06-04
 category: Board
 tags: ["Spring", "Project"]
-series: "Thymeleaf 게시판을 React로 전환"
-seriesOrder: 1
+book: "backend-engineering"
+series: "thymeleaf-게시판을-react로-전환"
+chapter: 2
 draft: false
 ---
 

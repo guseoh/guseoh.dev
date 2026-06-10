@@ -2,7 +2,7 @@
   color-scheme: light;
   --font-ui: Inter, Pretendard, "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-heading: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --font-prose: Batang, "KoPub Batang", "Noto Serif KR", "Noto Serif", serif;
+  --font-prose: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   --bg: #f7f9fc;
   --bg-deep: #eef3f8;
@@ -13,6 +13,7 @@
   --heading: #111923;
   --strong-text: #0f172a;
   --strong-bg: transparent;
+  --strong-outline: transparent;
   --muted: #667085;
   --muted-readable: #4e5969;
   --accent: #0a7185;
@@ -68,7 +69,8 @@ html[data-theme="dark"] {
   --ink: #e8e8e8;
   --heading: #f1f1f1;
   --strong-text: #f4f4f4;
-  --strong-bg: transparent;
+  --strong-bg: rgba(255, 255, 255, 0.045);
+  --strong-outline: rgba(255, 255, 255, 0.18);
   --muted: #969696;
   --muted-readable: #b8b8b8;
   --accent: #c7c7c7;

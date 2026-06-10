@@ -16,6 +16,8 @@ Java/Spring 백엔드 개발자 오지훈의 GitHub Pages 포트폴리오 블로
 - 홈: 블로그 활동 잔디, GitHub contributions, 대표 프로젝트 CTA, 최근 글, 주요 카테고리
 - 글 목록: 페이지네이션, 그리드/리스트 보기 전환
 - 글 상세: 메타데이터, 태그, TOC, 코드블록 언어 라벨, Copy 버튼, 이전/다음 글
+- Books: 사용자가 지정한 Book id 기준의 책장형 목록과 chapter 상세
+- Series: metadata의 표시 제목을 사용하는 연재 목록과 읽기 순서
 - 검색: `/search-index.json` 기반 검색, 카테고리/태그 필터, 결과 수 표시
 - SEO: canonical, Open Graph, Twitter Card, RSS, 수동 sitemap
 - UX: 라이트/다크 모드, 사이드바 접힘 상태 저장, 모바일 대응
@@ -54,8 +56,9 @@ date: 2026-05-25
 updated: 2026-05-25
 category: Board
 tags: ["Board", "Spring Boot", "JPA", "QueryDSL", "Performance"]
-series: "Board 프로젝트 성능 개선"
-seriesOrder: 2
+book: "backend-engineering"
+series: "board-프로젝트-성능-개선"
+chapter: 2
 heroImage: "/og-image.svg"
 draft: true
 ---
@@ -64,6 +67,11 @@ draft: true
 - `title`은 상세 글 페이지의 유일한 `h1`로 렌더링합니다.
 - 본문 heading은 SEO와 접근성을 위해 `##`부터 시작합니다.
 - `description`은 목록, RSS, 검색 인덱스, SEO 설명에 사용하므로 문제와 개선 결과가 드러나게 작성합니다.
+- `date`는 최초 작성일, `updated`는 마지막 수정일입니다.
+- `category`는 글 분류, `tags`는 검색과 필터용 키워드입니다.
+- `book`은 `src/data/books.json`에 등록된 Book `id`입니다.
+- `series`는 `src/data/series.json`에 등록된 Series `id`입니다.
+- `chapter`는 Book 또는 Series 내부 읽기 순서입니다.
 - `draft: true`인 글은 목록, RSS, sitemap, 검색 인덱스, 상세 페이지 생성에서 제외됩니다.
 
 ### 새 글 작성 순서
@@ -71,10 +79,26 @@ draft: true
 1. `src/content/blog/_template.md`를 복사해 글 성격에 맞는 폴더와 파일명으로 저장합니다.
 2. `category`는 글의 큰 소속 하나만 선택합니다.
 3. `tags`는 기술, 주제, 글 성격을 나타내는 값 3~7개 정도를 작성합니다.
-4. 연재 글이면 `series`, `seriesOrder`를 작성하고 단독 글이면 해당 필드를 삭제합니다.
-5. 본문에서는 `#`을 사용하지 않고 `##`부터 heading을 시작합니다.
-6. 작성 중에는 `draft: true`를 유지하고 발행 전에 false로 변경하거나 필드를 삭제합니다.
-7. 발행 전 `npm run check`와 `npm run build`를 실행합니다.
+4. Book에 포함할 글이면 `book`, 연재 글이면 `series`를 metadata의 `id`로 작성합니다.
+5. Book 또는 Series 내 순서가 필요하면 `chapter`를 작성합니다.
+6. 본문에서는 `#`을 사용하지 않고 `##`부터 heading을 시작합니다.
+7. 작성 중에는 `draft: true`를 유지하고 발행 전에 false로 변경하거나 필드를 삭제합니다.
+8. 발행 전 `npm run check`와 `npm run build`를 실행합니다.
+
+## Category / Book / Series 차이
+
+- Category: 게시글의 주제 분류입니다. 글 하나에 하나의 category를 사용합니다.
+- Book: 사용자가 직접 지정하는 큰 학습 묶음입니다. category와 독립적입니다.
+- Series: 순서대로 이어 읽는 연재 묶음입니다. Book 포함 여부와 독립적입니다.
+- 같은 category의 글을 서로 다른 Book에 넣을 수 있고, 서로 다른 category의 글을 하나의 Book으로 묶을 수도 있습니다.
+- `book`이 없는 글은 `/books/`에서 제외하며 별도의 미분류 Book을 만들지 않습니다.
+
+### Book 제목과 구성 관리
+
+- Book id, 화면 제목, 설명, 주제, 커버 문구, 정렬 순서는 `src/data/books.json`에서 관리합니다.
+- 화면 제목을 바꾸려면 해당 항목의 `title`을 수정합니다.
+- 게시글의 `book`에는 화면 제목이 아니라 해당 항목의 `id`를 작성합니다.
+- Book 글 수와 최근 업데이트 날짜는 동일한 `book` id를 가진 글을 기준으로 자동 계산합니다.
 
 ## 분류 운영 규칙
 
@@ -93,8 +117,10 @@ draft: true
 
 ## 시리즈 운영 규칙
 
-- 글 frontmatter의 `series`와 `seriesOrder`는 글 연결 순서를 담당합니다.
+- 글 frontmatter의 `series`에는 `src/data/series.json`의 `id`를 작성합니다.
 - 시리즈 제목, 설명, 노출 순서, 상태, featured 여부는 `src/data/series.json`에서 관리합니다.
+- 화면 제목을 바꾸려면 해당 항목의 `title`을 수정합니다. 카드와 상세 페이지는 제목을 자동 축약하지 않습니다.
+- 시리즈 읽기 순서는 `chapter`를 우선 사용합니다. 기존 `seriesOrder`도 호환을 위해 schema에서 허용하지만 새 글에는 사용하지 않습니다.
 - 상태 값은 `planned`, `ongoing`, `completed` 중 하나를 사용합니다.
 - `/series/`는 전체 시리즈 탐색, `/series/[series]/`는 개별 시리즈 글 목록 역할을 합니다.
 
@@ -156,6 +182,7 @@ Smoke test 기본 확인 URL:
 
 - `/`
 - `/blog/`
+- `/books/`
 - `/categories/`
 - `/tags/`
 - `/series/`
@@ -170,6 +197,8 @@ Smoke test 기본 확인 URL:
 - `/`
 - `/blog/`
 - `/blog/board/react01/`
+- `/books/`
+- `/books/backend-engineering/`
 - `/rss.xml`
 - `/sitemap.xml`
 - `/search/`
@@ -177,6 +206,7 @@ Smoke test 기본 확인 URL:
 - `/categories/`
 - `/tags/`
 - `/series/`
+- 개별 Book 페이지
 - 개별 카테고리, 태그, 시리즈 페이지
 
 ## 폴더 구조
@@ -188,11 +218,11 @@ src/
     layout/     Header, Sidebar, ThemeToggle, client scripts
     post/       상세 글 TOC와 코드블록 enhancement
   content/blog/ Markdown 글 데이터
-  data/         navigation, series, tags 운영 메타데이터
+  data/         books, navigation, series, tags 운영 메타데이터
   layouts/      BaseLayout
   pages/        Astro 라우트
   styles/       base, theme, layout, components, home, post CSS
-  utils/        posts, categories, tags, series, search 유틸
+  utils/        posts, books, categories, tags, series, search 유틸
 public/
   data/github-contributions.json
   og-image.svg

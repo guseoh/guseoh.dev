@@ -5,7 +5,7 @@ import { getCategoryName } from "./categories";
 export type SeriesStatus = "planned" | "ongoing" | "completed";
 
 export type SeriesMetadata = {
-  slug: string;
+  id: string;
   title: string;
   description: string;
   order: number;
@@ -14,8 +14,8 @@ export type SeriesMetadata = {
 };
 
 export type SeriesSummary = {
-  slug: string;
-  name: string;
+  id: string;
+  title: string;
   description: string;
   order: number;
   status: SeriesStatus;
@@ -26,7 +26,8 @@ export type SeriesSummary = {
   posts: CollectionEntry<"blog">[];
 };
 
-const SERIES_METADATA = new Map((seriesMetadata as SeriesMetadata[]).map((metadata) => [metadata.slug, metadata]));
+const SERIES = seriesMetadata as SeriesMetadata[];
+const SERIES_BY_ID = new Map(SERIES.map((metadata) => [metadata.id, metadata]));
 
 function getPostActivityDate(post: CollectionEntry<"blog">) {
   return post.data.updated ?? post.data.date;
@@ -52,9 +53,19 @@ export function normalizeSeriesName(seriesName: string) {
     .replace(/^-+|-+$/g, "");
 }
 
+const SERIES_BY_LEGACY_NAME = new Map(SERIES.map((metadata) => [normalizeSeriesName(metadata.title), metadata]));
+
+export function getSeriesMetadata(seriesValue: string): SeriesMetadata | undefined {
+  const value = seriesValue.trim();
+  return SERIES_BY_ID.get(value) ?? SERIES_BY_LEGACY_NAME.get(normalizeSeriesName(value));
+}
+
+export function resolveSeriesId(seriesValue: string) {
+  return getSeriesMetadata(seriesValue)?.id ?? normalizeSeriesName(seriesValue);
+}
+
 export function getSeriesContinuationMessage(seriesName: string) {
-  const normalizedName = normalizeSeriesName(seriesName);
-  const metadata = SERIES_METADATA.get(normalizedName);
+  const metadata = getSeriesMetadata(seriesName);
 
   if (metadata) {
     return `${metadata.description} 다음 글이 발행되면 이 시리즈에 이어서 연결됩니다.`;
@@ -63,20 +74,16 @@ export function getSeriesContinuationMessage(seriesName: string) {
   return `다음 ${seriesName} 기록이 발행되면 이 시리즈 목록에 이어서 연결됩니다.`;
 }
 
-export function getSeriesMetadata(seriesName: string): SeriesMetadata | undefined {
-  return SERIES_METADATA.get(normalizeSeriesName(seriesName));
-}
-
 export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSummary[] {
   const seriesMap = new Map<string, SeriesSummary>();
 
   for (const post of posts) {
-    const name = post.data.series?.trim();
-    if (!name) continue;
+    const seriesValue = post.data.series?.trim();
+    if (!seriesValue) continue;
 
-    const slug = normalizeSeriesName(name);
-    const metadata = SERIES_METADATA.get(slug);
-    const entry = seriesMap.get(slug);
+    const metadata = getSeriesMetadata(seriesValue);
+    const id = metadata?.id ?? normalizeSeriesName(seriesValue);
+    const entry = seriesMap.get(id);
 
     if (entry) {
       entry.posts.push(post);
@@ -87,10 +94,10 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
       continue;
     }
 
-    seriesMap.set(slug, {
-      slug,
-      name: metadata?.title ?? name,
-      description: metadata?.description ?? `${name} 시리즈 글을 모아둔 목록입니다.`,
+    seriesMap.set(id, {
+      id,
+      title: metadata?.title ?? seriesValue,
+      description: metadata?.description ?? `${seriesValue} 시리즈 글을 모아둔 목록입니다.`,
       order: metadata?.order ?? Number.MAX_SAFE_INTEGER,
       status: metadata?.status ?? "ongoing",
       featured: metadata?.featured ?? false,
@@ -106,8 +113,8 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
       ...series,
       category: getRepresentativeCategory(series.posts),
       posts: [...series.posts].sort((a, b) => {
-        const orderA = a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
-        const orderB = b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+        const orderA = a.data.chapter ?? a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.data.chapter ?? b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
 
         if (orderA !== orderB) return orderA - orderB;
         return b.data.date.valueOf() - a.data.date.valueOf();
@@ -119,6 +126,6 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
         return b.latestDate.valueOf() - a.latestDate.valueOf();
       }
 
-      return a.name.localeCompare(b.name, "ko");
+      return a.title.localeCompare(b.title, "ko");
     });
 }

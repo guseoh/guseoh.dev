@@ -23,7 +23,7 @@ const books = buildBookSummaries(posts);
         <ul class="book-grid">
           {books.map((book) => (
             <li>
-              <a class:list={["book-card", `book-card--${book.tone}`]} href={`/books/${book.slug}/`}>
+              <a class:list={["book-card", `book-card--${book.tone}`]} href={`/books/${book.id}/`}>
                 <span class="book-card__cover" aria-hidden="true">
                   <span class="book-card__cover-kicker">devjune.dev</span>
                   <strong>{book.coverLabel}</strong>
