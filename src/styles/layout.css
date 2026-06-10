@@ -93,7 +93,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--muted-readable);
@@ -196,7 +196,7 @@ html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal) .site-conten
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
@@ -281,7 +281,7 @@ html.left-sidebar-collapsed .site-sidebar,
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--muted-readable);
@@ -307,7 +307,7 @@ html.left-sidebar-collapsed .site-sidebar,
   height: 2.15rem;
   display: none;
   place-items: center;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
@@ -394,7 +394,7 @@ html.left-sidebar-collapsed .site-sidebar,
 .sidebar-search input,
 .sidebar-search button {
   min-height: 2.62rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--ink);
@@ -429,7 +429,7 @@ html.left-sidebar-collapsed .site-sidebar,
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--muted-readable);

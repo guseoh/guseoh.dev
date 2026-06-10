@@ -318,7 +318,7 @@
 }
 
 .grass-cell--today {
-  outline: 2px solid color-mix(in srgb, var(--link) 72%, transparent);
+  outline: 2px solid var(--grass-level-4);
   outline-offset: 1px;
 }
 

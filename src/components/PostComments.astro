@@ -9,15 +9,55 @@
       const target = document.getElementById("utterances-comments");
       if (!target) return;
 
-      const script = document.createElement("script");
-      script.src = "https://utteranc.es/client.js";
-      script.setAttribute("repo", "guseoh/guseoh.github.io");
-      script.setAttribute("issue-term", "pathname");
-      script.setAttribute("label", "comment");
-      script.setAttribute("theme", "github-light");
-      script.setAttribute("crossorigin", "anonymous");
-      script.async = true;
-      target.append(script);
+      const getUtterancesTheme = () =>
+        document.documentElement.getAttribute("data-theme") === "dark" ? "github-dark" : "github-light";
+
+      const syncTheme = () => {
+        const iframe = target.querySelector("iframe.utterances-frame");
+        if (!(iframe instanceof HTMLIFrameElement) || !iframe.contentWindow) return;
+
+        iframe.contentWindow.postMessage(
+          { type: "set-theme", theme: getUtterancesTheme() },
+          "https://utteranc.es"
+        );
+      };
+
+      const themeObserver = new MutationObserver(syncTheme);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"]
+      });
+
+      const loadComments = () => {
+        if (target.dataset.loaded === "true") return;
+        target.dataset.loaded = "true";
+
+        const script = document.createElement("script");
+        script.src = "https://utteranc.es/client.js";
+        script.setAttribute("repo", "guseoh/guseoh.github.io");
+        script.setAttribute("issue-term", "pathname");
+        script.setAttribute("label", "comment");
+        script.setAttribute("theme", getUtterancesTheme());
+        script.setAttribute("crossorigin", "anonymous");
+        script.addEventListener("load", () => window.setTimeout(syncTheme, 0));
+        script.async = true;
+        target.append(script);
+      };
+
+      if ("IntersectionObserver" in window) {
+        const visibilityObserver = new IntersectionObserver(
+          (entries) => {
+            if (!entries.some((entry) => entry.isIntersecting)) return;
+            visibilityObserver.disconnect();
+            loadComments();
+          },
+          { rootMargin: "400px 0px" }
+        );
+
+        visibilityObserver.observe(target);
+      } else {
+        loadComments();
+      }
     })();
   </script>
 </section>

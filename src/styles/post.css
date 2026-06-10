@@ -68,9 +68,8 @@ html.left-sidebar-collapsed .post-view--single > .post,
 
 .post {
   --post-content-width: 58rem;
-  --post-content-font: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --post-body-weight: 500;
-  --post-heading-weight: 780;
+  --post-body-weight: 400;
+  --post-heading-weight: 700;
   width: 100%;
   min-width: 0;
   border: 1px solid var(--border);
@@ -98,9 +97,13 @@ html.left-sidebar-collapsed .post-view--single > .post,
 }
 
 .post__header h1,
+.post > :where(h1, h2, h3, h4) {
+  font-family: var(--font-heading);
+}
+
 .post__description,
-.post > :where(h1, h2, h3, h4, p, ul, ol, blockquote, .markdown-alert, table, figure) {
-  font-family: var(--post-content-font);
+.post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
+  font-family: var(--font-prose);
 }
 
 .post__description {
@@ -177,14 +180,7 @@ html.left-sidebar-collapsed .post-view--single > .post,
 .post :where(p, li, td, th, blockquote) > :where(strong, b),
 .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
   color: var(--strong-text);
-  font-weight: 800;
-}
-
-html[data-theme="dark"] .post :where(p, li, td, th, blockquote) > :where(strong, b),
-html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
-  border-radius: 4px;
-  background: var(--strong-bg);
-  padding: 0.02em 0.16em;
+  font-weight: 600;
 }
 
 .post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
@@ -192,11 +188,11 @@ html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b
 }
 
 .post > :where(p, ul, ol, blockquote, .markdown-alert) {
-  line-height: 1.72;
+  line-height: 1.8;
 }
 
 .post > :where(ul, ol) :where(li) {
-  line-height: 1.72;
+  line-height: 1.8;
 }
 
 .post > table :where(td) {
@@ -294,7 +290,7 @@ html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b
   border-radius: 6px;
   background: var(--code-inline-bg);
   color: var(--code-inline-text, var(--heading));
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--font-mono);
   font-size: 0.92em;
   font-weight: 500;
   padding: 0.08rem 0.3rem;
@@ -645,7 +641,8 @@ html[data-theme="dark"] .astro-code span {
 }
 
 .comments-wrap {
-  margin-top: 1.5rem;
+  width: min(100%, 58rem);
+  margin: 1.5rem auto 0;
   border-top: 1px solid var(--border);
   padding-top: 1.05rem;
 }
@@ -663,6 +660,10 @@ html[data-theme="dark"] .astro-code span {
 .comments-wrap__public {
   margin-top: 0.72rem;
   padding: 0.65rem;
+}
+
+.comments-wrap__public .utterances {
+  max-width: none;
 }
 
 @media (max-width: 1439px) {

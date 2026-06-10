@@ -1,5 +1,6 @@
 import type { CollectionEntry } from "astro:content";
 import seriesMetadata from "../data/series.json";
+import { getCategoryName } from "./categories";
 
 export type SeriesStatus = "planned" | "ongoing" | "completed";
 
@@ -21,10 +22,27 @@ export type SeriesSummary = {
   featured: boolean;
   count: number;
   latestDate: Date;
+  category: string;
   posts: CollectionEntry<"blog">[];
 };
 
 const SERIES_METADATA = new Map((seriesMetadata as SeriesMetadata[]).map((metadata) => [metadata.slug, metadata]));
+
+function getPostActivityDate(post: CollectionEntry<"blog">) {
+  return post.data.updated ?? post.data.date;
+}
+
+function getRepresentativeCategory(posts: CollectionEntry<"blog">[]) {
+  const counts = new Map<string, number>();
+
+  for (const post of posts) {
+    const category = getCategoryName(post);
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"))[0]?.[0] ?? "Uncategorized";
+}
 
 export function normalizeSeriesName(seriesName: string) {
   return seriesName
@@ -63,8 +81,8 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
     if (entry) {
       entry.posts.push(post);
       entry.count += 1;
-      if (post.data.date > entry.latestDate) {
-        entry.latestDate = post.data.date;
+      if (getPostActivityDate(post) > entry.latestDate) {
+        entry.latestDate = getPostActivityDate(post);
       }
       continue;
     }
@@ -77,7 +95,8 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
       status: metadata?.status ?? "ongoing",
       featured: metadata?.featured ?? false,
       count: 1,
-      latestDate: post.data.date,
+      latestDate: getPostActivityDate(post),
+      category: getCategoryName(post),
       posts: [post]
     });
   }
@@ -85,6 +104,7 @@ export function buildSeriesSummary(posts: CollectionEntry<"blog">[]): SeriesSumm
   return Array.from(seriesMap.values())
     .map((series) => ({
       ...series,
+      category: getRepresentativeCategory(series.posts),
       posts: [...series.posts].sort((a, b) => {
         const orderA = a.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;
         const orderB = b.data.seriesOrder ?? Number.MAX_SAFE_INTEGER;

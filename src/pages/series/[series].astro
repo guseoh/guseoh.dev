@@ -2,9 +2,9 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostCard from "../../components/PostCard.astro";
+import { getCategoryName } from "../../utils/categories";
 import { buildSeriesSummary } from "../../utils/series";
-import { SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
+import { formatPostDate, getPostDescription, SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
 
 export async function getStaticPaths() {
   const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
@@ -16,31 +16,73 @@ export async function getStaticPaths() {
       seriesName: series.name,
       description: series.description,
       status: series.status,
+      category: series.category,
+      latestDate: series.latestDate,
       posts: series.posts
     }
   }));
 }
 
-const { seriesName, description, status, posts } = Astro.props as {
+const { seriesName, description, status, category, latestDate, posts } = Astro.props as {
   seriesName: string;
   description: string;
   status: string;
+  category: string;
+  latestDate: Date;
   posts: CollectionEntry<"blog">[];
 };
 ---
 
 <BaseLayout title={`devjune.dev | ${seriesName}`} description={`${description} - ${SITE_DESCRIPTION}`}>
-  <section class="hero">
-    <h1>{seriesName}</h1>
-    <p>{description}</p>
-    <p class="series-page-meta">{status} · {posts.length}개의 글이 이 시리즈에 연결되어 있습니다.</p>
-  </section>
+  <div class="library-page">
+    <section class="hero library-hero">
+      <p class="library-hero__eyebrow">Series · {category}</p>
+      <h1>{seriesName}</h1>
+      <p>{description}</p>
+      <dl class="library-summary">
+        <div>
+          <dt>Status</dt>
+          <dd>{status}</dd>
+        </div>
+        <div>
+          <dt>Posts</dt>
+          <dd>{posts.length}</dd>
+        </div>
+        <div>
+          <dt>Updated</dt>
+          <dd>{formatPostDate(latestDate)}</dd>
+        </div>
+      </dl>
+    </section>
 
-  <ul class="post-list" style="margin-top: 1rem;">
-    {posts.map((post) => (
-      <li>
-        <PostCard post={post} />
-      </li>
-    ))}
-  </ul>
+    <section class="chapter-section" aria-labelledby="series-posts-title">
+      <div class="chapter-section__head">
+        <div>
+          <p class="library-hero__eyebrow">Reading order</p>
+          <h2 id="series-posts-title">Posts</h2>
+        </div>
+        <span>{posts.length}개의 글</span>
+      </div>
+
+      <ol class="chapter-list">
+        {posts.map((post, index) => (
+          <li>
+            <a href={`/blog/${post.id}/`}>
+              <span class="chapter-list__number">{String(index + 1).padStart(2, "0")}</span>
+              <span class="chapter-list__content">
+                <strong>{post.data.title}</strong>
+                <span>{getPostDescription(post)}</span>
+              </span>
+              <span class="chapter-list__meta">
+                <span>{getCategoryName(post)}</span>
+                <time datetime={(post.data.updated ?? post.data.date).toISOString()}>
+                  {formatPostDate(post.data.updated ?? post.data.date)}
+                </time>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  </div>
 </BaseLayout>

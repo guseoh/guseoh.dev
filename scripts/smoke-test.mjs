@@ -1,6 +1,7 @@
 const DEFAULT_PATHS = [
   "/",
   "/blog/",
+  "/books/",
   "/categories/",
   "/tags/",
   "/series/",
