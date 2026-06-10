@@ -1,6 +1,6 @@
 .page-home-simple {
   background:
-    radial-gradient(circle at top left, rgba(10, 113, 133, 0.12), transparent 25rem),
+    radial-gradient(circle at top left, var(--home-glow), transparent 25rem),
     linear-gradient(180deg, var(--bg), var(--bg-deep));
 }
 

@@ -176,10 +176,14 @@ html.left-sidebar-collapsed .post-view--single > .post,
 
 .post :where(p, li, td, th, blockquote) > :where(strong, b),
 .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
+  color: var(--strong-text);
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .post :where(p, li, td, th, blockquote) > :where(strong, b),
+html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
   border-radius: 4px;
   background: var(--strong-bg);
-  color: var(--strong-text);
-  font-weight: 820;
   padding: 0.02em 0.16em;
 }
 
@@ -217,13 +221,15 @@ html.left-sidebar-collapsed .post-view--single > .post,
   scroll-margin-top: 5.5rem;
 }
 
-.post h2 {
-  margin-top: 2rem;
+.post > h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.95rem;
   font-size: 1.42rem;
 }
 
-.post h3 {
-  margin-top: 1.55rem;
+.post > h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
   font-size: 1.16rem;
 }
 
@@ -734,6 +740,16 @@ html[data-theme="dark"] .astro-code span {
 
   .post__header h1 {
     font-size: 1.55rem;
+  }
+
+  .post > h2 {
+    margin-top: 2.15rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .post > h3 {
+    margin-top: 1.75rem;
+    margin-bottom: 0.65rem;
   }
 
   .post-meta-grid {
