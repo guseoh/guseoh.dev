@@ -1,6 +1,6 @@
 ---
 title: "RESTful API란 무엇일까?"
-description: RESTful API의 개념, URI 설계, HTTP 메서드, 표현, 헤더, 멱등성 정리"
+description: "RESTful API의 개념, URI 설계, HTTP 메서드, 표현, 헤더, 멱등성 정리"
 date: 2026-06-10
 updated: 2026-06-11
 category: "Network"
