@@ -26,9 +26,13 @@ draft: true
 - chapter: Book 또는 Series 내부 읽기 순서입니다. 둘 다 없으면 삭제합니다.
 - Book 제목은 src/data/books.json의 title, Series 제목은 src/data/series.json의 title을 수정합니다.
 - category, book, series는 서로 독립적이며 서로 다른 category의 글도 같은 Book에 넣을 수 있습니다.
+- 등록되지 않은 book id를 작성하면 content schema 검증에서 오류가 발생합니다.
 - heroImage: public 기준 절대 경로를 사용합니다. 전용 이미지가 없으면 /og-image.svg를 사용합니다.
 - draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.
 - 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
+- Markdown 이미지는 ![이미지의 의미를 설명하는 alt](./image.png) 형식으로 작성합니다.
+- 본문 이미지는 데스크톱에서 최대 760px, 모바일에서 화면 너비에 맞춰 자동 축소됩니다.
+- 장식 목적이 아니라면 alt를 비워 두지 않습니다.
 -->
 
 > 페이지의 `h1`은 글 제목이 담당하므로 본문은 `##`부터 시작합니다.
@@ -56,6 +60,14 @@ draft: true
 ## 검증 결과
 
 실행한 명령, 테스트, 화면 확인 결과를 정리합니다.
+
+## 이미지 예시
+
+아래처럼 이미지의 내용이나 목적을 설명하는 alt 텍스트를 작성합니다.
+
+```md
+![게시글 조회 요청과 응답 흐름](./images/request-flow.png)
+```
 
 ## 배운 점
 

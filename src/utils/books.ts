@@ -23,6 +23,26 @@ export type BookSummary = BookMetadata & {
 
 const BOOKS = booksData as BookMetadata[];
 
+function validateBookMetadata(books: BookMetadata[]) {
+  const seenIds = new Set<string>();
+
+  for (const book of books) {
+    const id = book.id.trim();
+
+    if (!id) {
+      throw new Error("[books] src/data/books.json의 Book id는 비어 있을 수 없습니다.");
+    }
+
+    if (seenIds.has(id)) {
+      throw new Error(`[books] src/data/books.json에 중복된 Book id가 있습니다: ${id}`);
+    }
+
+    seenIds.add(id);
+  }
+}
+
+validateBookMetadata(BOOKS);
+
 function getPostActivityDate(post: CollectionEntry<"blog">) {
   return post.data.updated ?? post.data.date;
 }

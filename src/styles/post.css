@@ -179,19 +179,15 @@ html.left-sidebar-collapsed .post-view--single > .post,
   color: var(--ink);
 }
 
-.post :where(p, li, td, th, blockquote) > :where(strong, b),
-.post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
-  color: var(--strong-text);
+.post :where(p, li, td, th, blockquote) :where(strong, b) {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
   font-weight: 600;
-}
-
-html[data-theme="dark"] .post :where(p, li, td, th, blockquote) > :where(strong, b):not(:has(code)),
-html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b):not(:has(code)) {
-  border-radius: 4px;
-  background: var(--strong-bg);
-  box-shadow: 0 0 0 1px var(--strong-outline);
-  box-decoration-break: clone;
-  padding: 0.02em 0.16em;
+  outline: 0;
+  padding: 0;
 }
 
 .post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
@@ -268,15 +264,21 @@ html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b
 }
 
 .post a:not(.tag) {
-  color: var(--link);
+  color: var(--post-link);
   overflow-wrap: anywhere;
-  text-decoration-color: color-mix(in srgb, var(--link) 44%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--post-link) 58%, transparent);
   text-underline-offset: 0.16em;
 }
 
-.post a:not(.tag):hover,
+.post a:not(.tag):hover {
+  color: var(--post-link-hover);
+}
+
 .post a:not(.tag):focus-visible {
-  color: var(--link-hover);
+  border-radius: 3px;
+  color: var(--post-link-hover);
+  outline: 2px solid var(--post-link-focus);
+  outline-offset: 3px;
 }
 
 .post blockquote {
@@ -415,17 +417,17 @@ html[data-theme="dark"] .astro-code span {
 
 .post img {
   display: block;
-  max-width: 100%;
+  max-width: min(100%, 47.5rem);
   height: auto;
-  margin: 1.25rem auto 0;
+  margin: 1.5rem auto 0;
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
 .post > p:has(> img:only-child),
 .post > p:has(> a:only-child > img:only-child) {
-  max-width: min(100%, var(--post-content-width));
-  margin: 1.25rem auto 0;
+  max-width: min(100%, 47.5rem);
+  margin: 1.5rem auto 0;
   text-align: center;
 }
 
@@ -444,9 +446,14 @@ html[data-theme="dark"] .astro-code span {
 }
 
 .post figure {
+  width: min(100%, 51.25rem);
   max-width: 100%;
-  margin: 1.35rem auto 0;
+  margin: 1.75rem auto 0;
   text-align: center;
+}
+
+.post figure img {
+  max-width: 100%;
 }
 
 .post figcaption {
@@ -461,11 +468,11 @@ html[data-theme="dark"] .astro-code span {
 .post .markdown-alert {
   --alert-color: var(--alert-note);
   margin: 0.95rem auto 0;
-  border: 1px solid color-mix(in srgb, var(--alert-color) 24%, var(--border));
+  border: 1px solid color-mix(in srgb, var(--alert-color) 24%, var(--alert-border-base));
   border-left: 4px solid var(--alert-color);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--alert-color) 8%, var(--surface));
-  color: var(--ink);
+  background: color-mix(in srgb, var(--alert-color) 8%, var(--alert-surface));
+  color: var(--alert-text);
   padding: 0.68rem 0.9rem;
 }
 
@@ -512,6 +519,26 @@ html[data-theme="dark"] .astro-code span {
 .post .markdown-alert p:not(.markdown-alert-title) {
   margin: 0.42rem 0 0;
   color: inherit;
+}
+
+html[data-theme="dark"] .post .markdown-alert a:not(.tag) {
+  color: #075f9e;
+  text-decoration-color: color-mix(in srgb, #075f9e 58%, transparent);
+}
+
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):hover,
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
+  color: #064b7a;
+}
+
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
+  outline-color: #075f9e;
+}
+
+html[data-theme="dark"] .post .markdown-alert code {
+  border-color: #c7d4e2;
+  background: #e8eef5;
+  color: #253348;
 }
 
 .post-toc {
@@ -849,6 +876,23 @@ html[data-theme="dark"] .astro-code span {
 @media (max-width: 760px) {
   .post {
     padding: 1rem;
+  }
+
+  .post img {
+    max-width: 100%;
+    margin-top: 1.25rem;
+    border-radius: 6px;
+  }
+
+  .post > p:has(> img:only-child),
+  .post > p:has(> a:only-child > img:only-child) {
+    max-width: 100%;
+    margin-top: 1.25rem;
+  }
+
+  .post figure {
+    width: 100%;
+    margin-top: 1.5rem;
   }
 
   .post__header h1 {
