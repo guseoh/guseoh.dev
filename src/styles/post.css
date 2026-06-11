@@ -190,6 +190,11 @@ html.left-sidebar-collapsed .post-view--single > .post,
   padding: 0;
 }
 
+html[data-theme="dark"] .post :where(p, li, td, th, blockquote) :where(strong, b) {
+  color: #f5f5f5;
+  font-weight: 700;
+}
+
 .post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
   font-weight: var(--post-body-weight);
 }
@@ -467,33 +472,39 @@ html[data-theme="dark"] .astro-code span {
 
 .post .markdown-alert {
   --alert-color: var(--alert-note);
+  --alert-background: var(--alert-note-bg);
   margin: 0.95rem auto 0;
   border: 1px solid color-mix(in srgb, var(--alert-color) 24%, var(--alert-border-base));
   border-left: 4px solid var(--alert-color);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--alert-color) 8%, var(--alert-surface));
+  background: var(--alert-background);
   color: var(--alert-text);
   padding: 0.68rem 0.9rem;
 }
 
 .post .markdown-alert-note {
   --alert-color: var(--alert-note);
+  --alert-background: var(--alert-note-bg);
 }
 
 .post .markdown-alert-tip {
   --alert-color: var(--alert-tip);
+  --alert-background: var(--alert-tip-bg);
 }
 
 .post .markdown-alert-important {
   --alert-color: var(--alert-important);
+  --alert-background: var(--alert-important-bg);
 }
 
 .post .markdown-alert-warning {
   --alert-color: var(--alert-warning);
+  --alert-background: var(--alert-warning-bg);
 }
 
 .post .markdown-alert-caution {
   --alert-color: var(--alert-caution);
+  --alert-background: var(--alert-caution-bg);
 }
 
 .post .markdown-alert-title {
@@ -522,23 +533,23 @@ html[data-theme="dark"] .astro-code span {
 }
 
 html[data-theme="dark"] .post .markdown-alert a:not(.tag) {
-  color: #075f9e;
-  text-decoration-color: color-mix(in srgb, #075f9e 58%, transparent);
+  color: #90caf9;
+  text-decoration-color: color-mix(in srgb, #90caf9 64%, transparent);
 }
 
 html[data-theme="dark"] .post .markdown-alert a:not(.tag):hover,
 html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
-  color: #064b7a;
+  color: #bbdefb;
 }
 
 html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
-  outline-color: #075f9e;
+  outline-color: #90caf9;
 }
 
 html[data-theme="dark"] .post .markdown-alert code {
-  border-color: #c7d4e2;
-  background: #e8eef5;
-  color: #253348;
+  border-color: #36516d;
+  background: #1b2d42;
+  color: #edf4fb;
 }
 
 .post-toc {

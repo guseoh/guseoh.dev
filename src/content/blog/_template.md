@@ -8,7 +8,7 @@ tags:
   - Spring
   - JPA
   - Performance
-book: "backend-engineering"
+book: ""
 series: "board-프로젝트-개선-기록"
 chapter: 1
 heroImage: "/og-image.svg"
@@ -21,11 +21,12 @@ draft: true
 - description: 검색 결과와 OG 메타에 사용할 문제/결과 중심 요약을 작성합니다.
 - category: 글의 큰 소속 하나만 선택합니다. Board, OS, Java, Git 등이 현재 사용 중입니다.
 - tags: 기술, 주제, 글 성격을 나타내는 태그를 3~7개 정도 작성합니다.
-- book: src/data/books.json에 등록된 Book id입니다. Book에 포함하지 않을 글이면 삭제합니다.
+- book: src/data/books.json에 직접 등록한 Book id입니다. Book에 포함하지 않을 글이면 필드를 삭제하거나 빈 값으로 둡니다.
 - series: src/data/series.json에 등록된 Series id입니다. 연재 글이 아니면 삭제합니다.
 - chapter: Book 또는 Series 내부 읽기 순서입니다. 둘 다 없으면 삭제합니다.
 - Book 제목은 src/data/books.json의 title, Series 제목은 src/data/series.json의 title을 수정합니다.
 - category, book, series는 서로 독립적이며 서로 다른 category의 글도 같은 Book에 넣을 수 있습니다.
+- Book은 category나 tags를 기준으로 자동 생성되지 않습니다.
 - 등록되지 않은 book id를 작성하면 content schema 검증에서 오류가 발생합니다.
 - heroImage: public 기준 절대 경로를 사용합니다. 전용 이미지가 없으면 /og-image.svg를 사용합니다.
 - draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.

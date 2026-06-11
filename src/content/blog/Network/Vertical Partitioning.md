@@ -7,8 +7,6 @@ category: "Network"
 tags:
   - Network
   - Infra
-book: "network-and-web"
-chapter: 2
 heroImage: "/og-image.svg"
 draft: false
 ---

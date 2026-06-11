@@ -5,7 +5,6 @@ date: 2026-05-25
 updated: 2026-05-25
 category: OS
 tags: ["OS"]
-book: "operating-systems"
 series: "아주-쉬운-세가지-이야기"
 chapter: 4
 draft: false

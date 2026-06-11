@@ -7,8 +7,6 @@ category: "Spring"
 tags:
   - Spring
   - REST API
-book: "backend-engineering"
-chapter: 1
 heroImage: "/og-image.svg"
 draft: false
 ---

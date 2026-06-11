@@ -5,7 +5,6 @@ date: 2026-04-27
 updated: 2026-04-27
 category: Board
 tags: ["Board", "Spring Boot", "JPA", "Database", "SQL", "Performance", "Monitoring", "P6Spy", "Actuator"]
-book: "backend-engineering"
 series: "board-프로젝트-성능-개선"
 chapter: 4
 draft: false

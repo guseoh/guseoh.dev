@@ -5,7 +5,6 @@ date: 2026-05-26
 updated: 2026-05-26
 category: Board
 tags: ["Spring", "JPA"]
-book: "backend-engineering"
 series: "board-프로젝트-개선-기록"
 chapter: 3
 draft: false

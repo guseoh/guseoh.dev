@@ -3,7 +3,9 @@ import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 import booksData from "./data/books.json";
 
-const configuredBookIds = new Set(booksData.map((book) => book.id));
+const configuredBookIds = new Set(
+  (booksData as Array<{ id: string }>).map((book) => book.id)
+);
 
 const blog = defineCollection({
   loader: glob({

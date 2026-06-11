@@ -7,8 +7,6 @@ category: "Git"
 tags:
   - Git
   - Branch Strategy
-book: "git-and-workflow"
-chapter: 1
 ---
 
 ## Git Branch 전략

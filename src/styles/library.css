@@ -27,6 +27,55 @@
 
 .library-empty {
   margin-top: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  padding: 1.25rem;
+}
+
+.library-empty h2 {
+  margin-top: 0.55rem;
+  font-size: 1.18rem;
+}
+
+.library-empty > p:not(.library-hero__eyebrow) {
+  max-width: 46rem;
+  margin-top: 0.65rem;
+  color: var(--muted-readable);
+}
+
+.library-empty code {
+  border: 1px solid var(--code-inline-border);
+  border-radius: 5px;
+  background: var(--code-inline-bg);
+  color: var(--code-inline-text);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.06rem 0.24rem;
+}
+
+.library-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.library-empty__actions a {
+  border: 1px solid color-mix(in srgb, var(--link) 42%, var(--border));
+  border-radius: 8px;
+  color: var(--link);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.58rem 0.72rem;
+  text-decoration: none;
+}
+
+.library-empty__actions a:hover,
+.library-empty__actions a:focus-visible {
+  background: var(--surface-hover);
+  color: var(--link-hover);
 }
 
 .book-grid,

@@ -56,7 +56,7 @@ date: 2026-05-25
 updated: 2026-05-25
 category: Board
 tags: ["Board", "Spring Boot", "JPA", "QueryDSL", "Performance"]
-book: "backend-engineering"
+book: ""
 series: "board-프로젝트-성능-개선"
 chapter: 2
 heroImage: "/og-image.svg"
@@ -69,7 +69,7 @@ draft: true
 - `description`은 목록, RSS, 검색 인덱스, SEO 설명에 사용하므로 문제와 개선 결과가 드러나게 작성합니다.
 - `date`는 최초 작성일, `updated`는 마지막 수정일입니다.
 - `category`는 글 분류, `tags`는 검색과 필터용 키워드입니다.
-- `book`은 `src/data/books.json`에 등록된 Book `id`입니다.
+- `book`은 `src/data/books.json`에 사용자가 직접 등록한 Book `id`입니다. Book에 포함하지 않으면 생략하거나 빈 값으로 둡니다.
 - `series`는 `src/data/series.json`에 등록된 Series `id`입니다.
 - `chapter`는 Book 또는 Series 내부 읽기 순서입니다.
 - `draft: true`인 글은 목록, RSS, sitemap, 검색 인덱스, 상세 페이지 생성에서 제외됩니다.
@@ -85,22 +85,74 @@ draft: true
 7. 작성 중에는 `draft: true`를 유지하고 발행 전에 false로 변경하거나 필드를 삭제합니다.
 8. 발행 전 `npm run check`와 `npm run build`를 실행합니다.
 
-## Category / Book / Series 차이
+## Book 등록 가이드
+
+### Book과 Category의 차이
 
 - Category: 게시글의 주제 분류입니다. 글 하나에 하나의 category를 사용합니다.
-- Book: 사용자가 직접 지정하는 큰 학습 묶음입니다. category와 독립적입니다.
+- Book: 사용자가 직접 만드는 연속된 학습 묶음입니다. category와 독립적입니다.
 - Series: 순서대로 이어 읽는 연재 묶음입니다. Book 포함 여부와 독립적입니다.
 - 같은 category의 글을 서로 다른 Book에 넣을 수 있고, 서로 다른 category의 글을 하나의 Book으로 묶을 수도 있습니다.
 - `book`이 없는 글은 `/books/`에서 제외하며 별도의 미분류 Book을 만들지 않습니다.
+- Category, tags, navigation 주제를 기준으로 Book을 자동 생성하지 않습니다.
 
-### Book 제목과 구성 관리
+### Book 등록 방법
 
-- Book id, 화면 제목, 설명, 주제, 커버 문구, 정렬 순서는 `src/data/books.json`에서 관리합니다.
-- 화면 제목을 바꾸려면 해당 항목의 `title`을 수정합니다.
-- 화면 설명을 바꾸려면 해당 항목의 `description`을 수정합니다.
-- 게시글의 `book`에는 화면 제목이 아니라 해당 항목의 `id`를 작성합니다.
-- Book 글 수와 최근 업데이트 날짜는 동일한 `book` id를 가진 글을 기준으로 자동 계산합니다.
-- 등록되지 않은 `book` id는 content schema 검증에서 오류로 처리되므로 조용히 누락되지 않습니다.
+1. `src/data/books.json`을 엽니다.
+2. 배열에 새 Book metadata를 추가합니다.
+3. Book에 포함할 게시글 frontmatter의 `book`에 metadata의 `id`를 작성합니다.
+4. 필요한 경우 `chapter`에 Book 내부 읽기 순서를 작성합니다.
+5. `npm run check`와 `npm run build`를 실행한 뒤 `/books/`에서 결과를 확인합니다.
+
+```json
+[
+  {
+    "id": "spring-mvc-note",
+    "title": "Spring MVC 학습 노트",
+    "description": "Spring MVC와 REST API 응답 설계를 정리한 글 묶음",
+    "topics": ["Spring MVC", "REST API"],
+    "coverLabel": "SPRING MVC",
+    "tone": "navy",
+    "order": 10
+  }
+]
+```
+
+- `id`: 게시글과 연결되는 고유값입니다. 연결 후에는 가급적 변경하지 않습니다.
+- `title`: `/books/`와 Book 상세 화면에 표시되는 제목입니다.
+- `description`: Book 카드와 상세 화면에 표시되는 설명입니다.
+- `topics`: Book 카드에 표시되는 주제 목록입니다.
+- `coverLabel`: 표지 영역에 표시되는 짧은 문구입니다.
+- `tone`: `navy`, `charcoal`, `blue`, `burgundy`, `forest` 중 하나를 사용합니다.
+- `order`: `/books/`에서 Book이 표시되는 순서입니다.
+
+### 게시글을 Book에 연결하는 방법
+
+```yaml
+---
+title: "ResponseEntity란 무엇일까?"
+description: "ResponseEntity의 개념과 사용 이유 정리"
+date: 2026-06-11
+updated: 2026-06-11
+category: "Spring"
+tags:
+  - Spring
+  - REST API
+book: "spring-mvc-note"
+series: "rest-api-design"
+chapter: 2
+heroImage: "/og-image.svg"
+draft: false
+---
+```
+
+게시글의 `book`에는 화면 제목이 아니라 `src/data/books.json`에 등록한 `id`를 작성합니다. Book 글 수와 최근 업데이트 날짜는 같은 `book` id를 가진 글의 `updated ?? date`를 기준으로 자동 계산합니다.
+
+### Book 제목과 설명 수정 방법
+
+화면에 보이는 이름만 바꾸려면 `src/data/books.json`의 `title`만 수정합니다. 설명은 `description`을 수정합니다. `id`는 게시글 frontmatter와 연결되는 값이므로 제목 변경만을 위해 바꾸지 않습니다.
+
+등록되지 않은 `book` id는 content schema 검증에서 오류로 처리됩니다. `src/data/books.json`이 빈 배열이면 `/books/`에는 Book 카드 대신 등록 방법과 Posts/Series 이동 링크가 포함된 빈 상태 안내가 표시됩니다.
 
 ### 이미지 작성 규칙
 
@@ -215,7 +267,6 @@ Smoke test 기본 확인 URL:
 - `/blog/`
 - `/blog/board/react01/`
 - `/books/`
-- `/books/backend-engineering/`
 - `/rss.xml`
 - `/sitemap.xml`
 - `/search/`

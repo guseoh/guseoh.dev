@@ -5,7 +5,6 @@ date: 2026-05-28
 updated: 2026-06-02
 category: Java
 tags: ["java", "자료구조"]
-book: "java-and-data-structures"
 series: "data-structure"
 chapter: 1
 draft: false

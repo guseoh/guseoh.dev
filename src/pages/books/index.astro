@@ -18,7 +18,19 @@ const books = buildBookSummaries(posts);
 
     {
       books.length === 0 ? (
-        <p class="section-empty library-empty">아직 공개된 Book이 없습니다.</p>
+        <section class="library-empty" aria-labelledby="books-empty-title">
+          <p class="library-hero__eyebrow">Empty Library</p>
+          <h2 id="books-empty-title">아직 등록된 Book이 없습니다.</h2>
+          <p>
+            Book은 카테고리와 별개로 직접 등록하는 학습 묶음입니다.
+            <code>src/data/books.json</code>에 Book 정보를 추가한 뒤,
+            게시글 frontmatter의 <code>book</code> 필드에 해당 Book id를 작성해 주세요.
+          </p>
+          <div class="library-empty__actions">
+            <a href="/blog/">Posts 보러가기</a>
+            <a href="/series/">Series 보러가기</a>
+          </div>
+        </section>
       ) : (
         <ul class="book-grid">
           {books.map((book) => (
