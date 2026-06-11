@@ -57,6 +57,8 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
   wideContent={true}
 >
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
+    <PostToc headings={tocHeadings} />
+
     <article class="post">
       <header class="post__header">
         <h1>{post.data.title}</h1>
@@ -143,8 +145,6 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
         </nav>
       </footer>
     </article>
-
-    <PostToc headings={tocHeadings} />
   </div>
 
   <PostComments />

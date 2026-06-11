@@ -911,10 +911,6 @@
     flex-direction: column;
   }
 
-  .site-shell.sidebar-collapsed .site-main > .hero:first-child {
-    margin-top: 3rem;
-  }
-
   .search-page-form {
     grid-template-columns: 1fr;
   }

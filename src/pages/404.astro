@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { GITHUB_URL, SITE_DESCRIPTION } from "../utils/posts";
+---
+
+<BaseLayout
+  title="404 | devjune.dev"
+  description={`요청한 페이지를 찾을 수 없습니다. ${SITE_DESCRIPTION}`}
+  minimalHome={true}
+>
+  <section class="hero about-hero" aria-labelledby="not-found-title">
+    <p class="about-hero__eyebrow">404</p>
+    <h1 id="not-found-title">페이지를 찾을 수 없습니다.</h1>
+    <p>주소가 변경되었거나 삭제된 페이지일 수 있습니다. 아래 링크에서 다시 탐색해 주세요.</p>
+  </section>
+
+  <div class="about-grid">
+    <section class="about-panel about-panel--wide" aria-label="다시 탐색하기">
+      <h2>다시 탐색하기</h2>
+      <div class="about-actions">
+        <a href="/">Home</a>
+        <a href="/blog/">Posts</a>
+        <a href="/books/">Books</a>
+        <a href="/series/">Series</a>
+        <a href="/search/">Search</a>
+        <a href={GITHUB_URL} target="_blank" rel="noreferrer">GitHub</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>

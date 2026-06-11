@@ -71,6 +71,71 @@
       }
     });
 
+    const headerMenuButton = document.getElementById("header-menu-toggle");
+    const headerNav = document.getElementById("top-nav");
+
+    if (headerMenuButton instanceof HTMLButtonElement && headerNav instanceof HTMLElement) {
+      const headerMedia = window.matchMedia("(max-width: 760px)");
+
+      const applyHeaderMenuState = (open, { restoreFocus = false } = {}) => {
+        const narrow = headerMedia.matches;
+        const shouldOpen = narrow && Boolean(open);
+
+        headerNav.classList.toggle("is-open", shouldOpen);
+        headerNav.inert = narrow && !shouldOpen;
+        headerMenuButton.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+        headerMenuButton.setAttribute("aria-label", shouldOpen ? "메인 메뉴 닫기" : "메인 메뉴 열기");
+
+        if (narrow && !shouldOpen) {
+          headerNav.setAttribute("aria-hidden", "true");
+        } else {
+          headerNav.removeAttribute("aria-hidden");
+        }
+
+        if (restoreFocus) {
+          headerMenuButton.focus();
+        }
+      };
+
+      applyHeaderMenuState(false);
+
+      headerMenuButton.addEventListener("click", () => {
+        const open = headerMenuButton.getAttribute("aria-expanded") === "true";
+        applyHeaderMenuState(!open);
+      });
+
+      headerNav.addEventListener("click", (event) => {
+        if (event.target instanceof HTMLAnchorElement && headerMedia.matches) {
+          applyHeaderMenuState(false);
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (
+          headerMedia.matches &&
+          headerMenuButton.getAttribute("aria-expanded") === "true" &&
+          event.target instanceof Node &&
+          !headerMenuButton.contains(event.target) &&
+          !headerNav.contains(event.target)
+        ) {
+          applyHeaderMenuState(false);
+        }
+      });
+
+      window.addEventListener("keydown", (event) => {
+        if (
+          event.key === "Escape" &&
+          headerMedia.matches &&
+          headerMenuButton.getAttribute("aria-expanded") === "true"
+        ) {
+          event.preventDefault();
+          applyHeaderMenuState(false, { restoreFocus: true });
+        }
+      });
+
+      headerMedia.addEventListener("change", () => applyHeaderMenuState(false));
+    }
+
     const shell = document.querySelector(".site-shell");
     const sidebar = document.getElementById("site-sidebar");
     const sidebarOpenButton = document.getElementById("sidebar-open");
@@ -88,6 +153,29 @@
       const storageKey = "blog-left-sidebar-collapsed";
       const media = window.matchMedia("(max-width: 980px)");
       const isNarrow = () => media.matches;
+      const backgroundElements = [
+        document.querySelector(".site-header"),
+        document.querySelector(".site-content")
+      ].filter((element) => element instanceof HTMLElement);
+      let sidebarTrigger = sidebarOpenButton;
+
+      const getFocusableElements = () =>
+        Array.from(
+          sidebar.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((element) =>
+          element instanceof HTMLElement &&
+          !element.hidden &&
+          element.getAttribute("aria-hidden") !== "true" &&
+          element.getClientRects().length > 0
+        );
+
+      const setBackgroundInert = (inert) => {
+        for (const element of backgroundElements) {
+          element.inert = inert;
+        }
+      };
 
       const getStoredCollapsed = () => {
         try {
@@ -104,15 +192,29 @@
         }
       };
 
-      const applySidebarState = (collapsed, persist = false) => {
+      const applySidebarState = (
+        collapsed,
+        persist = false,
+        { moveFocus = false, restoreFocus = false } = {}
+      ) => {
         const narrow = isNarrow();
         const shouldCollapse = Boolean(collapsed);
+        const modalOpen = narrow && !shouldCollapse;
         const openLabel = narrow ? "사이드바 열기" : "탐색 펼치기";
 
         shell.classList.toggle("sidebar-collapsed", shouldCollapse);
         document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
-        document.body.classList.toggle("has-sidebar-open", narrow && !shouldCollapse);
+        document.body.classList.toggle("has-sidebar-open", modalOpen);
         sidebar.setAttribute("aria-hidden", shouldCollapse ? "true" : "false");
+
+        if (modalOpen) {
+          sidebar.setAttribute("role", "dialog");
+          sidebar.setAttribute("aria-modal", "true");
+        } else {
+          sidebar.removeAttribute("role");
+          sidebar.removeAttribute("aria-modal");
+        }
+
         sidebarOpenButton.hidden = !shouldCollapse;
         sidebarOpenButton.setAttribute("aria-label", openLabel);
         sidebarOpenButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
@@ -123,39 +225,84 @@
         sidebarCloseButton.hidden = !narrow;
 
         if (sidebarBackdrop instanceof HTMLButtonElement) {
-          sidebarBackdrop.hidden = shouldCollapse || !narrow;
+          sidebarBackdrop.hidden = !modalOpen;
         }
+
+        setBackgroundInert(modalOpen);
 
         if (!narrow && persist) {
           setStoredCollapsed(shouldCollapse);
+        }
+
+        if (moveFocus && modalOpen) {
+          window.requestAnimationFrame(() => {
+            const firstFocusable = getFocusableElements()[0];
+            if (firstFocusable instanceof HTMLElement) {
+              firstFocusable.focus();
+            } else {
+              sidebar.focus();
+            }
+          });
+        } else if (restoreFocus && sidebarTrigger instanceof HTMLElement) {
+          sidebarTrigger.focus();
         }
       };
 
       applySidebarState(isNarrow() ? true : getStoredCollapsed());
 
       sidebarOpenButton.addEventListener("click", () => {
-        applySidebarState(false, !isNarrow());
+        sidebarTrigger = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : sidebarOpenButton;
+        applySidebarState(false, !isNarrow(), { moveFocus: isNarrow() });
       });
 
       sidebarCollapseButton.addEventListener("click", () => {
-        applySidebarState(true, true);
-        sidebarOpenButton.focus();
+        applySidebarState(true, true, { restoreFocus: true });
       });
 
       sidebarCloseButton.addEventListener("click", () => {
-        applySidebarState(true);
+        applySidebarState(true, false, { restoreFocus: true });
       });
 
       if (sidebarBackdrop instanceof HTMLButtonElement) {
         sidebarBackdrop.addEventListener("click", () => {
-          applySidebarState(true);
+          applySidebarState(true, false, { restoreFocus: true });
         });
       }
 
       window.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && isNarrow() && !shell.classList.contains("sidebar-collapsed")) {
-          applySidebarState(true);
-          sidebarOpenButton.focus();
+          event.preventDefault();
+          applySidebarState(true, false, { restoreFocus: true });
+          return;
+        }
+
+        if (
+          event.key === "Tab" &&
+          isNarrow() &&
+          !shell.classList.contains("sidebar-collapsed")
+        ) {
+          const focusableElements = getFocusableElements();
+          const firstFocusable = focusableElements[0];
+          const lastFocusable = focusableElements.at(-1);
+
+          if (!(firstFocusable instanceof HTMLElement) || !(lastFocusable instanceof HTMLElement)) {
+            event.preventDefault();
+            sidebar.focus();
+            return;
+          }
+
+          if (event.shiftKey && document.activeElement === firstFocusable) {
+            event.preventDefault();
+            lastFocusable.focus();
+          } else if (!event.shiftKey && document.activeElement === lastFocusable) {
+            event.preventDefault();
+            firstFocusable.focus();
+          } else if (!sidebar.contains(document.activeElement)) {
+            event.preventDefault();
+            firstFocusable.focus();
+          }
         }
       });
 

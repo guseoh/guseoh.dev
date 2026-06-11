@@ -14,10 +14,12 @@
 
 .post-view > .post {
   grid-column: 1;
+  grid-row: 1;
 }
 
 .post-view > .post-toc {
   grid-column: 2;
+  grid-row: 1;
 }
 
 .post-view--single {
@@ -524,6 +526,91 @@ html[data-theme="dark"] .astro-code span {
   padding: 0.72rem;
 }
 
+.post-toc-mobile {
+  display: none;
+  width: min(100%, var(--post-body-max));
+  margin-inline: auto;
+}
+
+.post-toc-mobile__toggle {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--heading);
+  font-size: 0.84rem;
+  font-weight: 800;
+  padding: 0.65rem 0.78rem;
+  cursor: pointer;
+  box-shadow: 0 14px 28px -26px var(--shadow);
+}
+
+.post-toc-mobile__toggle:hover,
+.post-toc-mobile__toggle:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 54%, var(--border));
+  color: var(--link-hover);
+}
+
+.post-toc-mobile__chevron {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.post-toc-mobile__toggle[aria-expanded="true"] .post-toc-mobile__chevron {
+  transform: rotate(225deg);
+}
+
+.post-toc-mobile__panel {
+  margin-top: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  padding: 0.62rem;
+}
+
+.post-toc-mobile__panel[hidden] {
+  display: none;
+}
+
+.post-toc-mobile__list {
+  display: grid;
+  gap: 0.24rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-toc-mobile__item a {
+  display: block;
+  border-radius: 6px;
+  color: var(--muted-readable);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  padding: 0.34rem 0.42rem;
+  text-decoration: none;
+}
+
+.post-toc-mobile__item.depth-3 {
+  padding-left: 0.82rem;
+}
+
+.post-toc-mobile__item a:hover,
+.post-toc-mobile__item a:focus-visible,
+.post-toc-mobile__item a.is-active {
+  background: color-mix(in srgb, var(--tag-bg) 72%, transparent);
+  color: var(--link-hover);
+}
+
 .post-toc__title {
   color: var(--muted-readable);
   font-size: 0.72rem;
@@ -683,8 +770,15 @@ html[data-theme="dark"] .astro-code span {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-view > .post {
+  html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-view:not(.post-view--single) > .post {
     grid-column: 1;
+    grid-row: 2;
+  }
+
+  html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-toc-mobile {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
   }
 
   html:not(.left-sidebar-collapsed) .site-shell:not(.sidebar-collapsed) .post-toc {
@@ -692,7 +786,7 @@ html[data-theme="dark"] .astro-code span {
   }
 }
 
-@media (min-width: 1280px) and (max-width: 1439px) {
+@media (min-width: 1281px) and (max-width: 1439px) {
   /* Collapsed-nav desktops still have enough room for a compact sticky TOC. */
   html.left-sidebar-collapsed .post-view,
   .site-shell.sidebar-collapsed .post-view {
@@ -718,7 +812,7 @@ html[data-theme="dark"] .astro-code span {
   }
 }
 
-@media (max-width: 1279px) {
+@media (max-width: 1280px) {
   /* Tablet and mobile prioritize the article and avoid horizontal overflow. */
   .post-view,
   .post-view--single,
@@ -730,10 +824,19 @@ html[data-theme="dark"] .astro-code span {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .post-view > .post,
-  html.left-sidebar-collapsed .post-view > .post,
-  .site-shell.sidebar-collapsed .post-view > .post {
+  .post-view:not(.post-view--single) > .post,
+  html.left-sidebar-collapsed .post-view:not(.post-view--single) > .post,
+  .site-shell.sidebar-collapsed .post-view:not(.post-view--single) > .post {
     grid-column: 1;
+    grid-row: 2;
+  }
+
+  .post-view > .post-toc-mobile,
+  html.left-sidebar-collapsed .post-view > .post-toc-mobile,
+  .site-shell.sidebar-collapsed .post-view > .post-toc-mobile {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
   }
 
   .post-toc,

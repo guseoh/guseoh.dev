@@ -30,10 +30,27 @@ function isNavActive(href: string) {
     <a class="brand" href="/" aria-label="devjune.dev 홈으로 이동">devjune.dev</a>
 
     <div class="header-actions">
-      <nav class="top-nav" aria-label="Primary navigation">
+      <button
+        id="header-menu-toggle"
+        class="header-menu-toggle"
+        type="button"
+        aria-label="메인 메뉴 열기"
+        aria-controls="top-nav"
+        aria-expanded="false"
+      >
+        <span class="header-menu-toggle__line"></span>
+        <span class="header-menu-toggle__line"></span>
+        <span class="header-menu-toggle__line"></span>
+      </button>
+
+      <nav id="top-nav" class="top-nav" aria-label="Primary navigation">
         {
           headerLinks.map(({ href, label }) => (
-            <a class:list={["top-nav__link", isNavActive(href) && "is-active"]} href={href}>
+            <a
+              class:list={["top-nav__link", isNavActive(href) && "is-active"]}
+              href={href}
+              aria-current={isNavActive(href) ? "page" : undefined}
+            >
               {label}
             </a>
           ))

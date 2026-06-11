@@ -15,6 +15,28 @@ const { headings } = Astro.props as Props;
 {
   headings.length > 0 && (
     <>
+      <section class="post-toc-mobile" aria-label="Document table of contents">
+        <button
+          id="post-toc-toggle"
+          class="post-toc-mobile__toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="post-toc-mobile-panel"
+        >
+          <span>이 글의 목차</span>
+          <span class="post-toc-mobile__chevron" aria-hidden="true"></span>
+        </button>
+        <nav id="post-toc-mobile-panel" class="post-toc-mobile__panel" aria-label="접이식 글 목차" hidden>
+          <ul class="post-toc-mobile__list">
+            {headings.map((heading) => (
+              <li class:list={["post-toc-mobile__item", `depth-${heading.depth}`]}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </section>
+
       <aside class="post-toc" aria-label="Document table of contents">
         <p class="post-toc__title">ON THIS PAGE</p>
         <ul class="post-toc__list">
@@ -28,46 +50,106 @@ const { headings } = Astro.props as Props;
 
       <script is:inline>
         (() => {
-          const links = Array.from(document.querySelectorAll(".post-toc__item a"));
-          if (links.length === 0) return;
+          const initializeToc = () => {
+            const links = Array.from(
+              document.querySelectorAll(".post-toc__item a, .post-toc-mobile__item a")
+            );
+            if (links.length === 0) return;
+            const mobileToggle = document.getElementById("post-toc-toggle");
+            const mobilePanel = document.getElementById("post-toc-mobile-panel");
+            const compactMedia = window.matchMedia("(max-width: 1439px)");
 
-          const entries = links
-            .map((link) => {
-              if (!(link instanceof HTMLAnchorElement)) return null;
+            const entries = links
+              .map((link) => {
+                if (!(link instanceof HTMLAnchorElement)) return null;
 
-              const href = link.getAttribute("href") || "";
-              if (!href.startsWith("#")) return null;
+                const href = link.getAttribute("href") || "";
+                if (!href.startsWith("#")) return null;
 
-              const id = decodeURIComponent(href.slice(1));
-              const section = document.getElementById(id);
-              if (!(section instanceof HTMLElement)) return null;
+                const id = decodeURIComponent(href.slice(1));
+                const section = document.getElementById(id);
+                if (!(section instanceof HTMLElement)) return null;
 
-              return { link, section };
-            })
-            .filter((entry) => entry !== null);
+                return { link, section };
+              })
+              .filter((entry) => entry !== null);
 
-          if (entries.length === 0) return;
+            if (entries.length === 0) return;
 
-          const applyActive = () => {
-            const currentY = window.scrollY + 150;
-            let active = entries[0];
+            const sections = Array.from(new Set(entries.map((entry) => entry.section)));
 
-            for (const entry of entries) {
-              if (entry.section.offsetTop <= currentY) {
-                active = entry;
-              } else {
-                break;
+            const applyActive = () => {
+              const currentY = window.scrollY + 150;
+              let activeSection = sections[0];
+
+              for (const section of sections) {
+                if (section.offsetTop <= currentY) {
+                  activeSection = section;
+                } else {
+                  break;
+                }
               }
+
+              for (const entry of entries) {
+                const isActive = entry.section === activeSection;
+                entry.link.classList.toggle("is-active", isActive);
+                if (isActive) {
+                  entry.link.setAttribute("aria-current", "location");
+                } else {
+                  entry.link.removeAttribute("aria-current");
+                }
+              }
+            };
+
+            const applyMobileTocState = (open, { restoreFocus = false } = {}) => {
+              if (
+                !(mobileToggle instanceof HTMLButtonElement) ||
+                !(mobilePanel instanceof HTMLElement)
+              ) {
+                return;
+              }
+
+              const shouldOpen = Boolean(open);
+              mobileToggle.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+              mobilePanel.hidden = !shouldOpen;
+
+              if (restoreFocus) {
+                mobileToggle.focus();
+              }
+            };
+
+            if (mobileToggle instanceof HTMLButtonElement && mobilePanel instanceof HTMLElement) {
+              mobileToggle.addEventListener("click", () => {
+                applyMobileTocState(mobileToggle.getAttribute("aria-expanded") !== "true");
+              });
+
+              mobilePanel.addEventListener("click", (event) => {
+                if (event.target instanceof HTMLAnchorElement) {
+                  applyMobileTocState(false);
+                  window.setTimeout(applyActive, 0);
+                }
+              });
+
+              window.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && mobileToggle.getAttribute("aria-expanded") === "true") {
+                  event.preventDefault();
+                  applyMobileTocState(false, { restoreFocus: true });
+                }
+              });
+
+              compactMedia.addEventListener("change", () => applyMobileTocState(false));
             }
 
-            for (const entry of entries) {
-              entry.link.classList.toggle("is-active", entry === active);
-            }
+            applyActive();
+            window.addEventListener("scroll", applyActive, { passive: true });
+            window.addEventListener("resize", applyActive);
           };
 
-          applyActive();
-          window.addEventListener("scroll", applyActive, { passive: true });
-          window.addEventListener("resize", applyActive);
+          if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeToc, { once: true });
+          } else {
+            initializeToc();
+          }
         })();
       </script>
     </>
