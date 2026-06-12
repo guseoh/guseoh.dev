@@ -1,5 +1,5 @@
 ---
-title: 서블릿이란 무엇일까?"
+title: "서블릿이란 무엇일까?"
 description: "서블릿의 개념, 서블릿 컨테이너, 생명주기, MVC 구조로 발전한 이유를 정리"
 date: 2026-06-11
 updated: 2026-06-11
@@ -83,7 +83,7 @@ public class ServletApplication {
 
 ## 2. 서블릿 컨테이너와 생명주기
 
-서블릿은 개발자가 직접 `new HelloServlet()`처럼 생성해서 사용하는 객체가 아니다. 서블릿은 **서블릿 컨테이너(Servlet Container)**가 생성하고 관리한다.
+서블릿은 개발자가 직접 `new HelloServlet()`처럼 생성해서 사용하는 객체가 아니다. 서블릿은 **서블릿 컨테이너(Servlet Container)** 가 생성하고 관리한다.
 
 대표적인 서블릿 컨테이너로는 Tomcat이 있다. Tomcat 같은 WAS는 애플리케이션이 실행될 때 서블릿을 등록하고, 클라이언트 요청이 들어오면 요청 URL에 맞는 서블릿을 찾아 호출한다.
 
@@ -248,13 +248,12 @@ Content-Type: application/x-www-form-urlencoded
 username=kim&age=20
 ```
 
-* HTTP 메서드
-* 요청 URI
-* 쿼리 문자열
-* 요청 헤더
-* 쿠키
-* 요청 파라미터
-* 요청 body
+* HTTP 메서드: `POST`
+* 요청 URI: `/save`
+* 요청 헤더: Host: `localhost:8080`, `Content-Type: application/x-www-form-urlencoded`
+* 요청 파라미터: `username=kim`, `age=20`
+* 요청 body: `username=kim&age=20`
+
 
 ```java
 @WebServlet(name = "requestServlet", urlPatterns = "/request")
@@ -333,13 +332,21 @@ public class RequestBodyStringServlet extends HttpServlet {
 
 `HttpServletResponse`는 서버가 클라이언트에게 보낼 HTTP 응답을 만들 때 사용한다.
 
-주로 다음 작업을 처리한다.
+```text
+HTTP/1.1 200 OK
+Cache-Control: no-cache
+Content-Type: application/json;charset=UTF-8
 
-* 응답 상태 코드 설정
-* 응답 헤더 설정
-* Content-Type 설정
-* 문자 인코딩 설정
-* 응답 body 작성
+{
+    "message": "hello servlet"
+}
+```
+
+* 응답 상태 코드 설정: `HTTP/1.1 200 OK`
+* 응답 헤더 설정: `Cache-Control: no-cache`
+* Content-Type 설정: `Content-Type: application/json;`
+* 문자 인코딩 설정: `charset=UTF-8`
+* 응답 body 작성: `"message": "hello servlet"`
 
 
 ```java
@@ -365,17 +372,6 @@ public class ResponseServlet extends HttpServlet {
 }
 ```
 
-위 서블릿이 만드는 응답은 다음과 비슷하다.
-
-```text
-HTTP/1.1 200 OK
-Cache-Control: no-cache
-Content-Type: application/json;charset=UTF-8
-
-{
-    "message": "hello servlet"
-}
-```
 
 요청과 응답 처리를 정리하면 다음과 같다.
 
@@ -387,7 +383,7 @@ Content-Type: application/json;charset=UTF-8
 | `getInputStream()`    | HTTP 요청 body 직접 읽기     |
 | `getWriter()`         | HTTP 응답 body 작성        |
 
-서블릿을 사용하면 HTTP 요청과 응답을 매우 직접적으로 다룰 수 있다. 이 직접성은 서블릿의 장점이다. 하지만 요청 데이터 조회, 타입 변환, JSON 파싱, 응답 생성, View 이동 등을 개발자가 직접 처리해야 하므로 코드가 반복되고 복잡해지기 쉽다.
+**서블릿을 사용하면 HTTP 요청과 응답을 매우 직접적으로 다룰 수 있다.** 이 직접성은 서블릿의 장점이다. 하지만 요청 데이터 조회, 타입 변환, JSON 파싱, 응답 생성, View 이동 등을 개발자가 직접 처리해야 하므로 코드가 반복되고 복잡해지기 쉽다.
 
 ## 4. 서블릿의 한계와 MVC 구조
 
@@ -437,17 +433,20 @@ RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
 dispatcher.forward(request, response);
 ```
 
-이런 중복과 책임 혼합을 줄이기 위해 MVC 패턴이 사용된다. MVC는 역할을 Model, View, Controller로 나누는 구조다.
+이런 중복과 책임 혼합을 줄이기 위해 MVC 패턴이 사용된다. MVC는 역할을 `Model`, `View`, `Controller`로 나누는 구조다.
 
-**컨트롤러**: HTTP 요청을 받아 파라미터를 검증하고, 필요한 비즈니스 로직을 호출한다. 그리고 뷰에 전달할 결과 데이터를 조회해서 모델에 담는다.
-**모델**: 뷰에 출력할 데이터를 담아둔다. 뷰가 필요한 데이터를 모두 모델에 담아서 전달해주는 덕분에 뷰는 비즈니스 로직이나 데이터 접근을 몰라도 되고, 화면을 렌더링하는 일에 집중할 수 있다.
-**뷰**: 모델에 담겨 있는 데이터를 사용해서 화면을 그리는 일에 집중한다. 여기서 HTML을 생성하는 부분을 말한다.
+**컨트롤러**: HTTP 요청을 받아 파라미터를 검증하고, 필요한 비즈니스 로직을 호출한다. 그리고 뷰에 전달할 결과 데이터를 조회해서 모델에 담는다.  
+
+**모델**: 뷰에 출력할 데이터를 담아둔다. 뷰가 필요한 데이터를 모두 모델에 담아서 전달해주는 덕분에 뷰는 비즈니스 로직이나 데이터 접근을 몰라도 되고, 화면을 렌더링하는 일에 집중할 수 있다.  
+
+
+**뷰**: 모델에 담겨 있는 데이터를 사용해서 화면을 그리는 일에 집중한다. 여기서 HTML을 생성하는 부분을 말한다.  
 
 하지만 단순히 Controller를 여러 개 만든다고 해서 문제가 완전히 해결되지는 않는다. 모든 Controller가 공통 처리를 반복하면 여전히 중복이 발생한다. 그래서 **프론트 컨트롤러** 패턴이 사용된다.
 
 ![프론트 컨트롤러](<스크린샷 2026-06-12 170103.png>)
 
-프론트 컨트롤러는 모든 요청을 먼저 받아 공통 처리를 수행하고, 요청에 맞는 Controller를 찾아 호출한다.
+프론트 컨트롤러는 **모든 요청을 먼저 받아 공통 처리를 수행하고, 요청에 맞는 Controller를 찾아 호출**한다.
 
 Spring MVC의 핵심인 `DispatcherServlet`도 바로 이 프론트 컨트롤러 패턴으로 구현되어 있다. 즉, Spring MVC는 서블릿과 완전히 별개의 기술이 아니다.
 
