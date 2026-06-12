@@ -1,20 +1,19 @@
 ---
-
-title: "서블릿이란 무엇일까?"
+title: 서블릿이란 무엇일까?"
 description: "서블릿의 개념, 서블릿 컨테이너, 생명주기, MVC 구조로 발전한 이유를 정리"
 date: 2026-06-11
 updated: 2026-06-11
 category: "Spring"
 tags:
-
-* Spring
-* Servlet
-  book: ""
-  chapter: 1
-  heroImage: "/og-image.svg"
-  draft: true
-
+  - REST
+  - REST API
+  - HTTP
+book: ""
+chapter: 1
+heroImage: "/og-image.svg"
+draft: false
 ---
+
 
 ## 1. 들어가기 전
 
