@@ -11,5 +11,5 @@ tags:
 book: ""
 chapter: 1
 heroImage: "/og-image.svg"
-draft: false
+draft: true
 ---
