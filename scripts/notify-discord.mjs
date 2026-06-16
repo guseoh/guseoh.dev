@@ -5,7 +5,7 @@ if (!webhookUrl) {
   process.exit(0);
 }
 
-const repository = process.env.REPOSITORY ?? "guseoh/guseoh.dev";
+const repository = process.env.REPOSITORY ?? "guseoh/guseoh.github.io";
 const branch = process.env.BRANCH ?? "main";
 const refreshStatus = process.env.REFRESH_STATUS ?? "unknown";
 const source = process.env.REFRESH_SOURCE ?? "unknown";

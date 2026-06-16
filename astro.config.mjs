@@ -21,12 +21,12 @@ function remarkDemoteContentH1() {
 }
 
 export default defineConfig({
-  site: "https://guseoh.dev",
+  site: "https://guseoh.github.io",
   markdown: {
     remarkPlugins: [
       remarkDemoteContentH1,
       remarkCallout,
-      [remarkLinkMention, { site: "https://guseoh.dev" }]
+      [remarkLinkMention, { site: "https://guseoh.github.io" }]
     ],
     syntaxHighlight: {
       type: "shiki",

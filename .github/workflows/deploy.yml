@@ -68,7 +68,5 @@ jobs:
         run: npm run smoke
         env:
           SMOKE_BASE_URL: ${{ steps.deployment.outputs.page_url }}
-          SMOKE_ALLOW_DNS_FAILURE: true
           SMOKE_RETRIES: 8
           SMOKE_RETRY_DELAY_MS: 10000
-          SMOKE_TIMEOUT_MS: 10000

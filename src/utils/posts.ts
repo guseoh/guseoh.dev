@@ -3,7 +3,7 @@ import type { CollectionEntry } from "astro:content";
 export const SITE_TITLE = "devjune.dev";
 export const SITE_DESCRIPTION = "Java/Spring 백엔드 개발자 오지훈의 학습과 프로젝트 개선 기록";
 export const SITE_AUTHOR = "오지훈";
-export const SITE_URL = "https://guseoh.dev";
+export const SITE_URL = "https://guseoh.github.io";
 export const SITE_OG_IMAGE = "/og-image.svg";
 export const GITHUB_URL = "https://github.com/guseoh";
 export const HOME_POST_LIMIT = 5;

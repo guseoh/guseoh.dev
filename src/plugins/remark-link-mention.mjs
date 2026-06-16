@@ -120,7 +120,7 @@ function parseLinkMention(value, options) {
 
 export function remarkLinkMention(options = {}) {
   const settings = {
-    site: "https://guseoh.dev",
+    site: "https://guseoh.github.io",
     ...options
   };
 
