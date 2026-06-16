@@ -1,5 +1,6 @@
 ﻿import { defineConfig } from "astro/config";
 import { remarkCallout } from "./src/plugins/remark-callout.mjs";
+import { remarkLinkMention } from "./src/plugins/remark-link-mention.mjs";
 
 function remarkDemoteContentH1() {
   return (tree) => {
@@ -22,7 +23,11 @@ function remarkDemoteContentH1() {
 export default defineConfig({
   site: "https://guseoh.github.io",
   markdown: {
-    remarkPlugins: [remarkDemoteContentH1, remarkCallout],
+    remarkPlugins: [
+      remarkDemoteContentH1,
+      remarkCallout,
+      [remarkLinkMention, { site: "https://guseoh.github.io" }]
+    ],
     syntaxHighlight: {
       type: "shiki",
       excludeLangs: ["math"]

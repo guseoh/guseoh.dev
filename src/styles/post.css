@@ -162,6 +162,7 @@ html.left-sidebar-collapsed .post-view--single > .post,
   ol,
   blockquote,
   .markdown-alert,
+  .link-mention,
   .code-block,
   pre,
   table,
@@ -179,29 +180,20 @@ html.left-sidebar-collapsed .post-view--single > .post,
   color: var(--ink);
 }
 
-.post :where(p, li, td, th, blockquote) :where(strong, b) {
+.post :where(p, li, td, th, blockquote, .markdown-alert) :where(strong, b) {
   border: 0;
   border-radius: 0;
   background: none;
   box-shadow: none;
-  color: inherit;
-  font-weight: 600;
+  color: var(--article-strong-color);
+  font-weight: var(--article-strong-weight);
   outline: 0;
   padding: 0;
 }
 
-html[data-theme="dark"] .post
-  :where(p, li, td, th, blockquote):not(.markdown-alert *)
-  :where(strong, b):not(:has(code)) {
-  background: linear-gradient(
-    transparent 64%,
-    rgba(96, 165, 250, 0.18) 64%
-  );
-  color: #ffffff;
-  font-weight: 750;
-}
-
-html[data-theme="dark"] .post a :where(strong, b) {
+.post a:not(.link-mention) :where(strong, b),
+.post code :where(strong, b),
+.post pre :where(strong, b) {
   color: inherit;
 }
 
@@ -278,22 +270,111 @@ html[data-theme="dark"] .post a :where(strong, b) {
   margin-top: 0.22rem;
 }
 
-.post a:not(.tag) {
+.post a:not(.tag):not(.link-mention) {
   color: var(--post-link);
   overflow-wrap: anywhere;
   text-decoration-color: color-mix(in srgb, var(--post-link) 58%, transparent);
   text-underline-offset: 0.16em;
 }
 
-.post a:not(.tag):hover {
+.post a:not(.tag):not(.link-mention):hover {
   color: var(--post-link-hover);
 }
 
-.post a:not(.tag):focus-visible {
+.post a:not(.tag):not(.link-mention):focus-visible {
   border-radius: 3px;
   color: var(--post-link-hover);
   outline: 2px solid var(--post-link-focus);
   outline-offset: 3px;
+}
+
+.post .link-mention {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.78rem;
+  margin: 1rem auto 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 84%, var(--bg));
+  color: var(--ink);
+  padding: 0.78rem 0.84rem;
+  text-decoration: none;
+  box-shadow: 0 14px 28px -28px var(--shadow);
+}
+
+.post .link-mention:hover {
+  border-color: color-mix(in srgb, var(--accent) 42%, var(--border));
+  background: color-mix(in srgb, var(--surface-hover) 68%, var(--surface));
+  color: var(--ink);
+}
+
+.post .link-mention:focus-visible {
+  outline: 2px solid var(--post-link-focus);
+  outline-offset: 3px;
+}
+
+.post .link-mention__icon {
+  position: relative;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tag-bg) 82%, var(--surface));
+  color: var(--accent-strong);
+  font-size: 0.92rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.post .link-mention__favicon {
+  position: absolute;
+  inset: 0.44rem;
+  width: calc(100% - 0.88rem);
+  height: calc(100% - 0.88rem);
+  border: 0;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.post .link-mention__content {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.post .link-mention__title,
+.post .link-mention__description,
+.post .link-mention__url {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post .link-mention__title {
+  color: var(--heading);
+  font-size: 0.98rem;
+  font-weight: 780;
+  line-height: 1.34;
+}
+
+.post .link-mention__description {
+  color: var(--muted-readable);
+  font-size: 0.84rem;
+  line-height: 1.44;
+}
+
+.post .link-mention__url {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.35;
 }
 
 .post blockquote {
@@ -557,21 +638,21 @@ html[data-theme="dark"] .post img {
   color: inherit;
 }
 
-html[data-theme="dark"] .post .markdown-alert a:not(.tag) {
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):not(.link-mention) {
   color: #90caf9;
   text-decoration-color: color-mix(in srgb, #90caf9 64%, transparent);
 }
 
-html[data-theme="dark"] .post .markdown-alert a:not(.tag):hover,
-html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):not(.link-mention):hover,
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):not(.link-mention):focus-visible {
   color: #bbdefb;
 }
 
-html[data-theme="dark"] .post .markdown-alert a:not(.tag):focus-visible {
+html[data-theme="dark"] .post .markdown-alert a:not(.tag):not(.link-mention):focus-visible {
   outline-color: #90caf9;
 }
 
-html[data-theme="dark"] .post .markdown-alert code {
+html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
   border-color: #36516d;
   background: #1b2d42;
   color: #edf4fb;
@@ -959,6 +1040,7 @@ html[data-theme="dark"] .post .markdown-alert code {
     ol,
     blockquote,
     .markdown-alert,
+    .link-mention,
     .code-block,
     pre,
     table,

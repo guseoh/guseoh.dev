@@ -14,6 +14,8 @@
   --strong-text: #0f172a;
   --strong-bg: transparent;
   --strong-outline: transparent;
+  --article-strong-color: var(--strong-text);
+  --article-strong-weight: 700;
   --muted: #667085;
   --muted-readable: #4e5969;
   --accent: #0a7185;
@@ -82,6 +84,8 @@ html[data-theme="dark"] {
   --strong-text: #f4f4f4;
   --strong-bg: transparent;
   --strong-outline: transparent;
+  --article-strong-color: #ffffff;
+  --article-strong-weight: 760;
   --muted: #969696;
   --muted-readable: #b8b8b8;
   --accent: #c7c7c7;
