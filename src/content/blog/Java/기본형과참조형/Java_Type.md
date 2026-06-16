@@ -552,9 +552,3 @@ public class Member {
 * https://dev.java/learn/introducing-generics/
 * https://mangkyu.tistory.com/322
 * https://medium.com/@s23051/%EB%9E%98%ED%8D%BC-%ED%81%B4%EB%9E%98%EC%8A%A4%EB%9E%80-wrapper-class-cc5aa6f7cdd1
-
-::link-mention{
-  url="https://medium.com/@s23051/%EB%9E%98%ED%8D%BC-%ED%81%B4%EB%9E%98%EC%8A%A4%EB%9E%80-wrapper-class-cc5aa6f7cdd1"
-  title="[Java] 임시"
-  description="내부 블로그 글도 같은 카드 UI로 연결할 수 있습니다."
-}
