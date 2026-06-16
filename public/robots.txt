@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://guseoh.github.io/sitemap.xml
+Sitemap: https://guseoh.dev/sitemap.xml

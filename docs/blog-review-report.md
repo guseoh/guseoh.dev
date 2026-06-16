@@ -3,8 +3,8 @@
 ## 1. 리뷰 개요
 
 ### 대상
-- 배포 사이트: https://guseoh.github.io/
-- GitHub 레포지토리: https://github.com/guseoh/guseoh.github.io
+- 배포 사이트: https://guseoh.dev/
+- GitHub 레포지토리: https://github.com/guseoh/guseoh.dev
 - 로컬 프로젝트: `C:\Users\guseo\OneDrive\문서\codex_project\codex_github_profile_page_vibe`
 
 ### 리뷰 목적
@@ -52,7 +52,7 @@
 ### 3-1. 메인 페이지
 
 #### 현재 상태
-- URL: https://guseoh.github.io/
+- URL: https://guseoh.dev/
 - h1: `Java/Spring 백엔드 개발자 오지훈입니다.`
 - 최근 글 5개, Blog Activity, GitHub Activity, Topic Index가 표시됩니다.
 - 메인 페이지는 `minimalHome` 레이아웃을 사용해 왼쪽 사이드바 없이 콘텐츠 중심으로 구성됩니다.
@@ -78,7 +78,7 @@
 ### 3-2. 블로그 목록 페이지
 
 #### 현재 상태
-- URL: https://guseoh.github.io/blog/
+- URL: https://guseoh.dev/blog/
 - h1: `All Posts (9)`
 - 공개 글 9개가 표시됩니다.
 - Grid/List 보기 전환이 있고 `localStorage`로 선호 뷰를 저장합니다.
@@ -104,7 +104,7 @@
 ### 3-3. 상세 글 페이지
 
 #### 현재 상태
-- URL: https://guseoh.github.io/blog/board/react01/
+- URL: https://guseoh.dev/blog/board/react01/
 - 왼쪽 사이드바, 본문, 오른쪽 `ON THIS PAGE` 목차가 렌더링됩니다.
 - 1440px 기준 본문 폭은 약 860px, TOC는 sticky 상태로 오른쪽에 배치됩니다.
 - 390px 모바일에서는 TOC가 숨겨지고 본문 카드가 약 359px 폭을 사용합니다.
@@ -336,7 +336,7 @@ draft:
 - RSS는 `/rss.xml`에서 200 응답, item 9개, React01 글 포함 확인.
 - `/sitemap.xml`은 200 응답, URL 36개, React01 글 포함 확인.
 - `/sitemap-index.xml`과 `/sitemap-0.xml`도 함께 생성되며, `sitemap-0.xml`은 URL 37개입니다.
-- robots.txt는 `Sitemap: https://guseoh.github.io/sitemap.xml`을 가리킵니다.
+- robots.txt는 `Sitemap: https://guseoh.dev/sitemap.xml`을 가리킵니다.
 
 ### 문제점
 - 수동 `/sitemap.xml`에는 `/series/`가 빠져 있습니다.
