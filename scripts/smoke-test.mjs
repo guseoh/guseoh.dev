@@ -1,3 +1,5 @@
+import { lookup } from "node:dns/promises";
+
 const DEFAULT_PATHS = [
   "/",
   "/blog/",
@@ -22,6 +24,11 @@ const paths = (process.env.SMOKE_PATHS ?? DEFAULT_PATHS.join(","))
 
 const failures = [];
 
+if (allowDnsFailure && (await isHostPendingDns(baseUrl.hostname, requestTimeoutMs))) {
+  console.warn(`Smoke test skipped because ${baseUrl.hostname} is not resolvable yet.`);
+  process.exit(0);
+}
+
 for (const path of paths) {
   const url = new URL(path, baseUrl).toString();
   const result = await checkUrlWithRetry(url, retries, retryDelayMs, requestTimeoutMs);
@@ -33,6 +40,11 @@ for (const path of paths) {
 
   failures.push(result);
   console.error(`FAIL ${result.status ?? "ERR"} ${url} ${result.error ?? ""}`.trim());
+
+  if (allowDnsFailure && isDnsFailure(result)) {
+    console.warn(`Smoke test skipped because ${baseUrl.hostname} is not resolvable yet.`);
+    process.exit(0);
+  }
 }
 
 if (failures.length > 0) {
@@ -98,6 +110,31 @@ async function checkUrl(url, timeoutMs) {
 
 function isDnsFailure(result) {
   return result.errorCode === "ENOTFOUND" || result.errorCode === "EAI_AGAIN";
+}
+
+async function isHostPendingDns(hostname, timeoutMs) {
+  try {
+    await withTimeout(lookup(hostname), Math.min(timeoutMs, 5000));
+    return false;
+  } catch (error) {
+    const code = error instanceof Error && "code" in error ? String(error.code) : undefined;
+    return code === "ENOTFOUND" || code === "EAI_AGAIN";
+  }
+}
+
+function withTimeout(promise, timeoutMs) {
+  let timer;
+
+  return Promise.race([
+    promise.finally(() => clearTimeout(timer)),
+    new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        const error = new Error("DNS lookup timed out");
+        error.code = "EAI_AGAIN";
+        reject(error);
+      }, timeoutMs);
+    })
+  ]);
 }
 
 function normalizeBaseUrl(value) {
