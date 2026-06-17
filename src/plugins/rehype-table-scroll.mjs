@@ -20,6 +20,26 @@ function addColumnScopes(table) {
   }
 }
 
+function addCaption(table) {
+  const caption = table.properties?.dataTableCaption;
+  if (typeof caption !== "string" || caption.trim().length === 0) return;
+
+  const existingCaption = table.children?.find((child) => isElement(child, "caption"));
+  if (existingCaption) return;
+
+  table.children = [
+    {
+      type: "element",
+      tagName: "caption",
+      properties: {},
+      children: [{ type: "text", value: caption.trim() }]
+    },
+    ...(table.children ?? [])
+  ];
+
+  delete table.properties.dataTableCaption;
+}
+
 function wrapTables(node) {
   if (!Array.isArray(node?.children)) return;
 
@@ -28,11 +48,13 @@ function wrapTables(node) {
 
     if (isElement(child, "table")) {
       addColumnScopes(child);
+      addCaption(child);
       node.children[index] = {
         type: "element",
         tagName: "div",
         properties: {
-          className: ["table-scroll"]
+          className: ["table-scroll"],
+          dataTableCaption: child.children?.find((tableChild) => isElement(tableChild, "caption"))?.children?.[0]?.value
         },
         children: [child]
       };

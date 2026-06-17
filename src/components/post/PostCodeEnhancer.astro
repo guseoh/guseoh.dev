@@ -41,8 +41,63 @@
       return languageLabels.get(key) ?? (key.length > 0 ? key[0].toUpperCase() + key.slice(1) : "Code");
     };
 
+    const getMetaValue = (pre, code, marker, key) => marker?.dataset[key] || pre.dataset[key] || code?.dataset[key] || "";
+
+    const expandHighlightedLines = (value) => {
+      const lines = new Set();
+
+      for (const token of value.split(",")) {
+        const trimmed = token.trim();
+        if (!trimmed) continue;
+
+        const [startValue, endValue] = trimmed.split("-");
+        const start = Number(startValue);
+        const end = endValue ? Number(endValue) : start;
+
+        if (!Number.isInteger(start) || !Number.isInteger(end) || start < 1 || end < start) continue;
+
+        for (let line = start; line <= end; line += 1) {
+          lines.add(line);
+        }
+      }
+
+      return lines;
+    };
+
+    const applyLineMetadata = (wrapper, pre, code, marker) => {
+      const showLineNumbers = getMetaValue(pre, code, marker, "showLineNumbers") === "true";
+      const highlightedLines = expandHighlightedLines(getMetaValue(pre, code, marker, "highlightLines"));
+      const lines = Array.from(code?.querySelectorAll(":scope > .line") ?? []);
+
+      if (showLineNumbers) {
+        wrapper.classList.add("code-block--line-numbers");
+        pre.classList.add("has-line-numbers");
+      }
+
+      if (highlightedLines.size > 0) {
+        wrapper.classList.add("code-block--highlight-lines");
+      }
+
+      lines.forEach((line, lineIndex) => {
+        if (!(line instanceof HTMLElement)) return;
+
+        const lineNumber = lineIndex + 1;
+        if (showLineNumbers) {
+          line.dataset.lineNumber = String(lineNumber);
+        }
+
+        if (highlightedLines.has(lineNumber)) {
+          line.classList.add("is-highlighted");
+        }
+      });
+    };
+
     for (const [index, pre] of blocks.entries()) {
       if (!(pre instanceof HTMLPreElement) || pre.parentElement?.classList.contains("code-block")) continue;
+      const code = pre.querySelector("code");
+      const metaMarker = pre.previousElementSibling instanceof HTMLElement && pre.previousElementSibling.classList.contains("code-block-meta")
+        ? pre.previousElementSibling
+        : null;
 
       const wrapper = document.createElement("div");
       wrapper.className = "code-block";
@@ -51,9 +106,22 @@
       const header = document.createElement("div");
       header.className = "code-block__header";
 
+      const meta = document.createElement("div");
+      meta.className = "code-block__meta";
+
       const language = document.createElement("span");
       language.className = "code-block__language";
       language.textContent = getLanguageLabel(pre);
+      meta.append(language);
+
+      const codeTitle = getMetaValue(pre, code, metaMarker, "codeTitle").trim();
+      if (codeTitle.length > 0) {
+        const title = document.createElement("span");
+        title.className = "code-block__title";
+        title.textContent = codeTitle;
+        title.title = codeTitle;
+        meta.append(title);
+      }
 
       const button = document.createElement("button");
       button.type = "button";
@@ -68,8 +136,10 @@
       status.setAttribute("aria-atomic", "true");
       button.setAttribute("aria-describedby", status.id);
 
-      header.append(language, button, status);
+      header.append(meta, button, status);
       wrapper.append(header, pre);
+      applyLineMetadata(wrapper, pre, code, metaMarker);
+      metaMarker?.remove();
 
       const copyText = async (text) => {
         if (window.navigator?.clipboard && window.isSecureContext) {

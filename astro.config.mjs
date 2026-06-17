@@ -2,7 +2,9 @@
 import { rehypeImageFlags } from "./src/plugins/rehype-image-flags.mjs";
 import { rehypeTableScroll } from "./src/plugins/rehype-table-scroll.mjs";
 import { remarkCallout } from "./src/plugins/remark-callout.mjs";
+import { codeMetaShikiTransformer, remarkCodeMeta } from "./src/plugins/remark-code-meta.mjs";
 import { remarkLinkMention } from "./src/plugins/remark-link-mention.mjs";
+import { remarkTableCaptions } from "./src/plugins/remark-table-captions.mjs";
 
 function remarkDemoteContentH1() {
   return (tree) => {
@@ -27,7 +29,9 @@ export default defineConfig({
   markdown: {
     remarkPlugins: [
       remarkDemoteContentH1,
+      remarkTableCaptions,
       remarkCallout,
+      remarkCodeMeta,
       [remarkLinkMention, { site: "https://guseoh.github.io" }]
     ],
     rehypePlugins: [rehypeTableScroll, rehypeImageFlags],
@@ -40,7 +44,8 @@ export default defineConfig({
         light: "github-light",
         dark: "github-dark"
       },
-      defaultColor: false
+      defaultColor: false,
+      transformers: [codeMetaShikiTransformer()]
     }
   }
 });

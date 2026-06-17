@@ -10,11 +10,12 @@
       if (!(wrapper instanceof HTMLElement)) return;
 
       const isScrollable = wrapper.scrollWidth > wrapper.clientWidth + 1;
+      const caption = wrapper.querySelector("caption")?.textContent?.trim();
 
       if (isScrollable) {
         wrapper.tabIndex = 0;
         wrapper.setAttribute("role", "region");
-        wrapper.setAttribute("aria-label", "스크롤 가능한 표");
+        wrapper.setAttribute("aria-label", caption ? `스크롤 가능한 표: ${caption}` : "스크롤 가능한 표");
         return;
       }
 

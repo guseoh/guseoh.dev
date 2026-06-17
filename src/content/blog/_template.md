@@ -36,7 +36,10 @@ draft: true
 - 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
 - Markdown 이미지는 ![이미지의 의미를 설명하는 alt](./image.png) 형식으로 작성합니다.
 - 다크 모드에서 원본 색을 유지해야 하는 이미지는 alt나 title에 {no-dark-filter}를 붙입니다. 렌더링 시 표시는 제거됩니다.
+- 이미지 lightbox 확대 보기에서 제외할 작은 아이콘이나 배지는 alt나 title에 {no-lightbox}를 붙입니다. 렌더링 시 표시는 제거됩니다.
 - 본문 이미지는 데스크톱에서 최대 760px, 모바일에서 화면 너비에 맞춰 자동 축소됩니다.
+- 코드 블록에는 title="파일명", showLineNumbers, {2,4-5} 줄강조를 선택적으로 붙일 수 있습니다.
+- Markdown 표 바로 앞의 <!-- table-caption: 설명 --> 주석은 접근 가능한 표 캡션으로 렌더링됩니다.
 - 장식 목적이 아니라면 alt를 비워 두지 않습니다.
 -->
 
@@ -62,6 +65,18 @@ draft: true
 
 핵심 코드, 설정, 구조 변경을 설명합니다.
 
+```java title="PostService.java" showLineNumbers {2}
+public Post findPost(Long id) {
+    return postRepository.findById(id).orElseThrow();
+}
+```
+
+<!-- table-caption: 변경 전후 비교 -->
+| 구분 | 내용 |
+| --- | --- |
+| 변경 전 | 문제나 한계 |
+| 변경 후 | 개선된 동작 |
+
 ## 검증 결과
 
 실행한 명령, 테스트, 화면 확인 결과를 정리합니다.
@@ -73,6 +88,7 @@ draft: true
 ```md
 ![게시글 조회 요청과 응답 흐름](./images/request-flow.png)
 ![다크 모드에서도 원본 색을 유지할 ERD {no-dark-filter}](./images/erd.png)
+![확대 보기에서 제외할 작은 배지 {no-lightbox}](./images/badge.png)
 ```
 
 ## 배운 점

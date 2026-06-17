@@ -5,11 +5,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostComments from "../../components/PostComments.astro";
 import PostCodeEnhancer from "../../components/post/PostCodeEnhancer.astro";
 import PostHeadingEnhancer from "../../components/post/PostHeadingEnhancer.astro";
+import PostImageLightbox from "../../components/post/PostImageLightbox.astro";
+import PostReadingProgress from "../../components/post/PostReadingProgress.astro";
+import PostRelatedPosts from "../../components/post/PostRelatedPosts.astro";
 import PostTableEnhancer from "../../components/post/PostTableEnhancer.astro";
 import PostToc from "../../components/post/PostToc.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { getAdjacentPosts, getSeriesPosts } from "../../utils/postNavigation";
 import { buildPostTocHeadings } from "../../utils/postToc";
+import { getRelatedPosts } from "../../utils/relatedPosts";
 import { getSeriesContinuationMessage, getSeriesMetadata } from "../../utils/series";
 import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
@@ -53,6 +57,7 @@ const seriesTitle = seriesMetadata?.title ?? seriesName;
 const seriesPosts = getSeriesPosts(allPosts, seriesName);
 const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
 const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
+const relatedPosts = getRelatedPosts(post, allPosts, { limit: 3 });
 const siteUrl = Astro.site ?? new URL("https://guseoh.github.io");
 const postUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const postImage = new URL(post.data.heroImage ?? SITE_OG_IMAGE, siteUrl).toString();
@@ -95,6 +100,8 @@ const postStructuredData = {
   wideContent={true}
   structuredData={postStructuredData}
 >
+  <PostReadingProgress postId={post.id} />
+
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
     <PostToc headings={tocHeadings} />
 
@@ -152,7 +159,9 @@ const postStructuredData = {
         </aside>
       )}
 
-      <Content />
+      <div class="post__content">
+        <Content />
+      </div>
 
       <footer class="post-footer">
         {seriesName && seriesTitle && (
@@ -179,6 +188,8 @@ const postStructuredData = {
           </section>
         )}
 
+        <PostRelatedPosts relatedPosts={relatedPosts} />
+
         <nav class="post-adjacent" aria-label="Previous and next posts">
           {olderPost ? (
             <a class="post-adjacent__card" href={`/blog/${olderPost.id}/`}>
@@ -203,6 +214,7 @@ const postStructuredData = {
   </div>
 
   <PostComments />
+  <PostImageLightbox />
   <PostHeadingEnhancer />
   <PostTableEnhancer />
   <PostCodeEnhancer />

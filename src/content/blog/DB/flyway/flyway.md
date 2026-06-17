@@ -27,7 +27,7 @@ draft: false
 
 ## 2. Flyway란 무엇일까?
 
-![예시 1](image-1.png)
+![예시 1 {no-lightbox}](image-1.png)
 
 Flyway는 데이터베이스의 스키마 변경을 관리하는 **데이터베이스 마이그레이션 도구**다.
 
@@ -50,7 +50,7 @@ Flyway는 애플리케이션에 포함된 마이그레이션 파일과 데이터
 `flyway_schema_history`에는 적용된 버전, 파일명, 실행 시간, 성공 여부, 체크섬 등의 정보가 저장된다. 따라서 어떤 변경이 데이터베이스에 적용되었는지 확인할 수 있다.
 
 > [!note] 확인 명령어 및 결과
-> ```sql
+> ```sql title="flyway_schema_history.sql" showLineNumbers {2}
 > SELECT *
 > FROM flyway_schema_history
 > ORDER BY installed_rank;
@@ -68,6 +68,8 @@ Versioned Migration의 기본 형식은 다음과 같다.
 ![예시](image-6.png)
 
 각 부분의 의미는 다음과 같다.
+
+<!-- table-caption: Flyway 마이그레이션 파일명 구성 -->
 
 | 구성                    | 의미                            |
 | --------------------- | ----------------------------- |

@@ -476,7 +476,7 @@ Spring MVC의 핵심인 `DispatcherServlet`도 바로 이 프론트 컨트롤러
 * https://tomcat.apache.org/tomcat-11.0-doc/servletapi/jakarta/servlet/http/HttpServletResponse.html
 * https://tomcat.apache.org/tomcat-11.0-doc/servletapi/jakarta/servlet/RequestDispatcher.html
 * https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-servlet.html
-* https://docs.spring.io/spring-boot/api/java/org/springframework/boot/web/servlet/ServletComponentScan.html
+* https://docs.spring.io/spring-boot/api/java/org/springframework/boot/web/server/servlet/context/ServletComponentScan.html
 * https://www.openmaru.io/was-java-servlet%EC%84%9C%EB%B8%94%EB%A6%BF-%EB%8F%99%EC%9E%91-%EB%B0%A9%EC%8B%9D-%ED%95%9C%EB%88%88%EC%97%90-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0/
 * https://mangkyu.tistory.com/14
 * https://mangkyu.tistory.com/18

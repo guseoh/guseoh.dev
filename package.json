@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "content:check": "node scripts/check-content.mjs",
+    "links:check": "node scripts/check-links.mjs",
     "test": "node scripts/check-korea-date.mjs",
     "smoke": "node scripts/smoke-test.mjs"
   },

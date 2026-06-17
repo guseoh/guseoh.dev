@@ -1,0 +1,121 @@
+---
+---
+
+<dialog id="post-image-lightbox" class="post-lightbox" aria-labelledby="post-lightbox-caption">
+  <button class="post-lightbox__close" type="button" aria-label="이미지 확대 보기 닫기">닫기</button>
+  <div class="post-lightbox__frame">
+    <img alt="" />
+  </div>
+  <p id="post-lightbox-caption" class="post-lightbox__caption"></p>
+</dialog>
+
+<script is:inline>
+  (() => {
+    const postContent = document.querySelector(".post__content");
+    const dialog = document.getElementById("post-image-lightbox");
+    if (!(postContent instanceof HTMLElement) || !(dialog instanceof HTMLDialogElement)) return;
+    if (postContent.dataset.lightboxReady === "true") return;
+    postContent.dataset.lightboxReady = "true";
+
+    const image = dialog.querySelector("img");
+    const caption = dialog.querySelector(".post-lightbox__caption");
+    const closeButton = dialog.querySelector(".post-lightbox__close");
+    if (!(image instanceof HTMLImageElement) || !(caption instanceof HTMLElement) || !(closeButton instanceof HTMLButtonElement)) return;
+
+    let opener = null;
+    let lockedScrollY = 0;
+
+    const isEligibleImage = (candidate) => {
+      if (!(candidate instanceof HTMLImageElement)) return false;
+      if (candidate.closest("a, .link-mention, .comments-wrap")) return false;
+      if (
+        candidate.dataset.lightbox === "false" ||
+        candidate.getAttribute("dataLightbox") === "false" ||
+        candidate.getAttribute("datalightbox") === "false"
+      ) return false;
+      if (candidate.classList.contains("no-lightbox")) return false;
+      if (candidate.getAttribute("role") === "presentation" || candidate.getAttribute("aria-hidden") === "true") return false;
+      return Boolean(candidate.currentSrc || candidate.src);
+    };
+
+    const getCaption = (target) => {
+      const figureCaption = target.closest("figure")?.querySelector("figcaption")?.textContent?.trim();
+      return figureCaption || target.alt?.trim() || "";
+    };
+
+    const lockScroll = () => {
+      lockedScrollY = window.scrollY;
+      document.documentElement.classList.add("post-lightbox-open");
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+    };
+
+    const unlockScroll = () => {
+      document.documentElement.classList.remove("post-lightbox-open");
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      window.scrollTo({ top: lockedScrollY, behavior: "auto" });
+    };
+
+    const openLightbox = (target) => {
+      opener = target;
+      const src = target.currentSrc || target.src;
+      const label = getCaption(target);
+
+      image.src = src;
+      image.alt = target.alt || "";
+      image.style.width = target.naturalWidth ? `${target.naturalWidth}px` : "";
+      image.style.height = target.naturalHeight ? `${target.naturalHeight}px` : "";
+      caption.textContent = label;
+      caption.hidden = label.length === 0;
+
+      lockScroll();
+      dialog.showModal();
+      closeButton.focus();
+    };
+
+    const closeLightbox = () => {
+      if (dialog.open) {
+        dialog.close();
+      }
+    };
+
+    for (const target of Array.from(postContent.querySelectorAll("img"))) {
+      if (!isEligibleImage(target)) continue;
+
+      target.classList.add("post-lightbox-trigger");
+      target.tabIndex = 0;
+      target.setAttribute("role", "button");
+      target.setAttribute("aria-label", `이미지 크게 보기: ${getCaption(target) || "본문 이미지"}`);
+
+      target.addEventListener("click", () => openLightbox(target));
+      target.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openLightbox(target);
+      });
+    }
+
+    closeButton.addEventListener("click", closeLightbox);
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) {
+        closeLightbox();
+      }
+    });
+
+    dialog.addEventListener("close", () => {
+      unlockScroll();
+      image.removeAttribute("src");
+      if (opener instanceof HTMLElement) {
+        opener.focus();
+      }
+      opener = null;
+    });
+  })();
+</script>

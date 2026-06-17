@@ -7,7 +7,7 @@ const contentDir = path.join(rootDir, "src", "content", "blog");
 const markdownImagePattern = /!\[([^\]]*)\]\(([^)]*)\)/g;
 const htmlImagePattern = /<img\b[^>]*>/gi;
 const headingPattern = /^(#{1,6})\s+(.+?)\s*#*\s*$/;
-const markerPattern = /\s*\{(?:no-dark-filter|theme-safe|data-theme-safe)\}\s*/gi;
+const markerPattern = /\s*\{(?:no-dark-filter|theme-safe|data-theme-safe|no-lightbox|lightbox-false)\}\s*/gi;
 
 const failures = [];
 const warnings = [];
