@@ -1,4 +1,6 @@
 ﻿import { defineConfig } from "astro/config";
+import { rehypeImageFlags } from "./src/plugins/rehype-image-flags.mjs";
+import { rehypeTableScroll } from "./src/plugins/rehype-table-scroll.mjs";
 import { remarkCallout } from "./src/plugins/remark-callout.mjs";
 import { remarkLinkMention } from "./src/plugins/remark-link-mention.mjs";
 
@@ -28,6 +30,7 @@ export default defineConfig({
       remarkCallout,
       [remarkLinkMention, { site: "https://guseoh.github.io" }]
     ],
+    rehypePlugins: [rehypeTableScroll, rehypeImageFlags],
     syntaxHighlight: {
       type: "shiki",
       excludeLangs: ["math"]

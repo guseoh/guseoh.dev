@@ -41,7 +41,7 @@
       return languageLabels.get(key) ?? (key.length > 0 ? key[0].toUpperCase() + key.slice(1) : "Code");
     };
 
-    for (const pre of blocks) {
+    for (const [index, pre] of blocks.entries()) {
       if (!(pre instanceof HTMLPreElement) || pre.parentElement?.classList.contains("code-block")) continue;
 
       const wrapper = document.createElement("div");
@@ -59,9 +59,16 @@
       button.type = "button";
       button.className = "code-copy-button";
       button.textContent = "Copy";
-      button.setAttribute("aria-label", "Copy code block");
+      button.setAttribute("aria-label", "코드 블록 복사");
 
-      header.append(language, button);
+      const status = document.createElement("span");
+      status.id = `code-copy-status-${index}`;
+      status.className = "sr-only";
+      status.setAttribute("aria-live", "polite");
+      status.setAttribute("aria-atomic", "true");
+      button.setAttribute("aria-describedby", status.id);
+
+      header.append(language, button, status);
       wrapper.append(header, pre);
 
       const copyText = async (text) => {
@@ -90,17 +97,33 @@
         return copied ? "copied" : "selected";
       };
 
+      const announce = (message) => {
+        if (status.textContent === message) {
+          status.textContent = "";
+          window.setTimeout(() => {
+            status.textContent = message;
+          }, 20);
+          return;
+        }
+
+        status.textContent = message;
+      };
+
       button.addEventListener("click", async () => {
         const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
 
         try {
           const result = await copyText(code);
           button.textContent = result === "copied" ? "Copied" : "Selected";
+          announce(result === "copied"
+            ? "코드가 복사되었습니다."
+            : "코드를 선택했습니다. 직접 복사해 주세요.");
           window.setTimeout(() => {
             button.textContent = "Copy";
           }, 1400);
         } catch {
           button.textContent = "Selected";
+          announce("코드를 복사하지 못했습니다. 직접 선택해서 복사해 주세요.");
           window.setTimeout(() => {
             button.textContent = "Copy";
           }, 1400);

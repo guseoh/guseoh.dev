@@ -10,6 +10,7 @@ export const HOME_POST_LIMIT = 5;
 export const POSTS_PER_PAGE = 12;
 export const SIDEBAR_TAG_LIMIT = 16;
 export const DETAIL_TAG_LIMIT = 8;
+export const POST_STALE_MONTHS = 12;
 
 export const CORE_TECH_TAGS = [
   "Spring Boot",
@@ -41,6 +42,18 @@ export function getPostDescription(post: CollectionEntry<"blog">) {
     : "학습 과정과 구현 맥락을 정리한 기록입니다.";
 }
 
+export function getPostVerificationDate(post: CollectionEntry<"blog">) {
+  return post.data.lastVerified ?? post.data.updated ?? post.data.date;
+}
+
+export function isPostContentStale(post: CollectionEntry<"blog">, now: Date = new Date()) {
+  const verifiedAt = startOfUtcDay(getPostVerificationDate(post));
+  const staleBefore = startOfUtcDay(now);
+  staleBefore.setUTCMonth(staleBefore.getUTCMonth() - POST_STALE_MONTHS);
+
+  return verifiedAt <= staleBefore;
+}
+
 export function getReadingTime(post: CollectionEntry<"blog">) {
   const source = post.body ?? "";
   const codeBlocks = source.match(/```[\s\S]*?```/g) ?? [];
@@ -56,5 +69,9 @@ export function getReadingTime(post: CollectionEntry<"blog">) {
   const minutes = Math.max(1, Math.ceil(estimatedWords / 240));
 
   return `${minutes}분 읽기`;
+}
+
+function startOfUtcDay(date: Date) {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
 }
 

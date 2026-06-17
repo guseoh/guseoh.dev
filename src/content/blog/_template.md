@@ -3,6 +3,7 @@ title: "글 제목"
 description: "검색 결과와 OG 메타에 사용될 한두 문장 요약"
 date: 2026-06-05
 updated: 2026-06-05
+lastVerified: 2026-06-05
 category: "Board"
 tags:
   - Spring
@@ -19,6 +20,8 @@ draft: true
 작성 규칙
 - title: 상세 페이지의 유일한 h1입니다.
 - description: 검색 결과와 OG 메타에 사용할 문제/결과 중심 요약을 작성합니다.
+- date: 최초 작성일, updated는 마지막 수정일입니다.
+- lastVerified: 내용과 링크를 실제로 다시 확인한 날짜입니다. 확인하지 않았다면 삭제합니다.
 - category: 글의 큰 소속 하나만 선택합니다. Board, OS, Java, Git 등이 현재 사용 중입니다.
 - tags: 기술, 주제, 글 성격을 나타내는 태그를 3~7개 정도 작성합니다.
 - book: src/data/books.json에 직접 등록한 Book id입니다. Book에 포함하지 않을 글이면 필드를 삭제하거나 빈 값으로 둡니다.
@@ -32,6 +35,7 @@ draft: true
 - draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.
 - 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
 - Markdown 이미지는 ![이미지의 의미를 설명하는 alt](./image.png) 형식으로 작성합니다.
+- 다크 모드에서 원본 색을 유지해야 하는 이미지는 alt나 title에 {no-dark-filter}를 붙입니다. 렌더링 시 표시는 제거됩니다.
 - 본문 이미지는 데스크톱에서 최대 760px, 모바일에서 화면 너비에 맞춰 자동 축소됩니다.
 - 장식 목적이 아니라면 alt를 비워 두지 않습니다.
 -->
@@ -68,6 +72,7 @@ draft: true
 
 ```md
 ![게시글 조회 요청과 응답 흐름](./images/request-flow.png)
+![다크 모드에서도 원본 색을 유지할 ERD {no-dark-filter}](./images/erd.png)
 ```
 
 ## 배운 점

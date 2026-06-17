@@ -4,6 +4,8 @@ import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostComments from "../../components/PostComments.astro";
 import PostCodeEnhancer from "../../components/post/PostCodeEnhancer.astro";
+import PostHeadingEnhancer from "../../components/post/PostHeadingEnhancer.astro";
+import PostTableEnhancer from "../../components/post/PostTableEnhancer.astro";
 import PostToc from "../../components/post/PostToc.astro";
 import { normalizeCategory } from "../../utils/categories";
 import { getAdjacentPosts, getSeriesPosts } from "../../utils/postNavigation";
@@ -12,10 +14,16 @@ import { getSeriesContinuationMessage, getSeriesMetadata } from "../../utils/ser
 import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
   DETAIL_TAG_LIMIT,
+  GITHUB_URL,
+  SITE_AUTHOR,
   SITE_DESCRIPTION,
+  SITE_OG_IMAGE,
+  SITE_TITLE,
   formatPostDate,
   getPostDescription,
+  getPostVerificationDate,
   getReadingTime,
+  isPostContentStale,
   sortPostsByDate
 } from "../../utils/posts";
 
@@ -45,6 +53,36 @@ const seriesTitle = seriesMetadata?.title ?? seriesName;
 const seriesPosts = getSeriesPosts(allPosts, seriesName);
 const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
 const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
+const siteUrl = Astro.site ?? new URL("https://guseoh.github.io");
+const postUrl = new URL(Astro.url.pathname, siteUrl).toString();
+const postImage = new URL(post.data.heroImage ?? SITE_OG_IMAGE, siteUrl).toString();
+const verificationDate = getPostVerificationDate(post);
+const isStalePost = isPostContentStale(post);
+const postStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: post.data.title,
+  description,
+  datePublished: post.data.date.toISOString(),
+  dateModified: (post.data.updated ?? post.data.date).toISOString(),
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": postUrl
+  },
+  url: postUrl,
+  author: {
+    "@type": "Person",
+    name: SITE_AUTHOR,
+    url: GITHUB_URL
+  },
+  publisher: {
+    "@type": "Organization",
+    name: SITE_TITLE
+  },
+  image: postImage,
+  articleSection: categoryName,
+  keywords: post.data.tags.length > 0 ? post.data.tags : undefined
+};
 ---
 
 <BaseLayout
@@ -55,6 +93,7 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
   updatedTime={(post.data.updated ?? post.data.date).toISOString()}
   type="article"
   wideContent={true}
+  structuredData={postStructuredData}
 >
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
     <PostToc headings={tocHeadings} />
@@ -73,6 +112,12 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
             <div class="post-meta-item">
               <dt>수정일</dt>
               <dd><time datetime={post.data.updated.toISOString()}>{formatPostDate(post.data.updated)}</time></dd>
+            </div>
+          )}
+          {post.data.lastVerified && (
+            <div class="post-meta-item">
+              <dt>마지막 검증</dt>
+              <dd><time datetime={post.data.lastVerified.toISOString()}>{formatPostDate(post.data.lastVerified)}</time></dd>
             </div>
           )}
           <div class="post-meta-item">
@@ -96,6 +141,16 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
           )
         }
       </header>
+
+      {isStalePost && (
+        <aside class="post-freshness-note" aria-label="게시글 검증 안내">
+          <strong>검증 안내</strong>
+          <p>
+            이 글은 마지막 검증 후 1년 이상 지났습니다. 일부 내용이 현재 버전과 다를 수 있습니다.
+            <span> 마지막 기준일: <time datetime={verificationDate.toISOString()}>{formatPostDate(verificationDate)}</time></span>
+          </p>
+        </aside>
+      )}
 
       <Content />
 
@@ -148,5 +203,7 @@ const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
   </div>
 
   <PostComments />
+  <PostHeadingEnhancer />
+  <PostTableEnhancer />
   <PostCodeEnhancer />
 </BaseLayout>

@@ -1,0 +1,112 @@
+---
+---
+
+<div id="heading-copy-status" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+<script is:inline>
+  (() => {
+    const post = document.querySelector(".post");
+    const status = document.getElementById("heading-copy-status");
+    if (!(post instanceof HTMLElement) || !(status instanceof HTMLElement)) return;
+    if (post.dataset.headingAnchorsReady === "true") return;
+    post.dataset.headingAnchorsReady = "true";
+
+    const ensureHeadingActions = () => {
+      const headings = Array.from(post.querySelectorAll("h2[id], h3[id], h4[id]"));
+
+      for (const heading of headings) {
+        if (!(heading instanceof HTMLElement)) continue;
+
+        const id = heading.id;
+        if (!id || heading.querySelector(".post-heading-actions")) continue;
+
+        const label = heading.textContent?.trim() || "제목";
+        const actions = document.createElement("span");
+        actions.className = "post-heading-actions";
+
+        const anchor = document.createElement("a");
+        anchor.className = "post-heading-anchor";
+        anchor.href = `#${id}`;
+        anchor.setAttribute("aria-label", `제목 링크로 이동: ${label}`);
+        anchor.title = "제목 링크";
+        anchor.textContent = "#";
+
+        const button = document.createElement("button");
+        button.className = "post-heading-copy";
+        button.type = "button";
+        button.dataset.headingId = id;
+        button.setAttribute("aria-label", `제목 URL 복사: ${label}`);
+        button.title = "제목 URL 복사";
+        button.textContent = "복사";
+
+        actions.append(anchor, button);
+        heading.classList.add("post-heading");
+        heading.append(actions);
+      }
+    };
+
+    ensureHeadingActions();
+
+    const buttons = Array.from(post.querySelectorAll(".post-heading-copy"));
+    if (buttons.length === 0) return;
+
+    const copyText = async (text) => {
+      if (window.navigator?.clipboard && window.isSecureContext) {
+        await window.navigator.clipboard.writeText(text);
+        return "copied";
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "true");
+      textarea.style.position = "fixed";
+      textarea.style.top = "-1000px";
+      textarea.style.left = "-1000px";
+      document.body.append(textarea);
+      textarea.select();
+
+      const execCopy = document["exec" + "Command"];
+      const copied = typeof execCopy === "function" && execCopy.call(document, "copy");
+      textarea.remove();
+
+      return copied ? "copied" : "selected";
+    };
+
+    const announce = (message) => {
+      if (status.textContent === message) {
+        status.textContent = "";
+        window.setTimeout(() => {
+          status.textContent = message;
+        }, 20);
+        return;
+      }
+
+      status.textContent = message;
+    };
+
+    for (const button of buttons) {
+      if (!(button instanceof HTMLButtonElement)) continue;
+
+      button.addEventListener("click", async () => {
+        const id = button.dataset.headingId;
+        if (!id) return;
+
+        const url = new URL(window.location.href);
+        url.hash = id;
+
+        try {
+          const result = await copyText(url.toString());
+          button.textContent = result === "copied" ? "완료" : "선택됨";
+          announce(result === "copied"
+            ? "제목 URL이 복사되었습니다."
+            : "제목 URL을 선택했습니다. 직접 복사해 주세요.");
+          window.setTimeout(() => {
+            button.textContent = "복사";
+          }, 1400);
+        } catch {
+          announce("제목 URL을 복사하지 못했습니다.");
+        }
+      });
+    }
+  })();
+</script>

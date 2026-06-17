@@ -3,6 +3,7 @@ title: "Flyway는 무엇일까?"
 description: "Flyway의 개념과 동작 방식, 사용하는 이유에 대해 알아보자."
 date: 2026-06-17
 updated: 2026-06-17
+lastVerified: 2026-06-17
 category: "Spring"
 tags:
   - Spring Boot

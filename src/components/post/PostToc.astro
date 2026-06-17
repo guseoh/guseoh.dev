@@ -38,7 +38,7 @@ const { headings } = Astro.props as Props;
       </section>
 
       <aside class="post-toc" aria-label="Document table of contents">
-        <p class="post-toc__title">ON THIS PAGE</p>
+        <p class="post-toc__title">이 글의 목차</p>
         <ul class="post-toc__list">
           {headings.map((heading) => (
             <li class:list={["post-toc__item", `depth-${heading.depth}`]}>
@@ -51,6 +51,10 @@ const { headings } = Astro.props as Props;
       <script is:inline>
         (() => {
           const initializeToc = () => {
+            const tocRoot = document.querySelector(".post-view");
+            if (!(tocRoot instanceof HTMLElement) || tocRoot.dataset.tocReady === "true") return;
+            tocRoot.dataset.tocReady = "true";
+
             const links = Array.from(
               document.querySelectorAll(".post-toc__item a, .post-toc-mobile__item a")
             );
@@ -101,6 +105,16 @@ const { headings } = Astro.props as Props;
               }
             };
 
+            let activeFrame = 0;
+            const scheduleActive = () => {
+              if (activeFrame) return;
+
+              activeFrame = window.requestAnimationFrame(() => {
+                activeFrame = 0;
+                applyActive();
+              });
+            };
+
             const applyMobileTocState = (open, { restoreFocus = false } = {}) => {
               if (
                 !(mobileToggle instanceof HTMLButtonElement) ||
@@ -126,7 +140,7 @@ const { headings } = Astro.props as Props;
               mobilePanel.addEventListener("click", (event) => {
                 if (event.target instanceof HTMLAnchorElement) {
                   applyMobileTocState(false);
-                  window.setTimeout(applyActive, 0);
+                  window.setTimeout(scheduleActive, 0);
                 }
               });
 
@@ -141,8 +155,9 @@ const { headings } = Astro.props as Props;
             }
 
             applyActive();
-            window.addEventListener("scroll", applyActive, { passive: true });
-            window.addEventListener("resize", applyActive);
+            window.addEventListener("scroll", scheduleActive, { passive: true });
+            window.addEventListener("resize", scheduleActive);
+            window.addEventListener("hashchange", scheduleActive);
           };
 
           if (document.readyState === "loading") {

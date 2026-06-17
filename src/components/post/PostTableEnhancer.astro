@@ -1,0 +1,37 @@
+---
+---
+
+<script is:inline>
+  (() => {
+    const tables = Array.from(document.querySelectorAll(".post .table-scroll"));
+    if (tables.length === 0) return;
+
+    const updateTable = (wrapper) => {
+      if (!(wrapper instanceof HTMLElement)) return;
+
+      const isScrollable = wrapper.scrollWidth > wrapper.clientWidth + 1;
+
+      if (isScrollable) {
+        wrapper.tabIndex = 0;
+        wrapper.setAttribute("role", "region");
+        wrapper.setAttribute("aria-label", "스크롤 가능한 표");
+        return;
+      }
+
+      wrapper.removeAttribute("tabindex");
+      wrapper.removeAttribute("role");
+      wrapper.removeAttribute("aria-label");
+    };
+
+    const updateAll = () => tables.forEach(updateTable);
+
+    updateAll();
+
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(updateAll);
+      tables.forEach((table) => observer.observe(table));
+    } else {
+      window.addEventListener("resize", updateAll, { passive: true });
+    }
+  })();
+</script>

@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "content:check": "node scripts/check-content.mjs",
     "test": "node scripts/check-korea-date.mjs",
     "smoke": "node scripts/smoke-test.mjs"
   },

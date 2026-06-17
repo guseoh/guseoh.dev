@@ -80,7 +80,7 @@ int[] array = new int[10];
 - 최상위 타입인 `Object[]` 배열을 사용하기 때문에 요소 접근 성능이 좋다.
 - 하지만 중간에 요소를 삽입하거나 삭제하는 경우, 그 뒤의 요소들을 한 칸씩 밀거나 당겨야 하므로 비효율적일 수 있다.
 
-### LinkedList
+### List 구현체 LinkedList
 
 - 데이터(item)와 주소를 가진 `Node` 객체를 서로 연결하는 방식이다.
   - 데이터와 주소로 이루어진 객체를 `Node`라고 한다.
@@ -103,7 +103,7 @@ int[] array = new int[10];
 - `Stack`은 `Vector` 클래스를 상속받는다.
 - Java에서 지원하는 `Stack` 클래스의 메서드들도 대부분 `Vector`에 있는 메서드를 이용하여 구현되어 있어 구조적으로 크게 다르지 않다.
 
-### 객체 생성 방법
+### List 객체 생성 방법
 
 ```java
 ArrayList<T> list = new ArrayList<>();
@@ -141,7 +141,7 @@ Vector<T> vector1 = new Stack<>();
 
 ![Queue/Deque 인터페이스에 선언된 대표적인 메서드](image-1.png)
 
-### LinkedList
+### Queue/Deque 구현체 LinkedList
 
 왜 여기서 `LinkedList`가 또 등장하는지 의문이 들 수 있다. 아래 그림을 보면 `LinkedList`는 `List`와 `Deque`를 모두 구현하고 있다. 그리고 `Deque` 인터페이스는 `Queue` 인터페이스를 상속받는다.
 
@@ -175,7 +175,7 @@ System.out.println(stack.pop()); // 20
 - 주어진 데이터 중 최댓값 또는 최솟값을 꺼내올 때 유용하게 사용할 수 있다.
 - 하지만 사용자가 정의한 객체를 타입으로 사용할 경우 반드시 `Comparator` 또는 `Comparable`을 통해 정렬 방식을 구현해야 한다.
 
-### 객체 생성 방법
+### Queue/Deque 객체 생성 방법
 
 ```java
 ArrayDeque<Integer> arrayDeque = new ArrayDeque<>();
@@ -273,7 +273,7 @@ public HashSet() {
 > 
 > `SortedSet`은 반복자(iterator)는 요소들을 **오름차순 순서**로 순회한다. 또한 정렬 순서를 활용할 수 있는 여러 추가 메서드들을 제공한다.
 
-### 객체 생성 방법
+### Set 객체 생성 방법
 
 ```java
 HashSet<Integer> hashset = new HashSet<>();

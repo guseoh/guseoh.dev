@@ -104,7 +104,7 @@ html.left-sidebar-collapsed .post-view--single > .post,
 }
 
 .post__description,
-.post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
+.post > :where(p, ul, ol, blockquote, .markdown-alert, .table-scroll, figure) {
   font-family: var(--font-prose);
 }
 
@@ -117,7 +117,7 @@ html.left-sidebar-collapsed .post-view--single > .post,
 
 .post-meta-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(8.6rem, 1fr));
   gap: 0.65rem;
   margin: 0;
 }
@@ -165,7 +165,8 @@ html.left-sidebar-collapsed .post-view--single > .post,
   .link-mention,
   .code-block,
   pre,
-  table,
+  .table-scroll,
+  .post-freshness-note,
   figure,
   .post__header,
   .post-meta-grid,
@@ -197,7 +198,7 @@ html.left-sidebar-collapsed .post-view--single > .post,
   color: inherit;
 }
 
-.post > :where(p, ul, ol, blockquote, .markdown-alert, table, figure) {
+.post > :where(p, ul, ol, blockquote, .markdown-alert, .table-scroll, figure) {
   font-weight: var(--post-body-weight);
 }
 
@@ -209,11 +210,11 @@ html.left-sidebar-collapsed .post-view--single > .post,
   line-height: 1.8;
 }
 
-.post > table :where(td) {
+.post table :where(td) {
   font-weight: var(--post-body-weight);
 }
 
-.post > table :where(th) {
+.post table :where(th) {
   font-weight: 650;
 }
 
@@ -229,6 +230,57 @@ html.left-sidebar-collapsed .post-view--single > .post,
 
 .post :where(h1, h2, h3, h4) {
   scroll-margin-top: 5.5rem;
+}
+
+.post-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.post-heading-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.post-heading:hover .post-heading-actions,
+.post-heading:focus-within .post-heading-actions {
+  opacity: 1;
+}
+
+.post-heading-anchor,
+.post-heading-copy {
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  color: var(--post-link);
+  font-family: var(--font-ui);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1;
+  padding: 0.24rem 0.38rem;
+  text-decoration: none;
+}
+
+.post-heading-copy {
+  cursor: pointer;
+}
+
+.post-heading-anchor:hover,
+.post-heading-anchor:focus-visible,
+.post-heading-copy:hover,
+.post-heading-copy:focus-visible {
+  background: var(--surface-hover);
+  color: var(--post-link-hover);
 }
 
 .post > h2 {
@@ -425,13 +477,37 @@ html.left-sidebar-collapsed .post-view--single > .post,
   padding: 0;
 }
 
-html[data-theme="dark"] .post > :where(h1, h2, h3, h4, p, ul, ol, table, blockquote) > code,
-html[data-theme="dark"] .post > :where(h1, h2, h3, h4, p, ul, ol, table, blockquote) :not(pre) > code {
+html[data-theme="dark"] .post > :where(h1, h2, h3, h4, p, ul, ol, .table-scroll, blockquote) > code,
+html[data-theme="dark"] .post > :where(h1, h2, h3, h4, p, ul, ol, .table-scroll, blockquote) :not(pre) > code {
   border-color: rgba(125, 211, 252, 0.12);
   background: rgba(30, 41, 59, 0.75);
   box-shadow: none;
   color: #7dd3fc;
   padding: 0.1rem 0.34rem;
+}
+
+.post-freshness-note {
+  display: grid;
+  gap: 0.38rem;
+  margin: 1rem auto 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-left: 4px solid var(--accent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent-soft) 62%, var(--surface));
+  color: var(--ink);
+  padding: 0.68rem 0.9rem;
+}
+
+.post-freshness-note strong {
+  color: var(--heading);
+  font-size: 0.84rem;
+}
+
+.post-freshness-note p {
+  margin: 0;
+  color: var(--muted-readable);
+  font-size: 0.92rem;
+  line-height: 1.62;
 }
 
 .code-block {
@@ -492,14 +568,25 @@ html[data-theme="dark"] .astro-code span {
   color: var(--shiki-dark) !important;
 }
 
-.post table {
+.post .table-scroll {
   width: 100%;
-  display: block;
   margin: 1rem auto 0;
   overflow-x: auto;
-  border-collapse: collapse;
+  overflow-y: hidden;
   border: 1px solid var(--border);
   border-radius: 8px;
+  background: var(--post-bg);
+}
+
+.post .table-scroll:focus-visible {
+  outline: 2px solid var(--post-link-focus);
+  outline-offset: 3px;
+}
+
+.post .table-scroll > table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
 }
 
 .post th,
@@ -509,6 +596,12 @@ html[data-theme="dark"] .astro-code span {
   padding: 0.65rem 0.75rem;
   text-align: left;
   vertical-align: top;
+}
+
+.post th:first-child,
+.post td:first-child {
+  width: 1%;
+  white-space: nowrap;
 }
 
 .post th {
@@ -532,7 +625,12 @@ html[data-theme="dark"] .astro-code span {
 html[data-theme="dark"] .post img {
   border-color: rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.03);
-  filter: brightness(0.92) contrast(1.02);
+  filter: brightness(0.96) contrast(1.01);
+}
+
+html[data-theme="dark"] .post img.no-dark-filter,
+html[data-theme="dark"] .post img[data-theme-safe="true"] {
+  filter: none;
 }
 
 .post > p:has(> img:only-child),
@@ -1026,6 +1124,10 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
     margin-bottom: 0.65rem;
   }
 
+  .post-heading-actions {
+    opacity: 1;
+  }
+
   .post-meta-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1043,9 +1145,10 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
     .link-mention,
     .code-block,
     pre,
-    table,
+    .table-scroll,
     figure,
     .post__header,
+    .post-freshness-note,
     .post-meta-grid,
     .post-meta-tags,
     .post-footer
@@ -1065,5 +1168,11 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 @media (max-width: 480px) {
   .post-meta-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .post-heading-actions {
+    display: none;
   }
 }
