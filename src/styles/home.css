@@ -342,13 +342,6 @@
   --grass-level-4: var(--github-grass-4);
 }
 
-.home-content-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 1rem;
-  align-items: start;
-}
-
 .home-section__head {
   display: flex;
   align-items: center;
@@ -389,80 +382,6 @@
   gap: 0.45rem;
 }
 
-.home-topic-index {
-  min-width: 0;
-  gap: 0.72rem;
-  align-self: start;
-}
-
-.home-topic-index .home-section__head > div {
-  display: grid;
-  gap: 0.36rem;
-}
-
-.topic-index-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.72rem;
-}
-
-.topic-index-group {
-  min-width: 0;
-  display: grid;
-  align-content: space-between;
-  gap: 0.52rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card-bg);
-  color: var(--muted-readable);
-  box-shadow: 0 16px 30px -28px var(--shadow);
-  padding: 0.82rem;
-  text-decoration: none;
-}
-
-.topic-index-group__head {
-  min-width: 0;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.58rem;
-}
-
-.topic-index-group__head strong {
-  color: var(--heading);
-  font-size: 0.92rem;
-  line-height: 1.25;
-}
-
-.topic-index-group__description {
-  color: var(--muted-readable);
-  font-size: 0.7rem;
-  line-height: 1.48;
-}
-
-.topic-index-group__count {
-  flex: 0 0 auto;
-  border: 1px solid var(--tag-border);
-  border-radius: 999px;
-  background: var(--tag-bg);
-  color: var(--tag-text);
-  font-size: 0.66rem;
-  font-weight: 800;
-  line-height: 1;
-  padding: 0.28rem 0.42rem;
-}
-
-.topic-index-group:hover,
-.topic-index-group:focus-visible {
-  border-color: color-mix(in srgb, var(--accent) 52%, var(--border));
-  background: var(--surface-hover);
-}
-
-.topic-index-group:hover .topic-index-group__head strong,
-.topic-index-group:focus-visible .topic-index-group__head strong {
-  color: var(--link-hover);
-}
-
 .home-latest-posts {
   min-width: 0;
 }
@@ -494,9 +413,6 @@
     padding-left: 0;
   }
 
-  .topic-index-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 680px) {
@@ -542,7 +458,4 @@
     justify-content: flex-start;
   }
 
-  .topic-index-grid {
-    grid-template-columns: 1fr;
-  }
 }

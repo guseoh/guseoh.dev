@@ -167,6 +167,17 @@
         return copied ? "copied" : "selected";
       };
 
+      const getCodeText = () => {
+        const code = pre.querySelector("code");
+        const lines = Array.from(code?.querySelectorAll(":scope > .line") ?? []);
+
+        if (lines.length > 0) {
+          return lines.map((line) => line.textContent ?? "").join("\n");
+        }
+
+        return code?.textContent ?? pre.textContent ?? "";
+      };
+
       const announce = (message) => {
         if (status.textContent === message) {
           status.textContent = "";
@@ -180,10 +191,8 @@
       };
 
       button.addEventListener("click", async () => {
-        const code = pre.querySelector("code")?.textContent ?? pre.textContent ?? "";
-
         try {
-          const result = await copyText(code);
+          const result = await copyText(getCodeText());
           button.textContent = result === "copied" ? "Copied" : "Selected";
           announce(result === "copied"
             ? "코드가 복사되었습니다."

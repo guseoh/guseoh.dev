@@ -1,5 +1,4 @@
 import type { CollectionEntry } from "astro:content";
-import homeTopicsData from "../data/home-topics.json";
 import navigationData from "../data/navigation.json";
 import type { CategoryTreeGroup } from "./categories";
 import { getCategorySlug } from "./categories";
@@ -34,17 +33,6 @@ export type NavigationGroupView = Omit<NavigationGroup, "items"> & {
   href: string;
   count: number;
   items: NavigationItemView[];
-};
-
-type HomeTopicDefinition = {
-  title: string;
-  description: string;
-  href: string;
-  selectors: NavigationItem[];
-};
-
-export type HomeTopicView = Omit<HomeTopicDefinition, "selectors"> & {
-  count: number;
 };
 
 export function buildNavigationGroups(posts: CollectionEntry<"blog">[]): NavigationGroupView[] {
@@ -89,23 +77,6 @@ export function buildSidebarNavigation(posts: CollectionEntry<"blog">[]): Catego
       planned: item.planned
     }))
   }));
-}
-
-export function buildHomeTopicGroups(posts: CollectionEntry<"blog">[]): HomeTopicView[] {
-  return (homeTopicsData as HomeTopicDefinition[])
-    .map((topic) => {
-      const postIds = new Set(topic.selectors.flatMap((selector) =>
-        filterPostsByNavigationItem(posts, selector).map((post) => post.id)
-      ));
-
-      return {
-        title: topic.title,
-        description: topic.description,
-        href: topic.href,
-        count: postIds.size
-      };
-    })
-    .filter((topic) => topic.count > 0);
 }
 
 function filterPostsByNavigationItem(posts: CollectionEntry<"blog">[], item: NavigationItem) {

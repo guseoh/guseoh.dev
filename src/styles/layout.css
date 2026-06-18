@@ -176,16 +176,16 @@
 
 /* Outer shell: left navigation + page content. Post body/TOC columns live in post.css. */
 .site-layout {
-  --site-sidebar-width: minmax(240px, 280px);
+  --site-sidebar-width: clamp(240px, 18vw, 280px);
   --site-sidebar-collapsed-width: 2.75rem;
   --site-layout-gap: 1.25rem;
   flex: 1;
   display: grid;
-  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
+  grid-template-columns: minmax(0, var(--site-sidebar-width)) minmax(0, 1fr);
   gap: var(--site-layout-gap);
   align-items: start;
   padding: 1.25rem 0 3rem;
-  transition: grid-template-columns 180ms ease, gap 180ms ease;
+  transition: grid-template-columns 220ms ease, gap 220ms ease;
 }
 
 .site-layout--minimal {
@@ -194,7 +194,7 @@
 
 .site-layout--wide:not(.site-layout--minimal) {
   --site-layout-gap: clamp(1.25rem, 1.6vw, 2rem);
-  grid-template-columns: var(--site-sidebar-width) minmax(0, 1fr);
+  grid-template-columns: minmax(0, var(--site-sidebar-width)) minmax(0, 1fr);
 }
 
 .site-layout:not(.site-layout--minimal) > .site-sidebar {
@@ -209,7 +209,7 @@
 
 html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal),
 .site-shell.sidebar-collapsed .site-layout:not(.site-layout--minimal) {
-  grid-template-columns: var(--site-sidebar-collapsed-width) minmax(0, 1fr);
+  grid-template-columns: minmax(0, var(--site-sidebar-collapsed-width)) minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -277,6 +277,16 @@ html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal) .site-conten
   border: 0;
   background: rgba(10, 16, 24, 0.44);
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease, visibility 220ms ease;
+  visibility: hidden;
+}
+
+.sidebar-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .site-sidebar {
@@ -291,7 +301,7 @@ html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal) .site-conten
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
-  transition: opacity 160ms ease, transform 180ms ease, visibility 180ms ease;
+  transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
 }
 
 .site-sidebar::-webkit-scrollbar,
@@ -599,10 +609,9 @@ html.left-sidebar-collapsed .site-sidebar,
   }
 
   .site-shell.sidebar-collapsed .site-sidebar {
-    display: none;
     opacity: 0;
     pointer-events: none;
-    transform: translateX(-105%);
+    transform: translateX(calc(-100% - 1rem));
     visibility: hidden;
   }
 
@@ -685,5 +694,13 @@ html.left-sidebar-collapsed .site-sidebar,
 
   .site-layout {
     padding-bottom: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-layout,
+  .site-sidebar,
+  .sidebar-backdrop {
+    transition: none;
   }
 }

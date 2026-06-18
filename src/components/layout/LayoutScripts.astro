@@ -152,12 +152,15 @@
     ) {
       const storageKey = "blog-left-sidebar-collapsed";
       const media = window.matchMedia("(max-width: 980px)");
+      const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
       const isNarrow = () => media.matches;
+      const prefersReducedMotion = () => motionMedia.matches;
       const backgroundElements = [
         document.querySelector(".site-header"),
         document.querySelector(".site-content")
       ].filter((element) => element instanceof HTMLElement);
       let sidebarTrigger = sidebarOpenButton;
+      let backdropHideTimer = 0;
 
       const getFocusableElements = () =>
         Array.from(
@@ -192,6 +195,33 @@
         }
       };
 
+      const setBackdropVisible = (visible) => {
+        if (!(sidebarBackdrop instanceof HTMLButtonElement)) return;
+
+        window.clearTimeout(backdropHideTimer);
+
+        if (visible) {
+          sidebarBackdrop.hidden = false;
+          sidebarBackdrop.getBoundingClientRect();
+          sidebarBackdrop.classList.add("is-visible");
+          return;
+        }
+
+        sidebarBackdrop.classList.remove("is-visible");
+
+        if (prefersReducedMotion() || sidebarBackdrop.hidden) {
+          sidebarBackdrop.hidden = true;
+          return;
+        }
+
+        const hide = () => {
+          sidebarBackdrop.hidden = true;
+        };
+
+        sidebarBackdrop.addEventListener("transitionend", hide, { once: true });
+        backdropHideTimer = window.setTimeout(hide, 260);
+      };
+
       const applySidebarState = (
         collapsed,
         persist = false,
@@ -206,6 +236,7 @@
         document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
         document.body.classList.toggle("has-sidebar-open", modalOpen);
         sidebar.setAttribute("aria-hidden", shouldCollapse ? "true" : "false");
+        sidebar.inert = narrow && shouldCollapse;
 
         if (modalOpen) {
           sidebar.setAttribute("role", "dialog");
@@ -224,9 +255,7 @@
         sidebarCollapseButton.setAttribute("aria-label", "탐색 접기");
         sidebarCloseButton.hidden = !narrow;
 
-        if (sidebarBackdrop instanceof HTMLButtonElement) {
-          sidebarBackdrop.hidden = !modalOpen;
-        }
+        setBackdropVisible(modalOpen);
 
         setBackgroundInert(modalOpen);
 

@@ -2,14 +2,11 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
-import { buildHomeTopicGroups } from "../utils/navigation";
 import ActivitySection from "../components/home/ActivitySection.astro";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
-import TopicIndex from "../components/home/TopicIndex.astro";
 
 const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
-const homeTopicGroups = buildHomeTopicGroups(posts);
 ---
 
 <BaseLayout
@@ -19,9 +16,6 @@ const homeTopicGroups = buildHomeTopicGroups(posts);
 >
   <ArchiveHero />
   <ActivitySection posts={posts} username="guseoh" />
-  <div class="home-content-grid">
-    <TopicIndex groups={homeTopicGroups} />
-    <LatestPosts posts={posts} />
-  </div>
+  <LatestPosts posts={posts} />
 </BaseLayout>
 

@@ -18,17 +18,58 @@ const { postId } = Astro.props as Props;
   </div>
 </aside>
 
+<button
+  type="button"
+  class="post-back-to-top"
+  data-post-back-to-top
+  aria-label="페이지 맨 위로 이동"
+  aria-hidden="true"
+  tabindex="-1"
+  hidden
+>
+  <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+    <path d="m6 14 6-6 6 6"></path>
+    <path d="M12 8v12"></path>
+  </svg>
+  <span>맨 위로</span>
+</button>
+
 <script is:inline define:vars={{ postId }}>
   (() => {
+    let initialized = false;
+    let initAttempts = 0;
+
     const initReadingProgress = () => {
+      if (initialized) return;
+
       const content = document.querySelector(".post__content");
       const bar = document.querySelector("[data-reading-progress-bar]");
       const resume = document.querySelector("[data-post-resume]");
-      if (!(content instanceof HTMLElement) || !(bar instanceof HTMLElement) || !(resume instanceof HTMLElement)) return;
+      const backToTopButton = document.querySelector("[data-post-back-to-top]");
+      if (
+        !content ||
+        !bar ||
+        !resume ||
+        backToTopButton?.tagName !== "BUTTON"
+      ) {
+        initAttempts += 1;
+        if (initAttempts <= 20) {
+          window.setTimeout(initReadingProgress, 50);
+        }
+        return;
+      }
 
     const continueButton = resume.querySelector("[data-post-resume-continue]");
     const dismissButton = resume.querySelector("[data-post-resume-dismiss]");
-    if (!(continueButton instanceof HTMLButtonElement) || !(dismissButton instanceof HTMLButtonElement)) return;
+    if (continueButton?.tagName !== "BUTTON" || dismissButton?.tagName !== "BUTTON") {
+      initAttempts += 1;
+      if (initAttempts <= 20) {
+        window.setTimeout(initReadingProgress, 50);
+      }
+      return;
+    }
+
+    initialized = true;
 
     const STORAGE_KEY = `post-reading-position:${postId}`;
     const DISMISS_KEY = `post-reading-position-dismissed:${postId}`;
@@ -36,13 +77,19 @@ const { postId } = Astro.props as Props;
     const COMPLETE_THRESHOLD = 0.95;
     const SAVE_INTERVAL_MS = 1500;
     let frame = 0;
+    let frameFallback = 0;
     let lastSaveAt = 0;
     let currentProgress = 0;
     let activeHeadingId = "";
     let activeHeadingOffset = 0;
     let storageAvailable = true;
+    let backToTopVisible = false;
+    let backToTopHideTimer = 0;
+    let lastObservedScrollY = window.scrollY;
+    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const prefersReducedMotion = () => motionMedia.matches;
 
     const safeStorage = {
       get(key) {
@@ -85,13 +132,18 @@ const { postId } = Astro.props as Props;
       return clamp((window.scrollY - start) / (maxScroll - start), 0, 1);
     };
 
+    const hasReachedContentEnd = () => {
+      const { end } = getBounds();
+      return window.scrollY + window.innerHeight >= end - 1;
+    };
+
     const readActiveHeading = () => {
       const headings = Array.from(content.querySelectorAll("h2[id], h3[id], h4[id]"));
       let active = null;
       const y = window.scrollY + 160;
 
       for (const heading of headings) {
-        if (!(heading instanceof HTMLElement)) continue;
+        if (!("offsetTop" in heading)) continue;
         if (heading.offsetTop <= y) {
           active = heading;
         } else {
@@ -119,17 +171,72 @@ const { postId } = Astro.props as Props;
       safeStorage.set(STORAGE_KEY, JSON.stringify(payload));
     };
 
+    const setBackToTopVisible = (visible) => {
+      if (visible === backToTopVisible) return;
+      backToTopVisible = visible;
+      window.clearTimeout(backToTopHideTimer);
+
+      if (visible) {
+        backToTopButton.hidden = false;
+        backToTopButton.setAttribute("aria-hidden", "false");
+        backToTopButton.tabIndex = 0;
+        window.requestAnimationFrame(() => {
+          backToTopButton.classList.add("is-visible");
+        });
+        return;
+      }
+
+      backToTopButton.classList.remove("is-visible");
+      backToTopButton.setAttribute("aria-hidden", "true");
+      backToTopButton.tabIndex = -1;
+
+      if (document.activeElement === backToTopButton) {
+        backToTopButton.blur();
+      }
+
+      const hide = () => {
+        if (!backToTopVisible) {
+          backToTopButton.hidden = true;
+        }
+      };
+
+      if (prefersReducedMotion()) {
+        hide();
+      } else {
+        backToTopButton.addEventListener("transitionend", hide, { once: true });
+        backToTopHideTimer = window.setTimeout(hide, 240);
+      }
+    };
+
     const update = () => {
       frame = 0;
+      if (frameFallback) {
+        window.clearTimeout(frameFallback);
+        frameFallback = 0;
+      }
       currentProgress = readProgress();
       bar.style.transform = `scaleX(${currentProgress})`;
+      setBackToTopVisible(currentProgress >= COMPLETE_THRESHOLD || hasReachedContentEnd());
       readActiveHeading();
       savePosition();
     };
 
     const scheduleUpdate = () => {
-      if (frame) return;
+      if (frame || frameFallback) return;
       frame = window.requestAnimationFrame(update);
+      frameFallback = window.setTimeout(() => {
+        if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = 0;
+        }
+        update();
+      }, 120);
+    };
+
+    const pollScrollPosition = () => {
+      if (Math.abs(window.scrollY - lastObservedScrollY) < 1) return;
+      lastObservedScrollY = window.scrollY;
+      scheduleUpdate();
     };
 
     const parseRecord = () => {
@@ -171,7 +278,7 @@ const { postId } = Astro.props as Props;
     const restoreRecord = (record) => {
       const { start, maxScroll } = getBounds();
       const heading = record.headingId ? document.getElementById(record.headingId) : null;
-      const targetY = heading instanceof HTMLElement
+      const targetY = heading && "offsetTop" in heading
         ? heading.offsetTop + Number(record.headingOffset || 0)
         : start + (maxScroll - start) * clamp(Number(record.progress || 0), 0, 1);
 
@@ -202,12 +309,26 @@ const { postId } = Astro.props as Props;
       dismissResume();
     });
 
+    const scrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        behavior: prefersReducedMotion() ? "auto" : "smooth"
+      });
+    };
+
     dismissButton.addEventListener("click", dismissResume);
+    backToTopButton.addEventListener("click", scrollToTop);
+    backToTopButton.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      scrollToTop();
+    });
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", scheduleUpdate);
     window.addEventListener("load", scheduleUpdate);
     window.addEventListener("beforeunload", () => savePosition({ force: true }));
     window.addEventListener("pagehide", () => savePosition({ force: true }));
+    window.setInterval(pollScrollPosition, 300);
 
     if ("ResizeObserver" in window) {
       const observer = new ResizeObserver(scheduleUpdate);
@@ -215,7 +336,7 @@ const { postId } = Astro.props as Props;
     }
 
     for (const image of content.querySelectorAll("img")) {
-      if (image instanceof HTMLImageElement && !image.complete) {
+      if ("complete" in image && !image.complete) {
         image.addEventListener("load", scheduleUpdate, { once: true });
       }
     }
