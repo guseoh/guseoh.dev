@@ -1,20 +1,17 @@
 ---
-
 title: "자바의 this와 생성자는 무엇일까?"
 description: "자바 생성자의 역할과 기본 생성자, 객체 초기화, this와 this()의 사용 방법을 알아보자."
 date: 2026-06-18
 updated: 2026-06-18
 category: "Java"
 tags:
-
-* Java
-* Constructor
-* this
-  book: ""
-  chapter: 1
-  heroImage: "/og-image.svg"
-  draft: false
-
+    - Java
+    - Constructor
+    - this
+book: ""
+chapter: 1
+heroImage: "/og-image.svg"
+draft: false
 ---
 
 ## 1. 들어가기 전
