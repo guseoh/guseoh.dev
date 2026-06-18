@@ -5,13 +5,13 @@ date: 2026-06-18
 updated: 2026-06-18
 category: "Java"
 tags:
-    - Java
-    - Field
-    - Method
-    book: ""
-    chapter: 1
-    heroImage: "/og-image.svg"
-    draft: false
+  - Java
+  - Field
+  - Method
+book: ""
+chapter: 1
+heroImage: "/og-image.svg"
+draft: false
 ---
 
 ## 1. 들어가기 전

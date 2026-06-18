@@ -66,10 +66,47 @@ jobs:
       - name: Deploy updated activity
         id: deploy_activity
         if: steps.commit_activity.outputs.changed == 'true'
-        continue-on-error: true
-        run: gh workflow run deploy.yml --ref main
+        shell: bash
+        run: |
+          echo "run_id=" >> "$GITHUB_OUTPUT"
+          echo "head_sha=" >> "$GITHUB_OUTPUT"
+
+          target_sha="${COMMIT_HASH:?commit hash is required}"
+          remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+
+          if [ "$remote_sha" != "$target_sha" ]; then
+            echo "origin/main is $remote_sha, expected $target_sha"
+            exit 1
+          fi
+
+          gh workflow run deploy.yml --ref main
+
+          for attempt in {1..12}; do
+            run_id="$(gh run list \
+              --workflow deploy.yml \
+              --branch main \
+              --event workflow_dispatch \
+              --limit 20 \
+              --json databaseId,headSha \
+              --jq ".[] | select(.headSha == \"$target_sha\") | .databaseId" \
+              | head -n 1)"
+
+            if [ -n "$run_id" ]; then
+              echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+              echo "head_sha=$target_sha" >> "$GITHUB_OUTPUT"
+              echo "Deploy workflow_dispatch run $run_id was created for $target_sha."
+              exit 0
+            fi
+
+            echo "Waiting for deploy workflow_dispatch run for $target_sha (attempt $attempt/12)."
+            sleep 5
+          done
+
+          echo "No deploy workflow_dispatch run was created for $target_sha."
+          exit 1
         env:
           GH_TOKEN: ${{ github.token }}
+          COMMIT_HASH: ${{ steps.commit_activity.outputs.commit_hash }}
 
       - name: Write activity refresh summary
         if: always()
@@ -82,6 +119,8 @@ jobs:
           COMMITTED: ${{ steps.commit_activity.outputs.committed || 'false' }}
           COMMIT_HASH: ${{ steps.commit_activity.outputs.commit_hash }}
           DEPLOY_OUTCOME: ${{ steps.deploy_activity.outcome || 'skipped' }}
+          DEPLOY_RUN_ID: ${{ steps.deploy_activity.outputs.run_id }}
+          DEPLOY_HEAD_SHA: ${{ steps.deploy_activity.outputs.head_sha }}
         run: |
           {
             echo "## GitHub Activity refresh"
@@ -93,6 +132,8 @@ jobs:
             echo "- Committed: \`$COMMITTED\`"
             echo "- Commit: \`${COMMIT_HASH:-none}\`"
             echo "- Deploy dispatch: \`$DEPLOY_OUTCOME\`"
+            echo "- Deploy run: \`${DEPLOY_RUN_ID:-none}\`"
+            echo "- Deploy head SHA: \`${DEPLOY_HEAD_SHA:-none}\`"
             if [ -n "$REFRESH_DETAIL" ]; then
               echo "- Detail: $REFRESH_DETAIL"
             fi
@@ -113,6 +154,8 @@ jobs:
           COMMITTED: ${{ steps.commit_activity.outputs.committed || 'false' }}
           COMMIT_HASH: ${{ steps.commit_activity.outputs.commit_hash }}
           DEPLOY_OUTCOME: ${{ steps.deploy_activity.outcome || 'skipped' }}
+          DEPLOY_RUN_ID: ${{ steps.deploy_activity.outputs.run_id }}
+          DEPLOY_HEAD_SHA: ${{ steps.deploy_activity.outputs.head_sha }}
           JOB_STATUS: ${{ job.status }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 

@@ -24,6 +24,7 @@ for (const file of files) {
     continue;
   }
 
+  checkFrontmatterIndentation(relativePath, lines);
   checkDates(relativePath, frontmatter);
   checkImages(relativePath, lines);
   checkHeadingHierarchy(relativePath, lines);
@@ -97,6 +98,19 @@ function cleanScalar(value) {
   }
 
   return trimmed;
+}
+
+function checkFrontmatterIndentation(relativePath, lines) {
+  const endIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
+  if (endIndex === -1) return;
+
+  for (let index = 1; index < endIndex; index += 1) {
+    const line = lines[index];
+
+    if (/^\s+[A-Za-z][\w-]*:\s*/.test(line)) {
+      fail(relativePath, index + 1, "frontmatter의 top-level key가 들여쓰기되어 있습니다.");
+    }
+  }
 }
 
 function checkDates(relativePath, frontmatter) {

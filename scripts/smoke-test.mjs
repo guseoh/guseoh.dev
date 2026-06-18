@@ -17,6 +17,7 @@ const paths = (process.env.SMOKE_PATHS ?? DEFAULT_PATHS.join(","))
   .split(",")
   .map((path) => path.trim())
   .filter(Boolean);
+const expectedDeploySha = process.env.SMOKE_EXPECTED_SHA?.trim();
 
 const failures = [];
 
@@ -33,12 +34,23 @@ for (const path of paths) {
   console.error(`FAIL ${result.status ?? "ERR"} ${url} ${result.error ?? ""}`.trim());
 }
 
+if (expectedDeploySha) {
+  const result = await checkDeployMetaWithRetry(baseUrl, expectedDeploySha, retries, retryDelayMs);
+
+  if (result.ok) {
+    console.log(`OK deploy-meta ${result.sha} ${result.url}`);
+  } else {
+    failures.push(result);
+    console.error(formatDeployMetaFailure(result));
+  }
+}
+
 if (failures.length > 0) {
-  console.error(`Smoke test failed for ${failures.length} URL(s).`);
+  console.error(`Smoke test failed for ${failures.length} check(s).`);
   process.exit(1);
 }
 
-console.log(`Smoke test passed for ${paths.length} URL(s).`);
+console.log(`Smoke test passed for ${paths.length + (expectedDeploySha ? 1 : 0)} check(s).`);
 
 async function checkUrlWithRetry(url, retryCount, delayMs) {
   let lastResult = { ok: false, url, error: "not attempted" };
@@ -82,6 +94,70 @@ async function checkUrl(url) {
       error: error instanceof Error ? error.message : String(error)
     };
   }
+}
+
+async function checkDeployMetaWithRetry(base, expectedSha, retryCount, delayMs) {
+  let lastResult = { ok: false, url: "", expectedSha, error: "not attempted" };
+
+  for (let attempt = 0; attempt <= retryCount; attempt += 1) {
+    lastResult = await checkDeployMeta(base, expectedSha);
+
+    if (lastResult.ok) return lastResult;
+    if (attempt < retryCount) await delay(delayMs);
+  }
+
+  return lastResult;
+}
+
+async function checkDeployMeta(base, expectedSha) {
+  const url = new URL("/deploy-meta.json", base);
+  url.searchParams.set("ts", Math.floor(Date.now() / 1000).toString());
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "guseoh-blog-smoke-test"
+      }
+    });
+    const contentType = response.headers.get("content-type") ?? "";
+
+    if (!response.ok) {
+      return { ok: false, url: url.toString(), status: response.status, expectedSha, error: response.statusText };
+    }
+
+    if (!contentType.includes("json")) {
+      return {
+        ok: false,
+        url: url.toString(),
+        status: response.status,
+        expectedSha,
+        error: `unexpected content-type ${contentType}`
+      };
+    }
+
+    const body = await response.json();
+    const actualSha = typeof body.sha === "string" ? body.sha.trim() : "";
+
+    if (actualSha !== expectedSha) {
+      return { ok: false, url: url.toString(), status: response.status, expectedSha, actualSha };
+    }
+
+    return { ok: true, url: url.toString(), status: response.status, sha: actualSha };
+  } catch (error) {
+    return {
+      ok: false,
+      url: url.toString(),
+      expectedSha,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+function formatDeployMetaFailure(result) {
+  const actual = result.actualSha || "none";
+  const error = result.error ? ` ${result.error}` : "";
+
+  return `FAIL ${result.status ?? "ERR"} ${result.url} deploy-meta expected ${result.expectedSha} got ${actual}${error}`;
 }
 
 function normalizeBaseUrl(value) {
