@@ -1,4 +1,3 @@
-```javascript
 const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
 
 if (!webhookUrl) {
@@ -310,4 +309,3 @@ if (!response.ok) {
 }
 
 console.log(`Discord 알림 전송 완료: ${notification.title}`);
-```
