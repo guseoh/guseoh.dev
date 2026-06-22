@@ -103,7 +103,7 @@ Member member = new Member("user@example.com", "guseoh");
 
 ## 3. 기본 생성자와 this
 
-클래스에 생성자를 하나도 선언하지 않으면 자바 컴파일러는 매개변수가 없는 생성자를 자동으로 제공한다. 이를 **기본 생성자(Default Constructor)**라고 한다.
+클래스에 생성자를 하나도 선언하지 않으면 자바 컴파일러는 매개변수가 없는 생성자를 자동으로 제공한다. 이를 **기본 생성자(Default Constructor)** 라고 한다.
 
 ```java
 class Member {
