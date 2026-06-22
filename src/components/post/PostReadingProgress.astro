@@ -23,9 +23,6 @@ const { postId } = Astro.props as Props;
   class="post-back-to-top"
   data-post-back-to-top
   aria-label="페이지 맨 위로 이동"
-  aria-hidden="true"
-  tabindex="-1"
-  hidden
 >
   <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
     <path d="m6 14 6-6 6 6"></path>
@@ -83,8 +80,6 @@ const { postId } = Astro.props as Props;
     let activeHeadingId = "";
     let activeHeadingOffset = 0;
     let storageAvailable = true;
-    let backToTopVisible = false;
-    let backToTopHideTimer = 0;
     let lastObservedScrollY = window.scrollY;
     const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -132,11 +127,6 @@ const { postId } = Astro.props as Props;
       return clamp((window.scrollY - start) / (maxScroll - start), 0, 1);
     };
 
-    const hasReachedContentEnd = () => {
-      const { end } = getBounds();
-      return window.scrollY + window.innerHeight >= end - 1;
-    };
-
     const readActiveHeading = () => {
       const headings = Array.from(content.querySelectorAll("h2[id], h3[id], h4[id]"));
       let active = null;
@@ -171,43 +161,6 @@ const { postId } = Astro.props as Props;
       safeStorage.set(STORAGE_KEY, JSON.stringify(payload));
     };
 
-    const setBackToTopVisible = (visible) => {
-      if (visible === backToTopVisible) return;
-      backToTopVisible = visible;
-      window.clearTimeout(backToTopHideTimer);
-
-      if (visible) {
-        backToTopButton.hidden = false;
-        backToTopButton.setAttribute("aria-hidden", "false");
-        backToTopButton.tabIndex = 0;
-        window.requestAnimationFrame(() => {
-          backToTopButton.classList.add("is-visible");
-        });
-        return;
-      }
-
-      backToTopButton.classList.remove("is-visible");
-      backToTopButton.setAttribute("aria-hidden", "true");
-      backToTopButton.tabIndex = -1;
-
-      if (document.activeElement === backToTopButton) {
-        backToTopButton.blur();
-      }
-
-      const hide = () => {
-        if (!backToTopVisible) {
-          backToTopButton.hidden = true;
-        }
-      };
-
-      if (prefersReducedMotion()) {
-        hide();
-      } else {
-        backToTopButton.addEventListener("transitionend", hide, { once: true });
-        backToTopHideTimer = window.setTimeout(hide, 240);
-      }
-    };
-
     const update = () => {
       frame = 0;
       if (frameFallback) {
@@ -216,7 +169,6 @@ const { postId } = Astro.props as Props;
       }
       currentProgress = readProgress();
       bar.style.transform = `scaleX(${currentProgress})`;
-      setBackToTopVisible(currentProgress >= COMPLETE_THRESHOLD || hasReachedContentEnd());
       readActiveHeading();
       savePosition();
     };
