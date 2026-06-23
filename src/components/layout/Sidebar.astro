@@ -13,9 +13,11 @@ interface Props {
 }
 
 const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentTag, currentPath } = Astro.props as Props;
+const normalizedCurrentPath = currentPath.replace(/\/+$/, "") || "/";
+const isCategoriesPage = normalizedCurrentPath === "/categories";
 ---
 
-<button id="sidebar-open" class="sidebar-open" type="button" aria-label="탐색 펼치기" aria-controls="site-sidebar" aria-expanded="false">
+<button id="sidebar-open" class="sidebar-open" type="button" aria-label="사이트 탐색 열기" aria-controls="site-sidebar" aria-expanded="false">
   <span class="sidebar-open__line"></span>
   <span class="sidebar-open__line"></span>
   <span class="sidebar-open__line"></span>
@@ -23,9 +25,9 @@ const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentT
 
 <button id="sidebar-backdrop" class="sidebar-backdrop" type="button" aria-label="사이드바 닫기" hidden></button>
 
-<aside id="site-sidebar" class="site-sidebar" aria-label="Category sidebar" aria-hidden="false" tabindex="-1">
-  <section class="sidebar-close-section" aria-label="Sidebar controls">
-    <button id="sidebar-collapse-toggle" class="sidebar-collapse-toggle" type="button" aria-label="탐색 접기" aria-controls="site-sidebar" aria-expanded="true">
+<aside id="site-sidebar" class="site-sidebar" aria-label="사이트 탐색" aria-hidden="false" tabindex="-1">
+  <section class="sidebar-close-section" aria-label="사이드바 제어">
+    <button id="sidebar-collapse-toggle" class="sidebar-collapse-toggle" type="button" aria-label="사이트 탐색 접기" aria-controls="site-sidebar" aria-expanded="true">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="m15 6-6 6 6 6"></path>
       </svg>
@@ -39,16 +41,20 @@ const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentT
     </button>
   </section>
 
-  <form class="sidebar-search" action="/search/" method="get" aria-label="Search posts">
-    <label class="sr-only" for="sidebar-search-input">Search</label>
+  <form class="sidebar-search" action="/search/" method="get" aria-label="게시글 검색">
+    <label class="sr-only" for="sidebar-search-input">게시글 검색</label>
     <input id="sidebar-search-input" name="q" type="search" placeholder="Search posts" />
     <button type="submit" aria-label="검색 실행">Search</button>
   </form>
 
-  <section class="category-panel" aria-label="Topic index">
+  <section class="category-panel" aria-label="분류 탐색">
     <div class="category-panel__header">
       <h2>전체 탐색</h2>
-      <a href="/categories/">Categories</a>
+      <a
+        href="/categories/"
+        aria-current={isCategoriesPage ? "page" : undefined}
+        data-sidebar-current={isCategoriesPage ? "page" : undefined}
+      >Categories</a>
     </div>
 
     {
@@ -62,9 +68,8 @@ const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentT
           totalCount={totalPostCount}
           currentPath={currentPath}
           currentCategory={currentCategory}
-          currentTag={currentTag}
           showAllLink={true}
-          label="Sidebar category menu"
+          label="카테고리 탐색"
         />
       )
     }
@@ -73,14 +78,23 @@ const { categoryHierarchy, tagSummary, totalPostCount, currentCategory, currentT
       tagSummary.length > 0 && (
         <>
           <p class="category-panel__subhead">Tags</p>
-          <div class="topic-cloud topic-cloud--tags" role="list">
-            {tagSummary.map(({ tag, name, count }) => (
-              <a class:list={["topic-pill", "topic-pill--tag", currentTag === tag && "is-active"]} href={`/tags/${tag}/`} role="listitem">
-                <span>#{name}</span>
-                <strong>{count}</strong>
-              </a>
-            ))}
-          </div>
+          <nav class="topic-cloud topic-cloud--tags" aria-label="태그 탐색">
+            {tagSummary.map(({ tag, name, count }) => {
+              const isActive = currentTag === tag;
+
+              return (
+                <a
+                  class:list={["topic-pill", "topic-pill--tag", isActive && "is-active"]}
+                  href={`/tags/${tag}/`}
+                  aria-current={isActive ? "page" : undefined}
+                  data-sidebar-current={isActive ? "tag" : undefined}
+                >
+                  <span>#{name}</span>
+                  <strong>{count}</strong>
+                </a>
+              );
+            })}
+          </nav>
         </>
       )
     }

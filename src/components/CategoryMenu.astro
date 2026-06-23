@@ -8,7 +8,6 @@ interface Props {
   totalCount?: number;
   currentPath?: string;
   currentCategory?: string;
-  currentTag?: string;
   showAllLink?: boolean;
   label?: string;
 }
@@ -20,9 +19,8 @@ const {
   totalCount,
   currentPath = "",
   currentCategory = "",
-  currentTag = "",
   showAllLink = false,
-  label = "Category menu"
+  label = "카테고리 탐색"
 } = Astro.props as Props;
 
 const normalizePath = (path: string) => path.replace(/\/+$/, "") || "/";
@@ -31,14 +29,18 @@ const showAllPostsLink = showAllLink && typeof totalCount === "number";
 const isAllPostsActive = normalizedCurrentPath === "/blog" || normalizedCurrentPath.startsWith("/blog/page");
 const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
   currentCategory === child.slug ||
-  currentTag === child.slug ||
   (child.href ? normalizePath(child.href) === normalizedCurrentPath : false);
 ---
 
 <nav class:list={["category-menu", `category-menu--${variant}`]} aria-label={label} data-category-menu>
   {
     showAllPostsLink && (
-      <a class:list={["category-menu__all", isAllPostsActive && "is-active"]} href="/blog/">
+      <a
+        class:list={["category-menu__all", isAllPostsActive && "is-active"]}
+        href="/blog/"
+        aria-current={isAllPostsActive ? "page" : undefined}
+        data-sidebar-current={variant === "sidebar" && isAllPostsActive ? "page" : undefined}
+      >
         <span>전체 글</span>
         <strong>({totalCount})</strong>
       </a>
@@ -48,14 +50,19 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
   {groups.map((group, index) => {
     const hasChildren = group.children.length > 0;
     const isGroupPathActive = group.href ? normalizePath(group.href) === normalizedCurrentPath : false;
-    const isActiveGroup = currentCategory === group.slug || currentTag === group.slug || isGroupPathActive || group.children.some(isChildActive);
-    const isExpanded = isActiveGroup || (variant !== "home" && index === 0);
+    const isActiveGroup = currentCategory === group.slug || isGroupPathActive || group.children.some(isChildActive);
+    const isExpanded = isActiveGroup || (variant === "page" && index === 0);
     const panelId = `${idPrefix}-${group.slug}-panel`;
 
     return (
       <div class:list={["category-menu__group", isActiveGroup && "is-active"]}>
         <div class:list={["category-menu__parent", !hasChildren && "category-menu__parent--leaf"]}>
-          <a class="category-menu__parent-link" href={group.href}>
+          <a
+            class="category-menu__parent-link"
+            href={group.href}
+            aria-current={isGroupPathActive ? "page" : undefined}
+            data-sidebar-current={variant === "sidebar" && isGroupPathActive ? "page" : undefined}
+          >
             <span class="category-menu__title">{group.name}</span>
             <span class="category-menu__count">({group.count})</span>
           </a>
@@ -77,9 +84,17 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
 
         {hasChildren && (
           <div id={panelId} class="category-menu__children" hidden={!isExpanded}>
-            {group.children.map((child) => (
-              child.href ? (
-                <a class:list={["category-menu__child", isChildActive(child) && "is-active"]} href={child.href}>
+            {group.children.map((child) => {
+              const isActive = isChildActive(child);
+              const currentType = currentCategory === child.slug ? "category" : "page";
+
+              return child.href ? (
+                <a
+                  class:list={["category-menu__child", isActive && "is-active"]}
+                  href={child.href}
+                  aria-current={isActive ? "page" : undefined}
+                  data-sidebar-current={variant === "sidebar" && isActive ? currentType : undefined}
+                >
                   <span>{child.name}</span>
                   <strong>({child.count})</strong>
                 </a>
@@ -88,8 +103,8 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
                   <span>{child.name}</span>
                   <small>준비 중</small>
                 </span>
-              )
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

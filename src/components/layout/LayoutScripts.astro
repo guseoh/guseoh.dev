@@ -162,6 +162,31 @@
       let sidebarTrigger = sidebarOpenButton;
       let backdropHideTimer = 0;
 
+      const revealWithin = (container, element) => {
+        const containerRect = container.getBoundingClientRect();
+        const elementRect = element.getBoundingClientRect();
+
+        if (elementRect.top < containerRect.top) {
+          container.scrollTop -= containerRect.top - elementRect.top;
+        } else if (elementRect.bottom > containerRect.bottom) {
+          container.scrollTop += elementRect.bottom - containerRect.bottom;
+        }
+      };
+
+      const revealCurrentSidebarItem = () => {
+        const currentItem = sidebar.querySelector('[data-sidebar-current="tag"]')
+          ?? sidebar.querySelector('[data-sidebar-current="category"]')
+          ?? sidebar.querySelector("[data-sidebar-current]");
+        if (!(currentItem instanceof HTMLElement)) return;
+
+        const nestedScroller = currentItem.closest(".topic-cloud");
+        if (nestedScroller instanceof HTMLElement) {
+          revealWithin(nestedScroller, currentItem);
+        }
+
+        revealWithin(sidebar, currentItem);
+      };
+
       const getFocusableElements = () =>
         Array.from(
           sidebar.querySelectorAll(
@@ -230,7 +255,7 @@
         const narrow = isNarrow();
         const shouldCollapse = Boolean(collapsed);
         const modalOpen = narrow && !shouldCollapse;
-        const openLabel = narrow ? "사이드바 열기" : "탐색 펼치기";
+        const openLabel = narrow ? "사이드바 열기" : "사이트 탐색 펼치기";
 
         shell.classList.toggle("sidebar-collapsed", shouldCollapse);
         document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
@@ -252,7 +277,7 @@
         sidebarOpenButton.title = openLabel;
         sidebarCollapseButton.hidden = narrow || shouldCollapse;
         sidebarCollapseButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
-        sidebarCollapseButton.setAttribute("aria-label", "탐색 접기");
+        sidebarCollapseButton.setAttribute("aria-label", "사이트 탐색 접기");
         sidebarCloseButton.hidden = !narrow;
 
         setBackdropVisible(modalOpen);
@@ -261,6 +286,10 @@
 
         if (!narrow && persist) {
           setStoredCollapsed(shouldCollapse);
+        }
+
+        if (!shouldCollapse) {
+          window.requestAnimationFrame(revealCurrentSidebarItem);
         }
 
         if (moveFocus && modalOpen) {

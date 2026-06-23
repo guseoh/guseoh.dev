@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 import Header from "../components/layout/Header.astro";
 import Sidebar from "../components/layout/Sidebar.astro";
 import LayoutScripts from "../components/layout/LayoutScripts.astro";
+import { normalizeCategory } from "../utils/categories";
 import { buildTagSummary } from "../utils/tags";
 import { buildSidebarNavigation } from "../utils/navigation";
 import {
@@ -25,6 +26,7 @@ interface Props {
   updatedTime?: string;
   type?: "website" | "article";
   structuredData?: unknown;
+  currentCategory?: string;
 }
 
 const {
@@ -36,7 +38,8 @@ const {
   publishedTime,
   updatedTime,
   type = "website",
-  structuredData
+  structuredData,
+  currentCategory: currentCategoryName
 } = Astro.props;
 
 const posts = await getCollection("blog", ({ data }) => !data.draft);
@@ -47,7 +50,10 @@ const canonicalUrl = new URL(Astro.url.pathname, siteUrl).toString();
 const ogImageUrl = new URL(image, siteUrl).toString();
 
 const currentPath = Astro.url.pathname.replace(/\/+$/, "") || "/";
-const currentCategory = currentPath.startsWith("/categories/") ? currentPath.split("/")[2] ?? "" : "";
+const routeCategory = currentPath.startsWith("/categories/") ? currentPath.split("/")[2] ?? "" : "";
+const currentCategory = currentCategoryName?.trim()
+  ? normalizeCategory(currentCategoryName)
+  : routeCategory;
 const currentTag = currentPath.startsWith("/tags/") ? currentPath.split("/")[2] ?? "" : "";
 
 function serializeJsonLd(value: unknown) {
