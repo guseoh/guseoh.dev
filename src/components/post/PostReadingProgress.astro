@@ -1,22 +1,6 @@
----
-interface Props {
-  postId: string;
-}
-
-const { postId } = Astro.props as Props;
----
-
 <div class="post-reading-progress" aria-hidden="true">
   <span class="post-reading-progress__bar" data-reading-progress-bar></span>
 </div>
-
-<aside class="post-resume" data-post-resume hidden aria-label="이전 읽기 위치">
-  <p>이전에 읽던 위치가 있습니다.</p>
-  <div class="post-resume__actions">
-    <button type="button" data-post-resume-continue>이어서 읽기</button>
-    <button type="button" data-post-resume-dismiss>닫기</button>
-  </div>
-</aside>
 
 <button
   type="button"
@@ -31,7 +15,7 @@ const { postId } = Astro.props as Props;
   <span>맨 위로</span>
 </button>
 
-<script is:inline define:vars={{ postId }}>
+<script is:inline>
   (() => {
     let initialized = false;
     let initAttempts = 0;
@@ -41,14 +25,8 @@ const { postId } = Astro.props as Props;
 
       const content = document.querySelector(".post__content");
       const bar = document.querySelector("[data-reading-progress-bar]");
-      const resume = document.querySelector("[data-post-resume]");
       const backToTopButton = document.querySelector("[data-post-back-to-top]");
-      if (
-        !content ||
-        !bar ||
-        !resume ||
-        backToTopButton?.tagName !== "BUTTON"
-      ) {
+      if (!content || !bar || backToTopButton?.tagName !== "BUTTON") {
         initAttempts += 1;
         if (initAttempts <= 20) {
           window.setTimeout(initReadingProgress, 50);
@@ -56,242 +34,84 @@ const { postId } = Astro.props as Props;
         return;
       }
 
-    const continueButton = resume.querySelector("[data-post-resume-continue]");
-    const dismissButton = resume.querySelector("[data-post-resume-dismiss]");
-    if (continueButton?.tagName !== "BUTTON" || dismissButton?.tagName !== "BUTTON") {
-      initAttempts += 1;
-      if (initAttempts <= 20) {
-        window.setTimeout(initReadingProgress, 50);
-      }
-      return;
-    }
+      initialized = true;
 
-    initialized = true;
+      let frame = 0;
+      let frameFallback = 0;
+      let lastObservedScrollY = window.scrollY;
+      const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    const STORAGE_KEY = `post-reading-position:${postId}`;
-    const DISMISS_KEY = `post-reading-position-dismissed:${postId}`;
-    const MAX_AGE_DAYS = 90;
-    const COMPLETE_THRESHOLD = 0.95;
-    const SAVE_INTERVAL_MS = 1500;
-    let frame = 0;
-    let frameFallback = 0;
-    let lastSaveAt = 0;
-    let currentProgress = 0;
-    let activeHeadingId = "";
-    let activeHeadingOffset = 0;
-    let storageAvailable = true;
-    let lastObservedScrollY = window.scrollY;
-    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+      const prefersReducedMotion = () => motionMedia.matches;
 
-    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    const prefersReducedMotion = () => motionMedia.matches;
-
-    const safeStorage = {
-      get(key) {
-        if (!storageAvailable) return null;
-        try {
-          return window.localStorage.getItem(key);
-        } catch {
-          storageAvailable = false;
-          return null;
-        }
-      },
-      set(key, value) {
-        if (!storageAvailable) return;
-        try {
-          window.localStorage.setItem(key, value);
-        } catch {
-          storageAvailable = false;
-        }
-      },
-      remove(key) {
-        if (!storageAvailable) return;
-        try {
-          window.localStorage.removeItem(key);
-        } catch {
-          storageAvailable = false;
-        }
-      }
-    };
-
-    const getBounds = () => {
-      const start = content.getBoundingClientRect().top + window.scrollY;
-      const end = start + content.scrollHeight;
-      const maxScroll = Math.max(start, end - window.innerHeight);
-      return { start, end, maxScroll };
-    };
-
-    const readProgress = () => {
-      const { start, maxScroll } = getBounds();
-      if (maxScroll <= start) return 1;
-      return clamp((window.scrollY - start) / (maxScroll - start), 0, 1);
-    };
-
-    const readActiveHeading = () => {
-      const headings = Array.from(content.querySelectorAll("h2[id], h3[id], h4[id]"));
-      let active = null;
-      const y = window.scrollY + 160;
-
-      for (const heading of headings) {
-        if (!("offsetTop" in heading)) continue;
-        if (heading.offsetTop <= y) {
-          active = heading;
-        } else {
-          break;
-        }
-      }
-
-      activeHeadingId = active?.id ?? "";
-      activeHeadingOffset = active ? Math.max(0, window.scrollY - active.offsetTop) : 0;
-    };
-
-    const savePosition = ({ force = false } = {}) => {
-      if (!storageAvailable) return;
-      const now = Date.now();
-      if (!force && now - lastSaveAt < SAVE_INTERVAL_MS) return;
-      lastSaveAt = now;
-
-      const payload = {
-        headingId: activeHeadingId,
-        headingOffset: Math.round(activeHeadingOffset),
-        progress: Number(currentProgress.toFixed(4)),
-        savedAt: new Date().toISOString()
+      const getBounds = () => {
+        const start = content.getBoundingClientRect().top + window.scrollY;
+        const end = start + content.scrollHeight;
+        const maxScroll = Math.max(start, end - window.innerHeight);
+        return { start, end, maxScroll };
       };
 
-      safeStorage.set(STORAGE_KEY, JSON.stringify(payload));
-    };
+      const readProgress = () => {
+        const { start, maxScroll } = getBounds();
+        if (maxScroll <= start) return 1;
+        return clamp((window.scrollY - start) / (maxScroll - start), 0, 1);
+      };
 
-    const update = () => {
-      frame = 0;
-      if (frameFallback) {
-        window.clearTimeout(frameFallback);
-        frameFallback = 0;
-      }
-      currentProgress = readProgress();
-      bar.style.transform = `scaleX(${currentProgress})`;
-      readActiveHeading();
-      savePosition();
-    };
-
-    const scheduleUpdate = () => {
-      if (frame || frameFallback) return;
-      frame = window.requestAnimationFrame(update);
-      frameFallback = window.setTimeout(() => {
-        if (frame) {
-          window.cancelAnimationFrame(frame);
-          frame = 0;
+      const update = () => {
+        frame = 0;
+        if (frameFallback) {
+          window.clearTimeout(frameFallback);
+          frameFallback = 0;
         }
-        update();
-      }, 120);
-    };
+        bar.style.transform = `scaleX(${readProgress()})`;
+      };
 
-    const pollScrollPosition = () => {
-      if (Math.abs(window.scrollY - lastObservedScrollY) < 1) return;
-      lastObservedScrollY = window.scrollY;
-      scheduleUpdate();
-    };
+      const scheduleUpdate = () => {
+        if (frame || frameFallback) return;
+        frame = window.requestAnimationFrame(update);
+        frameFallback = window.setTimeout(() => {
+          if (frame) {
+            window.cancelAnimationFrame(frame);
+            frame = 0;
+          }
+          update();
+        }, 120);
+      };
 
-    const parseRecord = () => {
-      const raw = safeStorage.get(STORAGE_KEY);
-      if (!raw) return null;
-
-      try {
-        const record = JSON.parse(raw);
-        const savedAt = new Date(record.savedAt);
-        const ageMs = Date.now() - savedAt.valueOf();
-        const maxAgeMs = MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-
-        if (!Number.isFinite(savedAt.valueOf()) || ageMs > maxAgeMs) {
-          safeStorage.remove(STORAGE_KEY);
-          return null;
-        }
-
-        if (Number(record.progress) >= COMPLETE_THRESHOLD) {
-          return null;
-        }
-
-        return record;
-      } catch {
-        safeStorage.remove(STORAGE_KEY);
-        return null;
-      }
-    };
-
-    const shouldShowResume = (record) => {
-      if (!record) return false;
-      if (window.location.hash) return false;
-      try {
-        if (window.sessionStorage.getItem(DISMISS_KEY) === "true") return false;
-      } catch {
-      }
-      return Number(record.progress) > 0.05;
-    };
-
-    const restoreRecord = (record) => {
-      const { start, maxScroll } = getBounds();
-      const heading = record.headingId ? document.getElementById(record.headingId) : null;
-      const targetY = heading && "offsetTop" in heading
-        ? heading.offsetTop + Number(record.headingOffset || 0)
-        : start + (maxScroll - start) * clamp(Number(record.progress || 0), 0, 1);
-
-      window.scrollTo({ top: Math.max(0, targetY), behavior: "smooth" });
-      window.setTimeout(() => {
+      const pollScrollPosition = () => {
+        if (Math.abs(window.scrollY - lastObservedScrollY) < 1) return;
+        lastObservedScrollY = window.scrollY;
         scheduleUpdate();
-        window.dispatchEvent(new Event("hashchange"));
-      }, 250);
-    };
+      };
 
-    const dismissResume = () => {
-      resume.hidden = true;
-      try {
-        window.sessionStorage.setItem(DISMISS_KEY, "true");
-      } catch {
-      }
-    };
+      const scrollToTop = () => {
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion() ? "auto" : "smooth"
+        });
+      };
 
-    const record = parseRecord();
-    if (shouldShowResume(record)) {
-      resume.hidden = false;
-    }
-
-    continueButton.addEventListener("click", () => {
-      if (record) {
-        restoreRecord(record);
-      }
-      dismissResume();
-    });
-
-    const scrollToTop = () => {
-      window.scrollTo({
-        top: 0,
-        behavior: prefersReducedMotion() ? "auto" : "smooth"
+      backToTopButton.addEventListener("click", scrollToTop);
+      backToTopButton.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        scrollToTop();
       });
-    };
+      window.addEventListener("scroll", scheduleUpdate, { passive: true });
+      window.addEventListener("resize", scheduleUpdate);
+      window.addEventListener("load", scheduleUpdate);
+      window.setInterval(pollScrollPosition, 300);
 
-    dismissButton.addEventListener("click", dismissResume);
-    backToTopButton.addEventListener("click", scrollToTop);
-    backToTopButton.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      event.preventDefault();
-      scrollToTop();
-    });
-    window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate);
-    window.addEventListener("load", scheduleUpdate);
-    window.addEventListener("beforeunload", () => savePosition({ force: true }));
-    window.addEventListener("pagehide", () => savePosition({ force: true }));
-    window.setInterval(pollScrollPosition, 300);
-
-    if ("ResizeObserver" in window) {
-      const observer = new ResizeObserver(scheduleUpdate);
-      observer.observe(content);
-    }
-
-    for (const image of content.querySelectorAll("img")) {
-      if ("complete" in image && !image.complete) {
-        image.addEventListener("load", scheduleUpdate, { once: true });
+      if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(scheduleUpdate);
+        observer.observe(content);
       }
-    }
+
+      for (const image of content.querySelectorAll("img")) {
+        if ("complete" in image && !image.complete) {
+          image.addEventListener("load", scheduleUpdate, { once: true });
+        }
+      }
 
       scheduleUpdate();
     };

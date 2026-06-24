@@ -85,17 +85,32 @@ function renderLinkMention(data) {
   const icon = data.icon
     ? `<img class="link-mention__favicon" src="${escapeHtml(data.icon)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : "";
+  const preview = data.image
+    ? `<span class="link-mention__media"><img class="link-mention__preview" src="${escapeHtml(data.image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></span>`
+    : `<span class="link-mention__media link-mention__media--fallback" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.14-1.14"></path>
+    </svg>
+    <span>${escapeHtml(firstLetter(data.host))}</span>
+  </span>`;
 
   return `<a class="link-mention" href="${escapeHtml(data.href)}" data-link-mention="${data.isInternal ? "internal" : "external"}">
-  <span class="link-mention__icon" aria-hidden="true">
-    <span class="link-mention__icon-fallback">${escapeHtml(firstLetter(data.host))}</span>
-    ${icon}
-  </span>
   <span class="link-mention__content">
     <span class="link-mention__title">${escapeHtml(data.title)}</span>
     ${description}
-    <span class="link-mention__url">${escapeHtml(data.display)}</span>
+    <span class="link-mention__meta">
+      <span class="link-mention__source">
+        <span class="link-mention__icon" aria-hidden="true">
+          <span class="link-mention__icon-fallback">${escapeHtml(firstLetter(data.host))}</span>
+          ${icon}
+        </span>
+        <span>${escapeHtml(data.source)}</span>
+      </span>
+      <span class="link-mention__url">${escapeHtml(data.display)}</span>
+    </span>
   </span>
+  ${preview}
 </a>`;
 }
 
@@ -112,9 +127,11 @@ function parseLinkMention(value, options) {
     display: attributes.get("display")?.trim() || url.display,
     host: url.host,
     icon: normalizeImageUrl(attributes.get("icon") ?? attributes.get("favicon") ?? "", options.site),
+    image: normalizeImageUrl(attributes.get("image") ?? attributes.get("preview") ?? "", options.site),
     isInternal: url.isInternal,
     title: attributes.get("title")?.trim() || url.host,
-    description: attributes.get("description")?.trim() || ""
+    description: attributes.get("description")?.trim() || "",
+    source: attributes.get("source")?.trim() || url.host.replace(/^www\./, "")
   };
 }
 

@@ -177,7 +177,6 @@
 /* Outer shell: left navigation + page content. Post body/TOC columns live in post.css. */
 .site-layout {
   --site-sidebar-width: clamp(270px, 20vw, 320px);
-  --site-sidebar-collapsed-width: 2.75rem;
   --site-layout-gap: 1.25rem;
   flex: 1;
   display: grid;
@@ -209,8 +208,8 @@
 
 html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal),
 .site-shell.sidebar-collapsed .site-layout:not(.site-layout--minimal) {
-  grid-template-columns: minmax(0, var(--site-sidebar-collapsed-width)) minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, var(--site-sidebar-width)) minmax(0, 1fr);
+  gap: var(--site-layout-gap);
 }
 
 html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal) .site-content,
@@ -630,6 +629,7 @@ html.left-sidebar-collapsed .site-sidebar,
   }
 
   .site-layout,
+  .site-layout--wide:not(.site-layout--minimal),
   html.left-sidebar-collapsed .site-layout:not(.site-layout--minimal),
   .site-shell.sidebar-collapsed .site-layout:not(.site-layout--minimal),
   .site-shell.sidebar-collapsed .site-layout {

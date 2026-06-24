@@ -102,11 +102,12 @@ const postStructuredData = {
   structuredData={postStructuredData}
   currentCategory={post.data.category}
 >
-  <PostReadingProgress postId={post.id} />
+  <PostReadingProgress />
 
   <div class:list={["post-view", tocHeadings.length === 0 && "post-view--single"]}>
     <PostToc headings={tocHeadings} />
 
+    <div class="post-column">
     <article class="post">
       <header class="post__header">
         <h1>{post.data.title}</h1>
@@ -218,9 +219,10 @@ const postStructuredData = {
         </nav>
       </footer>
     </article>
+    <PostComments />
+    </div>
   </div>
 
-  <PostComments />
   <PostImageLightbox />
   <PostHeadingEnhancer />
   <PostTableEnhancer />
