@@ -252,9 +252,9 @@ account.getHistories().clear();
 
 단, `List.copyOf()`는 리스트 내부의 객체까지 깊게 복사하지 않는다. 원소가 가변 객체라면 해당 객체의 상태는 여전히 변경될 수 있다.
 
-```md
-::link-mention{url="https://innovation123.tistory.com/217 " title="깊은 복사(Deep Copy) vs 얕은 복사(Shallow Copy)" description="출처: https://innovation123.tistory.com/217 [HS_dev_log:티스토리]}
-```
+
+::link-mention{url="https://innovation123.tistory.com/217" title="깊은 복사(Deep Copy) vs 얕은 복사(Shallow Copy)" description="출처: https://innovation123.tistory.com/217 [HS_dev_log:티스토리]"}
+
 
 ```java
 public List<String> getHistories() {
@@ -272,9 +272,8 @@ public BankAccount(List<String> histories) {
 
 외부에서 전달받거나 외부로 반환하는 가변 객체를 복사해 내부 상태를 보호하는 방식을 **방어적 복사(defensive copy)** 라고 한다.
 
-```md
 ::link-mention{url="https://github.com/peeljunKim/effective-java/discussions/121" title="적시에 방어적 복사본을 만들라" description="이펙티브 자바 아이템 50. 적시에 방어적 복사본을 만들라}
-```
+
 
 ## 4. 참고 자료
 
