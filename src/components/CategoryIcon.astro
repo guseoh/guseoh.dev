@@ -1,48 +1,59 @@
 ---
+import {
+  siDocker,
+  siFlyway,
+  siGit,
+  siGrafana,
+  siHibernate,
+  siOpenjdk,
+  siPostgresql,
+  siPrometheus,
+  siReact,
+  siSpring,
+  siSpringsecurity,
+  type SimpleIcon
+} from "simple-icons";
 import { normalizeCategory } from "../utils/categories";
 
 interface Props {
   category: string;
 }
 
-type CategoryIconDefinition = {
-  kind: "simple-icons" | "fallback";
-  paths: string[];
-  slug?: string;
+type FallbackIconDefinition = {
+  paths: readonly string[];
 };
 
-// Brand paths come from Simple Icons. The slug and upstream source stay beside
-// each path so future updates can be checked without adding a runtime dependency.
-const categoryIcons: Record<string, CategoryIconDefinition> = {
-  spring: {
-    kind: "simple-icons",
-    slug: "spring",
-    // https://github.com/simple-icons/simple-icons/blob/develop/icons/spring.svg
-    // Upstream brand guidance: https://spring.io/trademarks
-    // Spring and its logo are trademarks of Broadcom Inc. and/or its subsidiaries.
-    paths: [
-      "M21.8537 1.4158a10.4504 10.4504 0 0 1-1.284 2.2471A11.9666 11.9666 0 1 0 3.8518 20.7757l.4445.3951a11.9543 11.9543 0 0 0 19.6316-8.2971c.3457-3.0126-.568-6.8649-2.0743-11.458zM5.5805 20.8745a1.0174 1.0174 0 1 1-.1482-1.4323 1.0396 1.0396 0 0 1 .1482 1.4323zm16.1991-3.5806c-2.9385 3.9263-9.2601 2.5928-13.2852 2.7904 0 0-.7161.0494-1.4323.1481 0 0 .2717-.1234.6174-.2469 2.8398-.9877 4.1732-1.1853 5.9018-2.0743 3.2349-1.6545 6.4698-5.2844 7.1118-9.0379-1.2347 3.6053-4.9881 6.7167-8.3959 7.9761-2.3459.8643-6.5685 1.7039-6.5685 1.7039l-.1729-.0988c-2.8645-1.4076-2.9632-7.6304 2.2718-9.6306 2.2966-.889 4.4696-.395 6.9637-.9877 2.6422-.6174 5.7043-2.5929 6.939-5.1857 1.3828 4.1732 3.062 10.643.0493 14.6434z"
-    ]
-  },
-  git: {
-    kind: "simple-icons",
-    slug: "git",
-    // https://github.com/simple-icons/simple-icons/blob/develop/icons/git.svg
-    // Git Logo by Jason Long, CC BY 3.0: https://git-scm.com/community/logos
-    paths: [
-      "M13.09 23.549a1.54 1.54 0 0 1-2.18 0L.451 13.089a1.54 1.54 0 0 1 0-2.179l7.191-7.19 2.733 2.733a1.85 1.85 0 0 0 .964 2.326v6.66a1.849 1.849 0 1 0 1.54 0V8.957l2.508 2.508a1.85 1.85 0 1 0 1.09-1.09l-2.634-2.634a1.85 1.85 0 0 0-2.378-2.377L8.73 2.63 10.91.451a1.54 1.54 0 0 1 2.179 0l10.459 10.46a1.54 1.54 0 0 1 0 2.179z"
-    ]
-  },
+// Brand SVG data is imported from Simple Icons instead of being copied into
+// the repository. Keep aliases here so category and tag spellings resolve in
+// one place. JPA intentionally uses Hibernate because JPA has no distinct,
+// broadly recognized official brand icon.
+const brandIcons = {
+  docker: siDocker,
+  flyway: siFlyway,
+  git: siGit,
+  grafana: siGrafana,
+  hibernate: siHibernate,
+  java: siOpenjdk,
+  postgresql: siPostgresql,
+  prometheus: siPrometheus,
+  react: siReact,
+  spring: siSpring,
+  "spring-security": siSpringsecurity
+} satisfies Record<string, SimpleIcon>;
+
+// These generic categories are project-authored line icons, not brand marks.
+const fallbackIcons = {
   board: {
-    kind: "fallback",
     paths: ["M4 5h16v14H4z", "M8 5v14", "M8 10h12"]
   },
-  java: {
-    kind: "fallback",
-    paths: ["m8 7-5 5 5 5", "m16 7 5 5-5 5", "m14 4-4 16"]
+  database: {
+    paths: [
+      "M4 5c0 1.1 3.6 2 8 2s8-.9 8-2-3.6-2-8-2-8 .9-8 2z",
+      "M4 5v14c0 1.1 3.6 2 8 2s8-.9 8-2V5",
+      "M4 12c0 1.1 3.6 2 8 2s8-.9 8-2"
+    ]
   },
   network: {
-    kind: "fallback",
     paths: [
       "M12 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
       "M5 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
@@ -51,32 +62,47 @@ const categoryIcons: Record<string, CategoryIconDefinition> = {
     ]
   },
   os: {
-    kind: "fallback",
     paths: ["M3 4h18v13H3z", "M8 21h8", "M12 17v4"]
+  },
+  repository: {
+    paths: ["M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4z", "M9 4v16", "M13 8h3"]
   }
+} satisfies Record<string, FallbackIconDefinition>;
+
+const iconAliases: Record<string, string> = {
+  db: "database",
+  github: "repository",
+  "github-actions": "repository",
+  jpa: "hibernate",
+  mysql: "database",
+  openjdk: "java",
+  springsecurity: "spring-security"
 };
 
 const { category } = Astro.props as Props;
-const categorySlug = normalizeCategory(category);
-const icon = categoryIcons[categorySlug];
+const normalizedCategory = normalizeCategory(category);
+const iconKey = iconAliases[normalizedCategory] ?? normalizedCategory;
+const brandIcon = brandIcons[iconKey as keyof typeof brandIcons];
+const fallbackIcon = fallbackIcons[iconKey as keyof typeof fallbackIcons];
+const iconPaths = brandIcon ? [brandIcon.path] : fallbackIcon?.paths;
 ---
 
 {
-  icon && (
+  iconPaths && (
     <svg
       class="category-icon"
       viewBox="0 0 24 24"
       aria-hidden="true"
       focusable="false"
-      data-icon-source={icon.kind}
-      data-simple-icons-slug={icon.slug}
-      fill={icon.kind === "simple-icons" ? "currentColor" : "none"}
-      stroke={icon.kind === "fallback" ? "currentColor" : "none"}
-      stroke-width={icon.kind === "fallback" ? "1.8" : undefined}
-      stroke-linecap={icon.kind === "fallback" ? "round" : undefined}
-      stroke-linejoin={icon.kind === "fallback" ? "round" : undefined}
+      data-icon-source={brandIcon ? "simple-icons" : "project"}
+      data-simple-icons-slug={brandIcon?.slug}
+      fill={brandIcon ? "currentColor" : "none"}
+      stroke={fallbackIcon ? "currentColor" : "none"}
+      stroke-width={fallbackIcon ? "1.8" : undefined}
+      stroke-linecap={fallbackIcon ? "round" : undefined}
+      stroke-linejoin={fallbackIcon ? "round" : undefined}
     >
-      {icon.paths.map((path) => <path d={path}></path>)}
+      {iconPaths.map((path) => <path d={path}></path>)}
     </svg>
   )
 }

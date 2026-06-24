@@ -89,7 +89,10 @@ export function buildCategoryHierarchy(posts: CollectionEntry<"blog">[]): Catego
           name: formatTagName(rawTag),
           slug: tagSlug,
           href: `/tags/${tagSlug}/`,
-          count: 1
+          count: 1,
+          // CategoryIcon renders only keys registered in its icon map. Unknown
+          // tags therefore remain text-only without reserving icon space.
+          categoryIcon: tagSlug
         });
       }
     }

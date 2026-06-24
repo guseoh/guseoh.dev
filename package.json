@@ -19,7 +19,8 @@
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
     "astro": "^6.3.3",
-    "remark-github-blockquote-alert": "^2.1.0"
+    "remark-github-blockquote-alert": "^2.1.0",
+    "simple-icons": "^16.24.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.6",

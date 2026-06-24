@@ -76,6 +76,7 @@
         "title": "Spring Security",
         "slug": "security",
         "type": "tag",
+        "icon": "spring-security",
         "description": "인증과 인가 구현 기록",
         "planned": true
       }

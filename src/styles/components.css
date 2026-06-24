@@ -165,6 +165,7 @@
 }
 
 .category-icon {
+  display: block;
   width: 1em;
   height: 1em;
   flex: 0 0 auto;
@@ -382,6 +383,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.42rem;
+}
+
+.category-menu__child-label .category-icon {
+  width: 0.9em;
+  height: 0.9em;
 }
 
 .category-menu__child strong {
