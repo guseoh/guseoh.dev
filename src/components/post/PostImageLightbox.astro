@@ -87,12 +87,21 @@
     };
 
     for (const target of Array.from(postContent.querySelectorAll("img"))) {
+      const captionId = target.getAttribute("data-caption-id");
+      if (captionId) {
+        const describedBy = target.getAttribute("aria-describedby")?.trim() || "";
+        target.setAttribute(
+          "aria-describedby",
+          Array.from(new Set([...describedBy.split(/\s+/), captionId].filter(Boolean))).join(" ")
+        );
+      }
+
       if (!isEligibleImage(target)) continue;
 
       target.classList.add("post-lightbox-trigger");
       target.tabIndex = 0;
       target.setAttribute("role", "button");
-      target.setAttribute("aria-label", `이미지 크게 보기: ${getCaption(target) || "본문 이미지"}`);
+      target.setAttribute("aria-label", `이미지 크게 보기: ${target.alt?.trim() || getCaption(target) || "본문 이미지"}`);
 
       target.addEventListener("click", () => openLightbox(target));
       target.addEventListener("keydown", (event) => {

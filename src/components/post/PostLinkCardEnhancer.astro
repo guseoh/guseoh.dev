@@ -1,0 +1,24 @@
+<script is:inline>
+  (() => {
+    const content = document.querySelector(".post__content");
+    if (!(content instanceof HTMLElement) || content.dataset.linkCardsReady === "true") return;
+    content.dataset.linkCardsReady = "true";
+
+    for (const preview of content.querySelectorAll(".link-mention__preview")) {
+      if (!(preview instanceof HTMLImageElement)) continue;
+      const media = preview.closest("[data-link-preview]");
+      if (!(media instanceof HTMLElement)) continue;
+
+      const showFallback = () => {
+        preview.hidden = true;
+        media.classList.add("link-mention__media--fallback");
+        media.removeAttribute("data-link-preview");
+      };
+
+      preview.addEventListener("error", showFallback, { once: true });
+      if (preview.complete && preview.naturalWidth === 0) {
+        showFallback();
+      }
+    }
+  })();
+</script>

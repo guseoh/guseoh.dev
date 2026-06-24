@@ -81,18 +81,60 @@ const { headings } = Astro.props as Props;
             if (entries.length === 0) return;
 
             const sections = Array.from(new Set(entries.map((entry) => entry.section)));
+            const desktopToc = document.querySelector(".post-toc");
+            const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+            let activeSection = null;
+            let tocInteractionUntil = 0;
+
+            const markTocInteraction = () => {
+              tocInteractionUntil = Date.now() + 1200;
+            };
+
+            if (desktopToc instanceof HTMLElement) {
+              desktopToc.addEventListener("wheel", markTocInteraction, { passive: true });
+              desktopToc.addEventListener("touchstart", markTocInteraction, { passive: true });
+              desktopToc.addEventListener("pointerdown", markTocInteraction, { passive: true });
+            }
+
+            const revealDesktopLink = (section) => {
+              if (!(desktopToc instanceof HTMLElement) || Date.now() < tocInteractionUntil) return;
+
+              const activeLink = entries.find((entry) =>
+                entry.section === section && entry.link.closest(".post-toc") === desktopToc
+              )?.link;
+              if (!(activeLink instanceof HTMLAnchorElement)) return;
+
+              const containerRect = desktopToc.getBoundingClientRect();
+              const linkRect = activeLink.getBoundingClientRect();
+              const outsideTop = linkRect.top < containerRect.top;
+              const outsideBottom = linkRect.bottom > containerRect.bottom;
+              if (!outsideTop && !outsideBottom) return;
+
+              const targetTop = activeLink.offsetTop - (desktopToc.clientHeight - activeLink.offsetHeight) / 2;
+              desktopToc.scrollTo({
+                top: Math.max(0, targetTop),
+                behavior: motionMedia.matches ? "auto" : "smooth"
+              });
+            };
 
             const applyActive = () => {
-              const currentY = window.scrollY + 150;
-              let activeSection = sections[0];
+              const readingOffset = Math.min(220, Math.max(128, window.innerHeight * 0.24));
+              const currentY = window.scrollY + readingOffset;
+              const atPageEnd = Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 2;
+              let nextSection = atPageEnd ? sections[sections.length - 1] : sections[0];
 
-              for (const section of sections) {
-                if (section.offsetTop <= currentY) {
-                  activeSection = section;
-                } else {
-                  break;
+              if (!atPageEnd) {
+                for (const section of sections) {
+                  if (section.offsetTop <= currentY) {
+                    nextSection = section;
+                  } else {
+                    break;
+                  }
                 }
               }
+
+              if (activeSection === nextSection) return;
+              activeSection = nextSection;
 
               for (const entry of entries) {
                 const isActive = entry.section === activeSection;
@@ -103,6 +145,8 @@ const { headings } = Astro.props as Props;
                   entry.link.removeAttribute("aria-current");
                 }
               }
+
+              revealDesktopLink(activeSection);
             };
 
             let activeFrame = 0;

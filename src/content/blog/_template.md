@@ -35,6 +35,7 @@ draft: true
 - draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.
 - 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
 - Markdown 이미지는 ![이미지의 의미를 설명하는 alt](./image.png) 형식으로 작성합니다.
+- 캡션이 필요한 이미지는 title에 "caption: 보충 설명"을 작성합니다. figure와 figcaption으로 렌더링됩니다.
 - 다크 모드에서 원본 색을 유지해야 하는 이미지는 alt나 title에 {no-dark-filter}를 붙입니다. 렌더링 시 표시는 제거됩니다.
 - 이미지 lightbox 확대 보기에서 제외할 작은 아이콘이나 배지는 alt나 title에 {no-lightbox}를 붙입니다. 렌더링 시 표시는 제거됩니다.
 - 본문 이미지는 데스크톱에서 최대 760px, 모바일에서 화면 너비에 맞춰 자동 축소됩니다.
@@ -120,6 +121,7 @@ public Post findPost(Long id) {
 
 ```md
 ![게시글 조회 요청과 응답 흐름](./images/request-flow.png)
+![요청 흐름의 핵심 단계](./images/request-flow.png "caption: 클라이언트 요청이 서버 응답으로 이어지는 처리 순서")
 ![다크 모드에서도 원본 색을 유지할 ERD {no-dark-filter}](./images/erd.png)
 ![확대 보기에서 제외할 작은 배지 {no-lightbox}](./images/badge.png)
 ```

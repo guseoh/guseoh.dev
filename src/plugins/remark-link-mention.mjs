@@ -78,6 +78,16 @@ function firstLetter(value) {
   return value.trim().replace(/^www\./, "").charAt(0).toUpperCase() || "L";
 }
 
+function renderPreviewPlaceholder(data) {
+  return `<span class="link-mention__placeholder">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.14-1.14"></path>
+    </svg>
+    <span>${escapeHtml(firstLetter(data.host))}</span>
+  </span>`;
+}
+
 function renderLinkMention(data) {
   const description = data.description
     ? `<span class="link-mention__description">${escapeHtml(data.description)}</span>`
@@ -85,15 +95,13 @@ function renderLinkMention(data) {
   const icon = data.icon
     ? `<img class="link-mention__favicon" src="${escapeHtml(data.icon)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : "";
+  const placeholder = renderPreviewPlaceholder(data);
   const preview = data.image
-    ? `<span class="link-mention__media"><img class="link-mention__preview" src="${escapeHtml(data.image)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></span>`
-    : `<span class="link-mention__media link-mention__media--fallback" aria-hidden="true">
-    <svg viewBox="0 0 24 24" focusable="false">
-      <path d="M10 13a5 5 0 0 0 7.54.54l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"></path>
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-2 2a5 5 0 0 0 7.07 7.07l1.14-1.14"></path>
-    </svg>
-    <span>${escapeHtml(firstLetter(data.host))}</span>
-  </span>`;
+    ? `<span class="link-mention__media" aria-hidden="true" data-link-preview>
+    ${placeholder}
+    <img class="link-mention__preview" src="${escapeHtml(data.image)}" alt="" width="640" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+  </span>`
+    : `<span class="link-mention__media link-mention__media--fallback" aria-hidden="true">${placeholder}</span>`;
 
   return `<a class="link-mention" href="${escapeHtml(data.href)}" data-link-mention="${data.isInternal ? "internal" : "external"}">
   <span class="link-mention__content">

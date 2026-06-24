@@ -2,8 +2,67 @@ const filterOptOutPattern = /\s*\{(?:no-dark-filter|theme-safe|data-theme-safe)\
 const lightboxOptOutPattern = /\s*\{(?:no-lightbox|lightbox-false)\}\s*/gi;
 const titleTokenPattern = /(?:^|\s)(?:no-dark-filter|theme-safe|data-theme-safe)(?=\s|$)/gi;
 const lightboxTitleTokenPattern = /(?:^|\s)(?:no-lightbox|lightbox-false)(?=\s|$)/gi;
+const captionTitlePattern = /^caption:\s*(.+)$/i;
 
-function visit(node) {
+function getOnlyImage(node) {
+  if (node?.type !== "element") return undefined;
+  if (node.tagName === "img") return node;
+
+  if (
+    node.tagName === "a" &&
+    Array.isArray(node.children) &&
+    node.children.length === 1 &&
+    node.children[0]?.type === "element" &&
+    node.children[0].tagName === "img"
+  ) {
+    return node.children[0];
+  }
+
+  return undefined;
+}
+
+function applyCaption(paragraph, state) {
+  if (
+    paragraph?.type !== "element" ||
+    paragraph.tagName !== "p" ||
+    !Array.isArray(paragraph.children) ||
+    paragraph.children.length !== 1
+  ) {
+    return;
+  }
+
+  const image = getOnlyImage(paragraph.children[0]);
+  if (!image) return;
+
+  const properties = image.properties ?? {};
+  const title = typeof properties.title === "string" ? properties.title.trim() : "";
+  const match = title.match(captionTitlePattern);
+  const caption = match?.[1]?.trim();
+  if (!caption) return;
+
+  state.captionIndex += 1;
+  const captionId = `post-image-caption-${state.captionIndex}`;
+
+  image.properties = {
+    ...properties,
+    "data-caption-id": captionId
+  };
+  delete image.properties.title;
+
+  paragraph.tagName = "figure";
+  paragraph.properties = { className: ["post-figure", "post-figure--captioned"] };
+  paragraph.children = [
+    paragraph.children[0],
+    {
+      type: "element",
+      tagName: "figcaption",
+      properties: { id: captionId },
+      children: [{ type: "text", value: caption }]
+    }
+  ];
+}
+
+function visit(node, state) {
   if (!Array.isArray(node?.children)) return;
 
   for (const child of node.children) {
@@ -11,8 +70,10 @@ function visit(node) {
       applyImageFlags(child);
     }
 
-    visit(child);
+    visit(child, state);
   }
+
+  applyCaption(node, state);
 }
 
 function applyImageFlags(image) {
@@ -80,6 +141,6 @@ function applyImageFlags(image) {
 
 export function rehypeImageFlags() {
   return (tree) => {
-    visit(tree);
+    visit(tree, { captionIndex: 0 });
   };
 }

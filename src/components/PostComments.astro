@@ -2,12 +2,44 @@
   <h2 class="comments-wrap__title">Comments</h2>
   <p class="comments-wrap__description">Comments require GitHub sign-in.</p>
 
-  <div id="utterances-comments" class="comments-wrap__public"></div>
+  <div id="utterances-comments" class="comments-wrap__public" aria-busy="true">
+    <div class="comments-loading" data-comments-loading role="status" aria-live="polite">
+      <span class="comments-loading__spinner" aria-hidden="true"></span>
+      <span>댓글을 불러오는 중입니다.</span>
+    </div>
+  </div>
 
   <script is:inline>
     (() => {
       const target = document.getElementById("utterances-comments");
       if (!target) return;
+      if (target.dataset.commentsInitialized === "true") return;
+      target.dataset.commentsInitialized = "true";
+
+      const loading = target.querySelector("[data-comments-loading]");
+      let frameObserver;
+
+      const finishLoading = () => {
+        if (loading instanceof HTMLElement) {
+          loading.hidden = true;
+        }
+        target.classList.add("is-ready");
+        target.removeAttribute("aria-busy");
+        frameObserver?.disconnect();
+      };
+
+      const watchFrame = () => {
+        const iframe = target.querySelector("iframe.utterances-frame");
+        if (!(iframe instanceof HTMLIFrameElement)) return;
+        if (iframe.dataset.commentsLoadWatched === "true") return;
+
+        iframe.dataset.commentsLoadWatched = "true";
+        iframe.addEventListener("load", finishLoading, { once: true });
+      };
+
+      frameObserver = new MutationObserver(watchFrame);
+      frameObserver.observe(target, { childList: true, subtree: true });
+      watchFrame();
 
       const getUtterancesTheme = () =>
         document.documentElement.getAttribute("data-theme") === "dark" ? "github-dark" : "github-light";
@@ -39,7 +71,10 @@
         script.setAttribute("label", "comment");
         script.setAttribute("theme", getUtterancesTheme());
         script.setAttribute("crossorigin", "anonymous");
-        script.addEventListener("load", () => window.setTimeout(syncTheme, 0));
+        script.addEventListener("load", () => {
+          watchFrame();
+          window.setTimeout(syncTheme, 0);
+        });
         script.async = true;
         target.append(script);
       };
