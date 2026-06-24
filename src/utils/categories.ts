@@ -12,6 +12,7 @@ export type CategoryTreeChild = {
   slug: string;
   href?: string;
   count: number;
+  categoryIcon?: string;
   description?: string;
   planned?: boolean;
 };

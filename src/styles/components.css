@@ -157,8 +157,18 @@
 
 .badge--category,
 .tag--category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
   border-color: color-mix(in srgb, var(--accent) 52%, var(--tag-border));
   color: var(--link);
+}
+
+.category-icon {
+  width: 1em;
+  height: 1em;
+  flex: 0 0 auto;
+  color: currentColor;
 }
 
 .badge--muted,
@@ -303,9 +313,15 @@
 }
 
 .category-menu__meta {
+  min-width: 0;
   display: inline-flex;
   align-items: center;
   gap: 0.48rem;
+}
+
+.category-menu__meta .category-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .category-menu__count {
@@ -360,6 +376,12 @@
 .category-menu__child span {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.category-menu__child-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
 }
 
 .category-menu__child strong {

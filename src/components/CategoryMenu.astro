@@ -1,4 +1,5 @@
 ---
+import CategoryIcon from "./CategoryIcon.astro";
 import type { CategoryTreeGroup } from "../utils/categories";
 
 interface Props {
@@ -63,7 +64,10 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
             aria-current={isGroupPathActive ? "page" : undefined}
             data-sidebar-current={variant === "sidebar" && isGroupPathActive ? "page" : undefined}
           >
-            <span class="category-menu__title">{group.name}</span>
+            <span class="category-menu__meta">
+              <CategoryIcon category={group.name} />
+              <span class="category-menu__title">{group.name}</span>
+            </span>
             <span class="category-menu__count">({group.count})</span>
           </a>
 
@@ -95,12 +99,18 @@ const isChildActive = (child: CategoryTreeGroup["children"][number]) =>
                   aria-current={isActive ? "page" : undefined}
                   data-sidebar-current={variant === "sidebar" && isActive ? currentType : undefined}
                 >
-                  <span>{child.name}</span>
+                  <span class="category-menu__child-label">
+                    {child.categoryIcon && <CategoryIcon category={child.categoryIcon} />}
+                    <span>{child.name}</span>
+                  </span>
                   <strong>({child.count})</strong>
                 </a>
               ) : (
                 <span class="category-menu__child category-menu__child--planned" aria-disabled="true">
-                  <span>{child.name}</span>
+                  <span class="category-menu__child-label">
+                    {child.categoryIcon && <CategoryIcon category={child.categoryIcon} />}
+                    <span>{child.name}</span>
+                  </span>
                   <small>준비 중</small>
                 </span>
               );

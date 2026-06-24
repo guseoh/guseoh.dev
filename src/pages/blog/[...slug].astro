@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import CategoryIcon from "../../components/CategoryIcon.astro";
 import PostComments from "../../components/PostComments.astro";
 import PostCodeEnhancer from "../../components/post/PostCodeEnhancer.astro";
 import PostHeadingEnhancer from "../../components/post/PostHeadingEnhancer.astro";
@@ -130,7 +131,12 @@ const postStructuredData = {
           )}
           <div class="post-meta-item">
             <dt>카테고리</dt>
-            <dd><a class="tag tag--category" href={`/categories/${categorySlug}/`}>{categoryName}</a></dd>
+            <dd>
+              <a class="tag tag--category" href={`/categories/${categorySlug}/`}>
+                <CategoryIcon category={categoryName} />
+                <span>{categoryName}</span>
+              </a>
+            </dd>
           </div>
           <div class="post-meta-item">
             <dt>읽는 시간</dt>

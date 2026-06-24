@@ -1,4 +1,5 @@
 ---
+import CategoryIcon from "./CategoryIcon.astro";
 import { normalizeCategory } from "../utils/categories";
 import { formatTagName, normalizeTag } from "../utils/tags";
 
@@ -15,7 +16,10 @@ const hiddenTagCount = Math.max(0, tags.length - visibleTags.length);
 ---
 
 <div class="badge-group">
-  <a class="badge badge--category" href={`/categories/${normalizeCategory(categoryName)}/`}>{categoryName}</a>
+  <a class="badge badge--category" href={`/categories/${normalizeCategory(categoryName)}/`}>
+    <CategoryIcon category={categoryName} />
+    <span>{categoryName}</span>
+  </a>
   {visibleTags.map((tag) => (
     <a class="badge badge--tag" href={`/tags/${normalizeTag(tag)}/`}>#{formatTagName(tag)}</a>
   ))}

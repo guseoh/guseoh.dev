@@ -63,6 +63,8 @@ export function buildNavigationGroups(posts: CollectionEntry<"blog">[]): Navigat
 }
 
 export function buildSidebarNavigation(posts: CollectionEntry<"blog">[]): CategoryTreeGroup[] {
+  const categorySlugs = new Set(posts.map(getCategorySlug));
+
   return buildNavigationGroups(posts).map((group) => ({
     name: group.title,
     slug: group.slug,
@@ -73,6 +75,7 @@ export function buildSidebarNavigation(posts: CollectionEntry<"blog">[]): Catego
       slug: item.slug ?? item.title,
       href: item.href,
       count: item.count,
+      categoryIcon: item.slug && categorySlugs.has(item.slug) ? item.slug : undefined,
       description: item.description,
       planned: item.planned
     }))

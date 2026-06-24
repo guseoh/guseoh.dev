@@ -17,7 +17,7 @@ const normalizedCurrentPath = currentPath.replace(/\/+$/, "") || "/";
 const isCategoriesPage = normalizedCurrentPath === "/categories";
 ---
 
-<button id="sidebar-open" class="sidebar-open" type="button" aria-label="사이트 탐색 열기" aria-controls="site-sidebar" aria-expanded="false">
+<button id="sidebar-open" class="sidebar-open" type="button" aria-label="사이드바 열기" aria-controls="site-sidebar" aria-expanded="false">
   <span class="sidebar-open__line"></span>
   <span class="sidebar-open__line"></span>
   <span class="sidebar-open__line"></span>
@@ -27,14 +27,14 @@ const isCategoriesPage = normalizedCurrentPath === "/categories";
 
 <aside id="site-sidebar" class="site-sidebar" aria-label="사이트 탐색" aria-hidden="false" tabindex="-1">
   <section class="sidebar-close-section" aria-label="사이드바 제어">
-    <button id="sidebar-collapse-toggle" class="sidebar-collapse-toggle" type="button" aria-label="사이트 탐색 접기" aria-controls="site-sidebar" aria-expanded="true">
+    <button id="sidebar-collapse-toggle" class="sidebar-collapse-toggle" type="button" aria-label="사이드바 닫기" aria-controls="site-sidebar" aria-expanded="true">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="m15 6-6 6 6 6"></path>
+        <path d="M6 6l12 12M18 6 6 18"></path>
       </svg>
-      <span>탐색 접기</span>
+      <span>사이드바 닫기</span>
     </button>
 
-    <button id="sidebar-close" class="sidebar-close" type="button" aria-label="사이드바 닫기" aria-controls="site-sidebar">
+    <button id="sidebar-close" class="sidebar-close" type="button" aria-label="사이드바 닫기" aria-controls="site-sidebar" aria-expanded="true">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M6 6l12 12M18 6 6 18"></path>
       </svg>

@@ -255,7 +255,7 @@
         const narrow = isNarrow();
         const shouldCollapse = Boolean(collapsed);
         const modalOpen = narrow && !shouldCollapse;
-        const openLabel = narrow ? "사이드바 열기" : "사이트 탐색 펼치기";
+        const openLabel = "사이드바 열기";
 
         shell.classList.toggle("sidebar-collapsed", shouldCollapse);
         document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
@@ -277,8 +277,9 @@
         sidebarOpenButton.title = openLabel;
         sidebarCollapseButton.hidden = narrow || shouldCollapse;
         sidebarCollapseButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
-        sidebarCollapseButton.setAttribute("aria-label", "사이트 탐색 접기");
+        sidebarCollapseButton.setAttribute("aria-label", "사이드바 닫기");
         sidebarCloseButton.hidden = !narrow;
+        sidebarCloseButton.setAttribute("aria-expanded", shouldCollapse ? "false" : "true");
 
         setBackdropVisible(modalOpen);
 

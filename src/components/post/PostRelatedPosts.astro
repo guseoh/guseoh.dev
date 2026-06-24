@@ -1,4 +1,5 @@
 ---
+import CategoryIcon from "../CategoryIcon.astro";
 import type { RelatedPostResult } from "../../utils/relatedPosts";
 import { normalizeCategory } from "../../utils/categories";
 import { formatTagName } from "../../utils/tags";
@@ -28,6 +29,7 @@ const { relatedPosts } = Astro.props as Props;
           return (
             <a class="post-related__card" href={`/blog/${post.id}/`}>
               <span class="post-related__meta">
+                <CategoryIcon category={categoryName} />
                 <span>{categoryName}</span>
                 <span aria-hidden="true">·</span>
                 <time datetime={post.data.date.toISOString()}>{formatPostDate(post.data.date)}</time>
