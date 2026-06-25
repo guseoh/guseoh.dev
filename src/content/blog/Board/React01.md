@@ -4,6 +4,8 @@ description: "Thymeleaf 게시판을 React로 전환에 대한 과정"
 date: 2026-06-04
 updated: 2026-06-04
 category: Board
+slug: "board/react01"
+commentKey: "/blog/board/react01/"
 tags: ["Spring", "Project"]
 series: "thymeleaf-게시판을-react로-전환"
 chapter: 2

@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { SITE } from "../../config/site";
 import contributionData from "../../../public/data/github-contributions.json";
 import { BLOG_GRASS_WEEKDAY_LABELS, buildBlogActivityStats } from "../../utils/blogStats";
 import {
@@ -13,7 +14,7 @@ interface Props {
   username?: string;
 }
 
-const { posts, username = "guseoh" } = Astro.props as Props;
+const { posts, username = SITE.githubActivityUsername } = Astro.props as Props;
 const blogStats = buildBlogActivityStats(posts);
 const githubStats = buildGitHubActivityStats(contributionData as GitHubContributionData);
 const numberFormatter = new Intl.NumberFormat("ko-KR");

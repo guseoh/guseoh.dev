@@ -4,6 +4,8 @@ description: "캡슐화의 의미와 필요한 이유를 알아보자."
 date: 2026-06-24
 updated: 2026-06-24
 category: "Java"
+slug: "java/캡슐화/encapsulation"
+commentKey: "/blog/java/캡슐화/encapsulation/"
 tags:
   - Java
   - OOP

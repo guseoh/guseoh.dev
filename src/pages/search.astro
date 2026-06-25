@@ -30,176 +30,20 @@ const navigationGroupsJson = JSON.stringify(navigationData);
     </form>
   </section>
 
+  <section class="search-recent" data-search-recent hidden aria-label="최근 검색어">
+    <div class="search-recent__head">
+      <h2>최근 검색어</h2>
+      <button type="button" data-search-recent-clear>전체 삭제</button>
+    </div>
+    <div class="search-recent__list" data-search-recent-list></div>
+  </section>
+
   <div class="search-results-meta" data-search-meta hidden></div>
   <ul class="post-list search-results" data-search-list aria-live="polite"></ul>
   <p class="section-empty search-empty" data-search-empty hidden>조건에 맞는 글이 없습니다.</p>
   <script is:inline id="search-navigation-groups" type="application/json" set:html={navigationGroupsJson}></script>
 
-  <script is:inline>
-    (() => {
-      const form = document.querySelector("[data-search-form]");
-      const input = document.getElementById("search-page-input");
-      const categorySelect = document.querySelector("[data-search-category]");
-      const tagSelect = document.querySelector("[data-search-tag]");
-      const list = document.querySelector("[data-search-list]");
-      const meta = document.querySelector("[data-search-meta]");
-      const empty = document.querySelector("[data-search-empty]");
-      const status = document.getElementById("search-status");
-      const navigationGroupsElement = document.getElementById("search-navigation-groups");
-      const params = new URLSearchParams(window.location.search);
-      const activeGroup = params.get("group") ?? "";
-      const collator = new Intl.Collator("ko-KR");
-      const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-      });
-
-      if (
-        !(form instanceof HTMLFormElement) ||
-        !(input instanceof HTMLInputElement) ||
-        !(categorySelect instanceof HTMLSelectElement) ||
-        !(tagSelect instanceof HTMLSelectElement) ||
-        !(list instanceof HTMLElement) ||
-        !(meta instanceof HTMLElement) ||
-        !(empty instanceof HTMLElement)
-      ) {
-        return;
-      }
-
-      const navigationGroups = navigationGroupsElement?.textContent
-        ? JSON.parse(navigationGroupsElement.textContent)
-        : [];
-      input.value = params.get("q") ?? "";
-      categorySelect.value = params.get("category") ?? "";
-      tagSelect.value = params.get("tag") ?? "";
-
-      const normalize = (value) => value.trim().toLowerCase();
-      const normalizeSlug = (value) => normalize(value)
-        .replace(/[^a-z0-9가-힣]+/gi, "-")
-        .replace(/^-+|-+$/g, "");
-      const escapeHtml = (value) =>
-        value.replace(/[&<>"']/g, (character) => ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          "\"": "&quot;",
-          "'": "&#39;"
-        })[character]);
-
-      const uniqueSorted = (items) => Array.from(new Set(items.filter(Boolean))).sort(collator.compare);
-
-      const fillSelect = (select, values, selectedValue, allLabel) => {
-        select.replaceChildren(new Option(allLabel, ""));
-        for (const value of values) {
-          select.append(new Option(value, value));
-        }
-        select.value = values.includes(selectedValue) ? selectedValue : "";
-      };
-
-      const renderPost = (post) => {
-        const dateLabel = dateFormatter.format(new Date(post.date));
-        const tags = post.tags.slice(0, 4).map((tag) => (
-          `<a class="badge" href="/tags/${encodeURIComponent(normalize(tag).replaceAll(" ", "-"))}/">#${escapeHtml(tag)}</a>`
-        )).join("");
-
-        return `
-          <li>
-            <article class="card post-card" data-post-slug="${escapeHtml(post.slug)}">
-              <header class="post-card__header">
-                <h2><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h2>
-              </header>
-              <p class="post-card__description">${escapeHtml(post.description || post.excerpt)}</p>
-              <div class="post-card__footer">
-                <div class="post-card__meta">
-                  <span>작성</span>
-                  <time datetime="${escapeHtml(post.date)}">${dateLabel}</time>
-                  <span aria-hidden="true">·</span>
-                  <span>${escapeHtml(post.readingTime)}</span>
-                </div>
-                <div class="badge-group">
-                  <a class="badge badge--category" href="/categories/${encodeURIComponent(normalize(post.category).replaceAll(" ", "-"))}/">${escapeHtml(post.category)}</a>
-                  ${tags}
-                </div>
-              </div>
-            </article>
-          </li>
-        `;
-      };
-
-      const updateUrl = () => {
-        const nextParams = new URLSearchParams();
-        const query = input.value.trim();
-
-        if (activeGroup) nextParams.set("group", activeGroup);
-        if (query) nextParams.set("q", query);
-        if (categorySelect.value) nextParams.set("category", categorySelect.value);
-        if (tagSelect.value) nextParams.set("tag", tagSelect.value);
-
-        const nextUrl = `${window.location.pathname}${nextParams.toString() ? `?${nextParams}` : ""}`;
-        window.history.replaceState(null, "", nextUrl);
-      };
-
-      const render = (posts) => {
-        const query = normalize(input.value);
-        const category = categorySelect.value;
-        const tag = tagSelect.value;
-        const group = navigationGroups.find((entry) => entry.slug === activeGroup);
-        const filtered = posts.filter((post) => {
-          const matchesQuery = query.length === 0 || post.searchText.includes(query);
-          const matchesCategory = !category || post.category === category;
-          const matchesTag = !tag || post.tags.includes(tag);
-          const matchesGroup = !group || group.items.some((item) => {
-            if (item.planned) return false;
-            if (item.type === "category") return normalizeSlug(post.category) === item.slug;
-            if (item.type === "tag") return post.tags.some((postTag) => normalizeSlug(postTag) === item.slug);
-            if (item.type === "series") return normalizeSlug(post.series || "") === item.slug;
-            if (item.type === "search") return post.searchText.includes(normalize(item.query || item.title));
-
-            return false;
-          });
-
-          return matchesQuery && matchesCategory && matchesTag && matchesGroup;
-        });
-
-        list.innerHTML = filtered.map(renderPost).join("");
-        empty.hidden = filtered.length > 0;
-        meta.hidden = false;
-        meta.textContent = group ? `${group.title} 그룹 · 총 ${filtered.length}개 결과` : `총 ${filtered.length}개 결과`;
-
-        if (status) {
-          status.textContent = query || category || tag || group
-            ? `검색 조건에 맞는 글 ${filtered.length}개를 찾았습니다.`
-            : `전체 ${posts.length}개의 글을 검색할 수 있습니다.`;
-        }
-
-        updateUrl();
-      };
-
-      fetch("/search-index.json")
-        .then((response) => {
-          if (!response.ok) throw new Error(`Search index request failed: ${response.status}`);
-          return response.json();
-        })
-        .then((posts) => {
-          fillSelect(categorySelect, uniqueSorted(posts.map((post) => post.category)), categorySelect.value, "전체 카테고리");
-          fillSelect(tagSelect, uniqueSorted(posts.flatMap((post) => post.tags)), tagSelect.value, "전체 태그");
-
-          form.addEventListener("submit", (event) => {
-            event.preventDefault();
-            render(posts);
-          });
-          input.addEventListener("input", () => render(posts));
-          categorySelect.addEventListener("change", () => render(posts));
-          tagSelect.addEventListener("change", () => render(posts));
-
-          render(posts);
-        })
-        .catch(() => {
-          meta.hidden = false;
-          meta.textContent = "검색 인덱스를 불러오지 못했습니다.";
-          empty.hidden = false;
-        });
-    })();
+  <script>
+    import "../scripts/search";
   </script>
 </BaseLayout>

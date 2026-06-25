@@ -1,4 +1,17 @@
-<section class="comments-wrap" aria-label="Comment section">
+---
+import { SITE } from "../config/site";
+
+interface Props {
+  commentKey?: string;
+  postUrl?: string;
+}
+
+const { commentKey = "pathname", postUrl = "" } = Astro.props as Props;
+const commentsIssueUrl = new URL(`${SITE.repositoryUrl}/issues`);
+commentsIssueUrl.searchParams.set("q", commentKey);
+---
+
+<section class="comments-wrap" aria-label="Comment section" data-comment-repository={SITE.commentRepository} data-comment-key={commentKey} data-comment-issue-url={commentsIssueUrl.toString()} data-post-url={postUrl}>
   <h2 class="comments-wrap__title">Comments</h2>
   <p class="comments-wrap__description">Comments require GitHub sign-in.</p>
 
@@ -6,6 +19,11 @@
     <div class="comments-loading" data-comments-loading role="status" aria-live="polite">
       <span class="comments-loading__spinner" aria-hidden="true"></span>
       <span>댓글을 불러오는 중입니다.</span>
+    </div>
+    <div class="comments-fallback" data-comments-fallback role="status" aria-live="polite" hidden>
+      <strong>댓글을 불러오지 못했습니다.</strong>
+      <p>GitHub에서 댓글과 토론을 확인할 수 있습니다.</p>
+      <a href={commentsIssueUrl.toString()} target="_blank" rel="noopener noreferrer">GitHub에서 확인하기</a>
     </div>
   </div>
 
@@ -17,15 +35,35 @@
       target.dataset.commentsInitialized = "true";
 
       const loading = target.querySelector("[data-comments-loading]");
+      const fallback = target.querySelector("[data-comments-fallback]");
+      const wrapper = target.closest("[data-comment-key]");
+      const repository = wrapper?.dataset.commentRepository || "guseoh/guseoh.github.io";
+      const commentKey = wrapper?.dataset.commentKey || "pathname";
       let frameObserver;
+      let themeObserver;
+      let timeoutId = 0;
+
+      const showFallback = () => {
+        if (target.classList.contains("is-ready")) return;
+        if (fallback instanceof HTMLElement) fallback.hidden = false;
+        if (loading instanceof HTMLElement) loading.hidden = true;
+        target.removeAttribute("aria-busy");
+        frameObserver?.disconnect();
+        themeObserver?.disconnect();
+        window.clearTimeout(timeoutId);
+      };
 
       const finishLoading = () => {
         if (loading instanceof HTMLElement) {
           loading.hidden = true;
         }
+        if (fallback instanceof HTMLElement) {
+          fallback.hidden = true;
+        }
         target.classList.add("is-ready");
         target.removeAttribute("aria-busy");
         frameObserver?.disconnect();
+        window.clearTimeout(timeoutId);
       };
 
       const watchFrame = () => {
@@ -54,7 +92,7 @@
         );
       };
 
-      const themeObserver = new MutationObserver(syncTheme);
+      themeObserver = new MutationObserver(syncTheme);
       themeObserver.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ["data-theme"]
@@ -66,8 +104,8 @@
 
         const script = document.createElement("script");
         script.src = "https://utteranc.es/client.js";
-        script.setAttribute("repo", "guseoh/guseoh.github.io");
-        script.setAttribute("issue-term", "pathname");
+        script.setAttribute("repo", repository);
+        script.setAttribute("issue-term", commentKey);
         script.setAttribute("label", "comment");
         script.setAttribute("theme", getUtterancesTheme());
         script.setAttribute("crossorigin", "anonymous");
@@ -75,8 +113,10 @@
           watchFrame();
           window.setTimeout(syncTheme, 0);
         });
+        script.addEventListener("error", showFallback, { once: true });
         script.async = true;
         target.append(script);
+        timeoutId = window.setTimeout(showFallback, 10000);
       };
 
       if ("IntersectionObserver" in window) {

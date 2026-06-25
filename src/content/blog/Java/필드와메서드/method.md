@@ -4,6 +4,8 @@ description: "자바 객체의 상태를 나타내는 필드와 행동을 나타
 date: 2026-06-18
 updated: 2026-06-18
 category: "Java"
+slug: "java/필드와메서드/method"
+commentKey: "/blog/java/필드와메서드/method/"
 tags:
   - Java
   - Field

@@ -4,6 +4,8 @@ description: "자바 생성자의 역할과 기본 생성자, 객체 초기화, 
 date: 2026-06-18
 updated: 2026-06-18
 category: "Java"
+slug: "java/this와생성자/this"
+commentKey: "/blog/java/this와생성자/this/"
 tags:
     - Java
     - Constructor

@@ -1,12 +1,13 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { SITE_DESCRIPTION, SITE_TITLE, sortPostsByDate } from "../utils/posts";
+import { SITE } from "../config/site";
+import { getPublishedPostsSorted } from "../utils/content/posts";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../utils/posts";
 import ActivitySection from "../components/home/ActivitySection.astro";
 import ArchiveHero from "../components/home/ArchiveHero.astro";
 import LatestPosts from "../components/home/LatestPosts.astro";
 
-const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const posts = await getPublishedPostsSorted();
 ---
 
 <BaseLayout
@@ -15,7 +16,7 @@ const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.dr
   minimalHome={true}
 >
   <ArchiveHero />
-  <ActivitySection posts={posts} username="guseoh" />
+  <ActivitySection posts={posts} username={SITE.githubActivityUsername} />
   <LatestPosts posts={posts} />
 </BaseLayout>
 

@@ -4,6 +4,8 @@ description: "자바의 기본형과 참조형에 대해 알아보자."
 date: 2026-06-15
 updated: 2026-06-15
 category: "Java"
+slug: "java/기본형과참조형/java_type"
+commentKey: "/blog/java/기본형과참조형/java_type/"
 tags:
   - Java
   - Primitive Type

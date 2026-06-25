@@ -1,10 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection } from "astro:content";
 import { buildTagSummary } from "../../utils/tags";
+import { getPublishedPosts } from "../../utils/content/posts";
 import { SITE_DESCRIPTION } from "../../utils/posts";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
+const posts = await getPublishedPosts();
 const tagSummary = buildTagSummary(posts);
 const tagGroups = [
   { type: "tech", title: "기술 태그", description: "Java, Spring, JPA처럼 구현 기술을 기준으로 찾습니다." },

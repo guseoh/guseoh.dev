@@ -4,6 +4,8 @@ description: "Spring Data의 Page, Pageable, Slice, Sort 개념과 설계하는 
 date: 2026-06-12
 updated: 2026-06-12
 category: "Spring"
+slug: "spring/paging"
+commentKey: "/blog/spring/paging/"
 tags:
   - Spring
   - Spring Data JPA

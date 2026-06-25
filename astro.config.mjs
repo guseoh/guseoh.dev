@@ -5,6 +5,7 @@ import { remarkCallout } from "./src/plugins/remark-callout.mjs";
 import { codeMetaShikiTransformer, remarkCodeMeta } from "./src/plugins/remark-code-meta.mjs";
 import { remarkLinkMention } from "./src/plugins/remark-link-mention.mjs";
 import { remarkTableCaptions } from "./src/plugins/remark-table-captions.mjs";
+import { SITE } from "./src/config/site.ts";
 
 function remarkDemoteContentH1() {
   return (tree) => {
@@ -25,14 +26,14 @@ function remarkDemoteContentH1() {
 }
 
 export default defineConfig({
-  site: "https://guseoh.github.io",
+  site: SITE.siteUrl,
   markdown: {
     remarkPlugins: [
       remarkDemoteContentH1,
       remarkTableCaptions,
       remarkCallout,
       remarkCodeMeta,
-      [remarkLinkMention, { site: "https://guseoh.github.io" }]
+      [remarkLinkMention, { site: SITE.siteUrl }]
     ],
     rehypePlugins: [rehypeTableScroll, rehypeImageFlags],
     syntaxHighlight: {

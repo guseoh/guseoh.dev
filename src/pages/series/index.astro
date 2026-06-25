@@ -1,10 +1,10 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { buildSeriesSummary } from "../../utils/series";
-import { SITE_DESCRIPTION, formatPostDate, sortPostsByDate } from "../../utils/posts";
+import { getPublishedPostsSorted } from "../../utils/content/posts";
+import { SITE_DESCRIPTION, formatPostDate, getPostPath } from "../../utils/posts";
 
-const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const posts = await getPublishedPostsSorted();
 const seriesSummary = buildSeriesSummary(posts);
 ---
 
@@ -43,7 +43,7 @@ const seriesSummary = buildSeriesSummary(posts);
 
                     <ol class="library-series-card__posts">
                       {previewPosts.map((post) => (
-                        <li><a href={`/blog/${post.id}/`}>{post.data.title}</a></li>
+                        <li><a href={getPostPath(post)}>{post.data.title}</a></li>
                       ))}
                     </ol>
 

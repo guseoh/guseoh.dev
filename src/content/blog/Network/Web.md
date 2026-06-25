@@ -4,6 +4,8 @@ description: "인터넷의 동작 원리"
 date: 2026-06-05
 updated: 2026-06-08
 category: "Network"
+slug: "network/web"
+commentKey: "/blog/network/web/"
 tags:
   - Network
   - Web

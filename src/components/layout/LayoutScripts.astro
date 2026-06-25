@@ -8,22 +8,36 @@
     const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
     const label = themeButton?.querySelector(".theme-toggle__label");
 
-    const getStoredTheme = () => {
+    const themeModes = ["system", "light", "dark"];
+    const getStoredThemeMode = () => {
       try {
         const stored = localStorage.getItem("theme");
-        return stored === "light" || stored === "dark" ? stored : null;
+        return themeModes.includes(stored) ? stored : "system";
       } catch {
-        return null;
+        return "system";
       }
     };
 
-    const updateThemeButton = (theme) => {
+    const getEffectiveTheme = (mode) => {
+      if (mode === "light" || mode === "dark") return mode;
+      return themeMedia.matches ? "dark" : "light";
+    };
+
+    const getThemeModeLabel = (mode) => {
+      if (mode === "light") return "Light";
+      if (mode === "dark") return "Dark";
+      return "System";
+    };
+
+    const updateThemeButton = (mode, theme) => {
       if (themeButton instanceof HTMLButtonElement) {
-        const current = theme === "dark" ? "Dark" : "Light";
+        const current = getThemeModeLabel(mode);
+        const effective = mode === "system" ? ` (${theme === "dark" ? "Dark" : "Light"})` : "";
         themeButton.dataset.theme = theme;
-        themeButton.setAttribute("aria-pressed", theme === "dark" ? "true" : "false");
-        themeButton.setAttribute("aria-label", `현재 테마: ${current}. 테마를 전환합니다.`);
-        themeButton.title = `현재 테마: ${current}`;
+        themeButton.dataset.themeMode = mode;
+        themeButton.removeAttribute("aria-pressed");
+        themeButton.setAttribute("aria-label", `현재 테마: ${current}${effective}. 테마를 전환합니다.`);
+        themeButton.title = `현재 테마: ${current}${effective}`;
 
         if (label instanceof HTMLElement) {
           label.textContent = current;
@@ -31,44 +45,73 @@
       }
     };
 
-    const applyTheme = (theme, { persist = true, notify = true } = {}) => {
-      const nextTheme = theme === "dark" ? "dark" : "light";
+    const applyThemeMode = (mode, { persist = true, notify = true } = {}) => {
+      const nextMode = themeModes.includes(mode) ? mode : "system";
+      const nextTheme = getEffectiveTheme(nextMode);
       root.setAttribute("data-theme", nextTheme);
+      root.setAttribute("data-theme-mode", nextMode);
       root.style.colorScheme = nextTheme;
-      updateThemeButton(nextTheme);
+      updateThemeButton(nextMode, nextTheme);
 
       if (persist) {
         try {
-          localStorage.setItem("theme", nextTheme);
+          localStorage.setItem("theme", nextMode);
         } catch {
         }
       }
 
       if (notify) {
-        window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: nextTheme } }));
+        window.dispatchEvent(new CustomEvent("themechange", { detail: { theme: nextTheme, mode: nextMode } }));
       }
     };
 
-    const currentTheme = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
-    applyTheme(currentTheme, { persist: false, notify: false });
+    const currentMode = root.getAttribute("data-theme-mode") || getStoredThemeMode();
+    applyThemeMode(currentMode, { persist: false, notify: false });
 
     if (themeButton instanceof HTMLButtonElement) {
       themeButton.addEventListener("click", () => {
-        const now = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
-        applyTheme(now === "dark" ? "light" : "dark");
+        const mode = root.getAttribute("data-theme-mode") || "system";
+        const index = themeModes.indexOf(mode);
+        applyThemeMode(themeModes[(index + 1) % themeModes.length]);
       });
     }
 
     window.addEventListener("storage", (event) => {
-      if (event.key === "theme" && (event.newValue === "light" || event.newValue === "dark")) {
-        applyTheme(event.newValue, { persist: false });
+      if (event.key === "theme") {
+        applyThemeMode(themeModes.includes(event.newValue) ? event.newValue : "system", { persist: false });
       }
     });
 
-    themeMedia.addEventListener("change", (event) => {
-      if (!getStoredTheme()) {
-        applyTheme(event.matches ? "dark" : "light", { persist: false });
+    themeMedia.addEventListener("change", () => {
+      const mode = root.getAttribute("data-theme-mode") || getStoredThemeMode();
+      if (mode === "system") {
+        applyThemeMode("system", { persist: false });
       }
+    });
+
+    window.addEventListener("keydown", (event) => {
+      if (!(event.key.toLowerCase() === "k" && (event.ctrlKey || event.metaKey)) || event.altKey) {
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      const isEditable = activeElement instanceof HTMLInputElement
+        || activeElement instanceof HTMLTextAreaElement
+        || activeElement instanceof HTMLSelectElement
+        || activeElement?.getAttribute("contenteditable") === "true";
+
+      if (isEditable) return;
+
+      event.preventDefault();
+      const searchInput = document.getElementById("search-page-input");
+
+      if (searchInput instanceof HTMLInputElement) {
+        searchInput.focus();
+        searchInput.select();
+        return;
+      }
+
+      window.location.href = "/search/?focus=1";
     });
 
     const headerMenuButton = document.getElementById("header-menu-toggle");

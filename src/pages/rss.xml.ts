@@ -1,10 +1,10 @@
 import type { APIContext } from "astro";
 import rss from "@astrojs/rss";
-import { getCollection } from "astro:content";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL, sortPostsByDate } from "../utils/posts";
+import { getPublishedPostsSorted } from "../utils/content/posts";
+import { getPostPath, SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../utils/posts";
 
 export async function GET(context: APIContext) {
-  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const posts = await getPublishedPostsSorted();
 
   return rss({
     title: SITE_TITLE,
@@ -14,7 +14,7 @@ export async function GET(context: APIContext) {
       title: post.data.title,
       description: post.data.description || SITE_DESCRIPTION,
       pubDate: post.data.date,
-      link: `/blog/${post.id}/`
+      link: getPostPath(post)
     }))
   });
 }

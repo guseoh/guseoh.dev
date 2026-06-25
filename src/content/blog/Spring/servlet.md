@@ -4,6 +4,8 @@ description: "서블릿의 개념, 서블릿 컨테이너, 생명주기, MVC 구
 date: 2026-06-11
 updated: 2026-06-11
 category: "Spring"
+slug: "spring/servlet"
+commentKey: "/blog/spring/servlet/"
 tags:
   - REST
   - REST API

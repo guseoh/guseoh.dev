@@ -12,6 +12,8 @@ const markerPattern = /\s*\{(?:no-dark-filter|theme-safe|data-theme-safe|no-ligh
 const failures = [];
 const warnings = [];
 const files = await listMarkdownFiles(contentDir);
+const slugLocations = new Map();
+const aliasLocations = new Map();
 
 for (const file of files) {
   const relativePath = toRepoPath(file);
@@ -26,9 +28,13 @@ for (const file of files) {
 
   checkFrontmatterIndentation(relativePath, lines);
   checkDates(relativePath, frontmatter);
+  checkRequiredFrontmatter(relativePath, lines, frontmatter);
+  checkTags(relativePath, lines, frontmatter);
+  collectSlugAndAliases(relativePath, lines, frontmatter);
   checkImages(relativePath, lines);
   checkHeadingHierarchy(relativePath, lines);
 }
+checkSlugCollisions();
 
 for (const warning of warnings) {
   console.warn(warning);
@@ -100,6 +106,43 @@ function cleanScalar(value) {
   return trimmed;
 }
 
+function readStringList(lines, keyLine) {
+  const line = lines[keyLine - 1] ?? "";
+  const inlineValue = line.replace(/^[A-Za-z][\w-]*:\s*/, "").trim();
+
+  if (inlineValue.startsWith("[") && inlineValue.endsWith("]")) {
+    return inlineValue
+      .slice(1, -1)
+      .split(",")
+      .map((item) => cleanScalar(item))
+      .filter(Boolean);
+  }
+
+  if (inlineValue.length > 0) {
+    return [cleanScalar(inlineValue)];
+  }
+
+  const values = [];
+  for (let index = keyLine; index < lines.length; index += 1) {
+    const itemMatch = lines[index].match(/^\s*-\s*(.+?)\s*$/);
+    if (!itemMatch) break;
+    values.push(cleanScalar(itemMatch[1]));
+  }
+
+  return values;
+}
+
+function normalizeBlogPath(value) {
+  const trimmed = value.trim().replace(/^\/+/, "").replace(/^blog\/+/i, "").replace(/\/+$/, "");
+  return `/blog/${trimmed}/`;
+}
+
+function addLocation(map, key, file, line) {
+  const locations = map.get(key) ?? [];
+  locations.push({ file, line });
+  map.set(key, locations);
+}
+
 function checkFrontmatterIndentation(relativePath, lines) {
   const endIndex = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
   if (endIndex === -1) return;
@@ -126,6 +169,78 @@ function checkDates(relativePath, frontmatter) {
 
   if (lastVerified && lastVerified.value < date.value) {
     fail(relativePath, lastVerified.line, "`lastVerified`는 `date`보다 빠를 수 없습니다.");
+  }
+}
+
+function checkRequiredFrontmatter(relativePath, lines, frontmatter) {
+  for (const key of ["title", "description", "date", "category", "slug", "commentKey", "draft"]) {
+    const entry = frontmatter.get(key);
+    if (!entry || String(entry.value ?? "").trim().length === 0) {
+      fail(relativePath, 1, `frontmatter에 \`${key}\`가 필요합니다.`);
+    }
+  }
+
+  const tags = frontmatter.get("tags");
+  if (!tags || readStringList(lines, tags.line).length === 0) {
+    fail(relativePath, 1, "frontmatter에 `tags`가 필요합니다.");
+  }
+
+  const draft = frontmatter.get("draft");
+  if (draft && draft.value !== "true" && draft.value !== "false") {
+    fail(relativePath, draft.line, "`draft`는 true 또는 false를 명시해야 합니다.");
+  }
+
+  const commentKey = frontmatter.get("commentKey");
+  if (commentKey && !commentKey.value.startsWith("/blog/")) {
+    fail(relativePath, commentKey.line, "`commentKey`는 /blog/.../ 형태여야 합니다.");
+  }
+}
+
+function checkTags(relativePath, lines, frontmatter) {
+  const tagsEntry = frontmatter.get("tags");
+  if (!tagsEntry) return;
+
+  const tags = readStringList(lines, tagsEntry.line);
+  const normalized = tags.map((tag) => tag.trim().toLowerCase());
+  if (new Set(normalized).size !== normalized.length) {
+    fail(relativePath, tagsEntry.line, "`tags`에 중복 값이 있습니다.");
+  }
+}
+
+function collectSlugAndAliases(relativePath, lines, frontmatter) {
+  const slug = frontmatter.get("slug");
+  if (slug?.value) {
+    addLocation(slugLocations, normalizeBlogPath(slug.value), relativePath, slug.line);
+  }
+
+  const aliases = frontmatter.get("aliases");
+  if (!aliases) return;
+
+  for (const alias of readStringList(lines, aliases.line)) {
+    addLocation(aliasLocations, normalizeBlogPath(alias), relativePath, aliases.line);
+  }
+}
+
+function checkSlugCollisions() {
+  for (const [slug, locations] of slugLocations) {
+    if (locations.length > 1) {
+      for (const location of locations) {
+        fail(location.file, location.line, `중복된 slug입니다: ${slug}`);
+      }
+    }
+
+    const aliasConflicts = aliasLocations.get(slug) ?? [];
+    for (const location of aliasConflicts) {
+      fail(location.file, location.line, `alias가 게시글 slug와 충돌합니다: ${slug}`);
+    }
+  }
+
+  for (const [alias, locations] of aliasLocations) {
+    if (locations.length > 1) {
+      for (const location of locations) {
+        fail(location.file, location.line, `중복된 alias입니다: ${alias}`);
+      }
+    }
   }
 }
 

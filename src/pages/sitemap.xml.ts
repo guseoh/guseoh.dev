@@ -1,9 +1,9 @@
-import { getCollection } from "astro:content";
 import { buildBookSummaries } from "../utils/books";
-import { buildCategorySummary } from "../utils/categories";
+import { buildCategorySummary, filterPostsByCategory } from "../utils/categories";
+import { getPublishedPostsSorted } from "../utils/content/posts";
 import { buildSeriesSummary } from "../utils/series";
-import { buildTagSummary } from "../utils/tags";
-import { POSTS_PER_PAGE, SITE_URL, sortPostsByDate } from "../utils/posts";
+import { buildTagSummary, normalizeTag } from "../utils/tags";
+import { getPostActivityDate, getPostPath, POSTS_PER_PAGE, SITE_URL } from "../utils/posts";
 
 function escapeXml(value: string) {
   return value
@@ -18,34 +18,79 @@ function buildUrl(path: string) {
   return new URL(path, SITE_URL).toString();
 }
 
+function formatLastmod(date?: Date) {
+  return date?.toISOString().slice(0, 10);
+}
+
+function latestPostDate(posts: { data: { date: Date; lastVerified?: Date; updated?: Date } }[]) {
+  if (posts.length === 0) return undefined;
+
+  return new Date(Math.max(...posts.map((post) => {
+    const date = post.data.updated ?? post.data.lastVerified ?? post.data.date;
+    return date.valueOf();
+  })));
+}
+
 export async function GET() {
-  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const posts = await getPublishedPostsSorted();
   const categories = buildCategorySummary(posts);
   const books = buildBookSummaries(posts);
   const series = buildSeriesSummary(posts);
   const tags = buildTagSummary(posts);
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
 
-  const staticPaths = ["/", "/about/", "/blog/", "/books/", "/categories/", "/tags/", "/series/", "/search/"];
-  const pagePaths = totalPages > 1
-    ? Array.from({ length: totalPages - 1 }, (_, index) => `/blog/page/${index + 2}/`)
-    : [];
-  const postPaths = posts.map((post) => `/blog/${post.id}/`);
-  const categoryPaths = categories.map((category) => `/categories/${category.slug}/`);
-  const bookPaths = books.map((book) => `/books/${book.id}/`);
-  const tagPaths = tags.map((tag) => `/tags/${tag.tag}/`);
-  const seriesPaths = series.map((entry) => `/series/${entry.id}/`);
-  const today = new Date().toISOString().slice(0, 10);
+  const urlsByPath = new Map<string, string | undefined>();
+  const addUrl = (path: string, lastmod?: Date) => {
+    if (!urlsByPath.has(path)) {
+      urlsByPath.set(path, formatLastmod(lastmod));
+    }
+  };
 
-  const urls = [...staticPaths, ...pagePaths, ...postPaths, ...bookPaths, ...categoryPaths, ...tagPaths, ...seriesPaths]
-    .map((path) => {
-      const post = posts.find((entry) => path === `/blog/${entry.id}/`);
-      const lastmod = post ? (post.data.updated ?? post.data.date).toISOString().slice(0, 10) : today;
+  addUrl("/", latestPostDate(posts));
+  addUrl("/about/");
+  addUrl("/blog/", latestPostDate(posts.slice(0, POSTS_PER_PAGE)));
+  addUrl("/books/", latestPostDate(posts.filter((post) => post.data.book?.trim())));
+  addUrl("/categories/", latestPostDate(posts));
+  addUrl("/tags/", latestPostDate(posts));
+  addUrl("/series/", latestPostDate(posts.filter((post) => post.data.series?.trim())));
+  addUrl("/search/");
+
+  if (totalPages > 1) {
+    for (let index = 1; index < totalPages; index += 1) {
+      const pagePosts = posts.slice(index * POSTS_PER_PAGE, (index + 1) * POSTS_PER_PAGE);
+      addUrl(`/blog/page/${index + 1}/`, latestPostDate(pagePosts));
+    }
+  }
+
+  for (const post of posts) {
+    addUrl(getPostPath(post), getPostActivityDate(post));
+  }
+
+  for (const category of categories) {
+    addUrl(`/categories/${category.slug}/`, latestPostDate(filterPostsByCategory(posts, category.slug)));
+  }
+
+  for (const book of books) {
+    addUrl(`/books/${book.id}/`, book.latestDate);
+  }
+
+  for (const tag of tags) {
+    addUrl(`/tags/${tag.tag}/`, latestPostDate(posts.filter((post) =>
+      post.data.tags.some((postTag) => normalizeTag(postTag) === tag.tag)
+    )));
+  }
+
+  for (const entry of series) {
+    addUrl(`/series/${entry.id}/`, entry.latestDate);
+  }
+
+  const urls = [...urlsByPath.entries()]
+    .map(([path, lastmod]) => {
+      const lastmodNode = lastmod ? `\n    <lastmod>${lastmod}</lastmod>` : "";
 
       return [
         "  <url>",
-        `    <loc>${escapeXml(buildUrl(path))}</loc>`,
-        `    <lastmod>${lastmod}</lastmod>`,
+        `    <loc>${escapeXml(buildUrl(path))}</loc>${lastmodNode}`,
         "  </url>"
       ].join("\n");
     })

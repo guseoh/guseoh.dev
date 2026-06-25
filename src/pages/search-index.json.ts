@@ -1,9 +1,8 @@
-import { getCollection } from "astro:content";
 import { buildSearchIndex } from "../utils/search";
-import { sortPostsByDate } from "../utils/posts";
+import { getPublishedPostsSorted } from "../utils/content/posts";
 
 export async function GET() {
-  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const posts = await getPublishedPostsSorted();
 
   return new Response(JSON.stringify(buildSearchIndex(posts)), {
     headers: {

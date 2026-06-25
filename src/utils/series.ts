@@ -1,6 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 import seriesMetadata from "../data/series.json";
 import { getCategoryName } from "./categories";
+import { getPostActivityDate } from "./posts";
 
 export type SeriesStatus = "planned" | "ongoing" | "completed";
 
@@ -28,10 +29,6 @@ export type SeriesSummary = {
 
 const SERIES = seriesMetadata as SeriesMetadata[];
 const SERIES_BY_ID = new Map(SERIES.map((metadata) => [metadata.id, metadata]));
-
-function getPostActivityDate(post: CollectionEntry<"blog">) {
-  return post.data.updated ?? post.data.date;
-}
 
 function getRepresentativeCategory(posts: CollectionEntry<"blog">[]) {
   const counts = new Map<string, number>();

@@ -4,11 +4,17 @@ description: "검색 결과와 OG 메타에 사용될 한두 문장 요약"
 date: 2026-06-05
 updated: 2026-06-05
 lastVerified: 2026-06-05
+slug: "board/example-post"
+aliases: []
+commentKey: "/blog/board/example-post/"
 category: "Board"
 tags:
   - Spring
   - JPA
   - Performance
+testedWith:
+  java: "21"
+  springBoot: "4.0"
 book: ""
 series: "board-프로젝트-개선-기록"
 chapter: 1
@@ -22,8 +28,12 @@ draft: true
 - description: 검색 결과와 OG 메타에 사용할 문제/결과 중심 요약을 작성합니다.
 - date: 최초 작성일, updated는 마지막 수정일입니다.
 - lastVerified: 내용과 링크를 실제로 다시 확인한 날짜입니다. 확인하지 않았다면 삭제합니다.
+- slug: 공개 URL을 결정하는 고정 값입니다. 파일을 옮겨도 바꾸지 않습니다.
+- aliases: 이전 공개 URL이 있을 때만 /blog/.../ 형태로 추가합니다.
+- commentKey: Utterances Issue 연결을 위한 고정 값입니다. 처음 발행한 URL을 유지합니다.
 - category: 글의 큰 소속 하나만 선택합니다. Board, OS, Java, Git 등이 현재 사용 중입니다.
 - tags: 기술, 주제, 글 성격을 나타내는 태그를 3~7개 정도 작성합니다.
+- testedWith: 실제로 확인한 기술 버전만 선택적으로 적습니다. 확인하지 않았다면 삭제합니다.
 - book: src/data/books.json에 직접 등록한 Book id입니다. Book에 포함하지 않을 글이면 필드를 삭제하거나 빈 값으로 둡니다.
 - series: src/data/series.json에 등록된 Series id입니다. 연재 글이 아니면 삭제합니다.
 - chapter: Book 또는 Series 내부 읽기 순서입니다. 둘 다 없으면 삭제합니다.
@@ -32,7 +42,7 @@ draft: true
 - Book은 category나 tags를 기준으로 자동 생성되지 않습니다.
 - 등록되지 않은 book id를 작성하면 content schema 검증에서 오류가 발생합니다.
 - heroImage: public 기준 절대 경로를 사용합니다. 전용 이미지가 없으면 /og-image.svg를 사용합니다.
-- draft: 작성 중에는 true, 발행할 때 false로 변경하거나 필드를 삭제합니다.
+- draft: 작성 중에는 true, 발행할 때는 반드시 false로 명시합니다.
 - 본문에서 # heading을 사용하지 않습니다. 본문 heading은 반드시 ##부터 시작합니다.
 - Markdown 이미지는 ![이미지의 의미를 설명하는 alt](./image.png) 형식으로 작성합니다.
 - 캡션이 필요한 이미지는 title에 "caption: 보충 설명"을 작성합니다. figure와 figcaption으로 렌더링됩니다.

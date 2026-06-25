@@ -1,6 +1,7 @@
 import type { CollectionEntry } from "astro:content";
 import booksData from "../data/books.json";
 import { getCategoryName } from "./categories";
+import { getPostActivityDate } from "./posts";
 
 export type BookTone = "navy" | "charcoal" | "blue" | "burgundy" | "forest";
 
@@ -42,10 +43,6 @@ function validateBookMetadata(books: BookMetadata[]) {
 }
 
 validateBookMetadata(BOOKS);
-
-function getPostActivityDate(post: CollectionEntry<"blog">) {
-  return post.data.updated ?? post.data.date;
-}
 
 function compareBookPosts(a: CollectionEntry<"blog">, b: CollectionEntry<"blog">) {
   const chapterA = a.data.chapter ?? Number.MAX_SAFE_INTEGER;

@@ -1,9 +1,11 @@
 ---
 title: "[OS] 운영체제 개요"
-description: ""
+description: "운영체제가 필요한 이유와 CPU, 메모리, 입출력 자원 관리 역할을 정리한 개요"
 date: 2026-05-20
 updated: 2026-05-20
 category: OS
+slug: "os/os_1"
+commentKey: "/blog/os/os_1/"
 tags: ["OS"]
 series: "아주-쉬운-세가지-이야기"
 chapter: 1

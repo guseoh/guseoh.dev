@@ -4,6 +4,8 @@ description: "자바의 public, protected, package-private, private 접근 범�
 date: 2026-06-22
 updated: 2026-06-23
 category: "Java"
+slug: "java/접근제한자/accessmodifier"
+commentKey: "/blog/java/접근제한자/accessmodifier/"
 tags:
 - Java
 - Access Modifier

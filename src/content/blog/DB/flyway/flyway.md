@@ -5,6 +5,8 @@ date: 2026-06-17
 updated: 2026-06-17
 lastVerified: 2026-06-17
 category: "Spring"
+slug: "db/flyway/flyway"
+commentKey: "/blog/db/flyway/flyway/"
 tags:
   - Spring Boot
   -  Flyway

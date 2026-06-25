@@ -4,9 +4,12 @@ description: "Git Flow와 GitHub Flow의 차이를 정리하고 개인 프로젝
 date: 2026-03-27
 updated: 2026-05-17
 category: "Git"
+slug: "git_branch"
+commentKey: "/blog/git_branch/"
 tags:
   - Git
   - Branch Strategy
+draft: false
 ---
 
 ## Git Branch 전략

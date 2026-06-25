@@ -3,7 +3,7 @@ import CategoryIcon from "../CategoryIcon.astro";
 import type { RelatedPostResult } from "../../utils/relatedPosts";
 import { normalizeCategory } from "../../utils/categories";
 import { formatTagName } from "../../utils/tags";
-import { formatPostDate, getPostDescription, getReadingTime } from "../../utils/posts";
+import { formatPostDate, getPostDescription, getPostPath, getReadingTime } from "../../utils/posts";
 
 interface Props {
   relatedPosts: RelatedPostResult[];
@@ -27,7 +27,7 @@ const { relatedPosts } = Astro.props as Props;
           const visibleCommonTags = commonTags.slice(0, 3);
 
           return (
-            <a class="post-related__card" href={`/blog/${post.id}/`}>
+            <a class="post-related__card" href={getPostPath(post)}>
               <span class="post-related__meta">
                 <CategoryIcon category={categoryName} />
                 <span>{categoryName}</span>

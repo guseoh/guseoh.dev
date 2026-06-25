@@ -8,13 +8,16 @@ const configuredBookIds = new Set(
 );
 
 const blogSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
+  title: z.string().trim().min(1),
+  description: z.string().trim().min(1),
   date: z.date(),
   updated: z.date().optional(),
   lastVerified: z.date().optional(),
-  category: z.string().optional(),
+  category: z.string().trim().min(1),
   tags: z.array(z.string()).default([]),
+  slug: z.string().trim().min(1),
+  aliases: z.array(z.string().trim().min(1)).default([]),
+  commentKey: z.string().trim().min(1),
   book: z.string().trim().optional().refine(
     (bookId) => !bookId || configuredBookIds.has(bookId),
     {
@@ -25,7 +28,8 @@ const blogSchema = z.object({
   chapter: z.number().int().positive().optional(),
   seriesOrder: z.number().optional(),
   heroImage: z.string().optional(),
-  draft: z.boolean().optional()
+  testedWith: z.record(z.string().trim().min(1), z.string().trim().min(1)).optional(),
+  draft: z.boolean()
 }).superRefine((data, context) => {
   if (data.updated && data.updated < data.date) {
     context.addIssue({
@@ -40,6 +44,15 @@ const blogSchema = z.object({
       code: "custom",
       path: ["lastVerified"],
       message: "lastVerified는 date보다 빠를 수 없습니다."
+    });
+  }
+
+  const normalizedTags = data.tags.map((tag) => tag.trim().toLowerCase());
+  if (new Set(normalizedTags).size !== normalizedTags.length) {
+    context.addIssue({
+      code: "custom",
+      path: ["tags"],
+      message: "tags에는 중복 값을 사용할 수 없습니다."
     });
   }
 });

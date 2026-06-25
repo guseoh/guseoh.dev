@@ -3,17 +3,22 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import PostViewSwitch from "../../components/PostViewSwitch.astro";
 import Pagination from "../../components/Pagination.astro";
-import { getCollection } from "astro:content";
-import { POSTS_PER_PAGE, SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
+import { getPublishedPostsSorted } from "../../utils/content/posts";
+import { getPostSlug, POSTS_PER_PAGE, SITE_DESCRIPTION } from "../../utils/posts";
 
-const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const posts = await getPublishedPostsSorted();
 
 const pagePosts = posts.slice(0, POSTS_PER_PAGE);
 const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
 ---
 
 <BaseLayout title="devjune.dev | Blog" description={SITE_DESCRIPTION}>
-  <section class="blog-list-page" aria-label="All posts">
+  <section
+    class="blog-list-page"
+    aria-label="All posts"
+    data-published-post-count={posts.length}
+    data-latest-post-slug={posts[0] ? getPostSlug(posts[0]) : ""}
+  >
     <div class="blog-list-head">
       <div>
         <h1 class="blog-list-head__title">All Posts ({posts.length})</h1>

@@ -1,27 +1,90 @@
 import type { CollectionEntry } from "astro:content";
+import { BLOG_LIMITS, CORE_TECH_TAGS as CONFIGURED_CORE_TECH_TAGS, SITE } from "../config/site";
 
-export const SITE_TITLE = "devjune.dev";
-export const SITE_DESCRIPTION = "Java/Spring 백엔드 개발자 오지훈의 학습과 프로젝트 개선 기록";
-export const SITE_AUTHOR = "오지훈";
-export const SITE_URL = "https://guseoh.github.io";
-export const SITE_OG_IMAGE = "/og-image.svg";
-export const GITHUB_URL = "https://github.com/guseoh";
-export const HOME_POST_LIMIT = 8;
-export const POSTS_PER_PAGE = 12;
-export const SIDEBAR_TAG_LIMIT = 16;
-export const DETAIL_TAG_LIMIT = 8;
-export const POST_STALE_MONTHS = 12;
+export const SITE_TITLE = SITE.title;
+export const SITE_DESCRIPTION = SITE.description;
+export const SITE_AUTHOR = SITE.author;
+export const SITE_URL = SITE.siteUrl;
+export const SITE_OG_IMAGE = SITE.defaultOgImage;
+export const GITHUB_URL = SITE.githubUrl;
+export const REPOSITORY_URL = SITE.repositoryUrl;
+export const COMMENT_REPOSITORY = SITE.commentRepository;
+export const HOME_POST_LIMIT = BLOG_LIMITS.homePostLimit;
+export const POSTS_PER_PAGE = BLOG_LIMITS.postsPerPage;
+export const SIDEBAR_TAG_LIMIT = BLOG_LIMITS.sidebarTagLimit;
+export const DETAIL_TAG_LIMIT = BLOG_LIMITS.detailTagLimit;
+export const POST_STALE_MONTHS = BLOG_LIMITS.postStaleMonths;
 
-export const CORE_TECH_TAGS = [
-  "Spring Boot",
-  "JPA",
-  "QueryDSL",
-  "MySQL",
-  "Docker",
-  "GitHub Actions",
-  "AWS EC2",
-  "Monitoring"
-];
+export const CORE_TECH_TAGS = [...CONFIGURED_CORE_TECH_TAGS];
+
+type ContentEntryWithFilePath = CollectionEntry<"blog"> & {
+  filePath?: string;
+};
+
+export function normalizePostSlug(value: string) {
+  return value
+    .trim()
+    .replace(/^\/+/, "")
+    .replace(/^blog\/+/i, "")
+    .replace(/\/+$/, "");
+}
+
+export function normalizeBlogPath(value: string) {
+  const slug = normalizePostSlug(value);
+  return slug ? `/blog/${slug}/` : "/blog/";
+}
+
+export function getPostSlug(post: CollectionEntry<"blog">) {
+  return normalizePostSlug(post.data.slug || post.id);
+}
+
+export function getPostPath(post: CollectionEntry<"blog">) {
+  return normalizeBlogPath(getPostSlug(post));
+}
+
+export function getPostUrl(post: CollectionEntry<"blog">, siteUrl: string | URL = SITE_URL) {
+  return new URL(getPostPath(post), siteUrl).toString();
+}
+
+export function getPostAliases(post: CollectionEntry<"blog">) {
+  const canonical = getPostPath(post);
+  const aliases = post.data.aliases ?? [];
+
+  return Array.from(new Set(aliases.map(normalizeBlogPath).filter((alias) => alias !== canonical)));
+}
+
+export function getPostCommentKey(post: CollectionEntry<"blog">) {
+  const key = post.data.commentKey?.trim();
+  return key ? normalizeBlogPath(key) : getPostPath(post);
+}
+
+export function getPostSourcePath(post: CollectionEntry<"blog">) {
+  const entry = post as ContentEntryWithFilePath;
+  const filePath = entry.filePath?.replace(/\\/g, "/");
+
+  if (filePath) {
+    const srcIndex = filePath.indexOf("src/content/blog/");
+    return srcIndex >= 0 ? filePath.slice(srcIndex) : filePath;
+  }
+
+  return `src/content/blog/${post.id}.md`;
+}
+
+export function getPostEditUrl(post: CollectionEntry<"blog">) {
+  return `${REPOSITORY_URL}/edit/main/${encodeURIComponent(getPostSourcePath(post)).replace(/%2F/g, "/")}`;
+}
+
+export function getPostActivityDate(post: CollectionEntry<"blog">) {
+  return post.data.updated ?? post.data.lastVerified ?? post.data.date;
+}
+
+export function getPostOgImagePath(post: CollectionEntry<"blog">) {
+  if (post.data.heroImage && post.data.heroImage !== SITE_OG_IMAGE) {
+    return post.data.heroImage;
+  }
+
+  return `/og/${encodeURIComponent(getPostSlug(post)).replace(/%2F/g, "/")}.svg`;
+}
 
 export function sortPostsByDate(posts: CollectionEntry<"blog">[]) {
   return [...posts].sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());

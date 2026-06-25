@@ -4,11 +4,11 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import PostCard from "../../../components/PostCard.astro";
 import PostViewSwitch from "../../../components/PostViewSwitch.astro";
 import Pagination from "../../../components/Pagination.astro";
-import { getCollection } from "astro:content";
-import { POSTS_PER_PAGE, SITE_DESCRIPTION, sortPostsByDate } from "../../../utils/posts";
+import { getPublishedPostsSorted } from "../../../utils/content/posts";
+import { POSTS_PER_PAGE, SITE_DESCRIPTION } from "../../../utils/posts";
 
 export async function getStaticPaths() {
-  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const posts = await getPublishedPostsSorted();
 
   const totalPages = Math.ceil(posts.length / POSTS_PER_PAGE);
   if (totalPages <= 1) return [];

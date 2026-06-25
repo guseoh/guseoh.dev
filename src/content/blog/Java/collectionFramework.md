@@ -4,6 +4,8 @@ description: "자바 컬렉션 프레임워크 학습 기록"
 date: 2026-05-28
 updated: 2026-06-02
 category: Java
+slug: "java/collectionframework"
+commentKey: "/blog/java/collectionframework/"
 tags: ["java", "자료구조"]
 series: "data-structure"
 chapter: 1

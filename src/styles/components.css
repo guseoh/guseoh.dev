@@ -24,6 +24,31 @@
   color: var(--muted-readable);
 }
 
+.post-alias-notice {
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.post-alias-notice a {
+  min-height: 2.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--link) 42%, var(--border));
+  border-radius: 8px;
+  color: var(--link);
+  font-weight: 850;
+  padding: 0.58rem 0.78rem;
+  text-decoration: none;
+}
+
+.post-alias-notice a:hover,
+.post-alias-notice a:focus-visible {
+  background: var(--surface-hover);
+  color: var(--link-hover);
+}
+
 .section-title {
   margin: 1.5rem 0 0.8rem;
   font-size: 1.2rem;
@@ -911,8 +936,85 @@
   font-weight: 800;
 }
 
+.search-recent {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.search-recent[hidden] {
+  display: none;
+}
+
+.search-recent__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.search-recent__head h2 {
+  color: var(--heading);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.search-recent__head button,
+.search-recent__list button {
+  border: 1px solid var(--control-border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted-readable);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.48rem 0.62rem;
+  cursor: pointer;
+}
+
+.search-recent__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.search-recent__head button:hover,
+.search-recent__head button:focus-visible,
+.search-recent__list button:hover,
+.search-recent__list button:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+  color: var(--link-hover);
+}
+
 .search-results {
   margin-top: 0.75rem;
+}
+
+.search-results mark {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+  color: var(--heading);
+  padding-inline: 0.08em;
+}
+
+.search-match-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.34rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.search-match-reasons li {
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface));
+  color: var(--muted-readable);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.34rem 0.48rem;
 }
 
 .search-empty {

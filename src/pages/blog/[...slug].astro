@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import CategoryIcon from "../../components/CategoryIcon.astro";
 import PostComments from "../../components/PostComments.astro";
@@ -12,7 +12,9 @@ import PostReadingProgress from "../../components/post/PostReadingProgress.astro
 import PostRelatedPosts from "../../components/post/PostRelatedPosts.astro";
 import PostTableEnhancer from "../../components/post/PostTableEnhancer.astro";
 import PostToc from "../../components/post/PostToc.astro";
+import { SITE } from "../../config/site";
 import { normalizeCategory } from "../../utils/categories";
+import { getPublishedPostsSorted } from "../../utils/content/posts";
 import { getAdjacentPosts, getSeriesPosts } from "../../utils/postNavigation";
 import { buildPostTocHeadings } from "../../utils/postToc";
 import { getRelatedPosts } from "../../utils/relatedPosts";
@@ -21,30 +23,65 @@ import { formatTagName, normalizeTag } from "../../utils/tags";
 import {
   DETAIL_TAG_LIMIT,
   GITHUB_URL,
+  REPOSITORY_URL,
   SITE_AUTHOR,
   SITE_DESCRIPTION,
-  SITE_OG_IMAGE,
   SITE_TITLE,
+  getPostAliases,
+  getPostCommentKey,
   formatPostDate,
+  getPostEditUrl,
+  getPostOgImagePath,
+  getPostPath,
   getPostDescription,
+  getPostSourcePath,
+  getPostUrl,
   getPostVerificationDate,
   getReadingTime,
+  getPostSlug,
   isPostContentStale,
-  sortPostsByDate
 } from "../../utils/posts";
 
-export async function getStaticPaths() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+type BlogStaticPath = {
+  params: { slug: string };
+  props: {
+    post: CollectionEntry<"blog">;
+    canonicalPath: string;
+    isAlias: boolean;
+    aliasPath?: string;
+  };
+};
 
-  return posts.map((post) => ({
-    params: { slug: post.id },
-    props: { post }
-  }));
+export async function getStaticPaths() {
+  const posts = await getPublishedPostsSorted();
+
+  return posts.flatMap((post) => {
+    const canonicalSlug = getPostSlug(post);
+    const canonicalPath = getPostPath(post);
+    const entries: BlogStaticPath[] = [{
+      params: { slug: canonicalSlug },
+      props: { post, canonicalPath, isAlias: false }
+    }];
+
+    for (const alias of getPostAliases(post)) {
+      entries.push({
+        params: { slug: alias.replace(/^\/blog\/|\/$/g, "") },
+        props: { post, canonicalPath, isAlias: true, aliasPath: alias }
+      });
+    }
+
+    return entries;
+  });
 }
 
-const { post } = Astro.props as { post: CollectionEntry<"blog"> };
+const { post, canonicalPath, isAlias = false, aliasPath } = Astro.props as {
+  post: CollectionEntry<"blog">;
+  canonicalPath: string;
+  isAlias?: boolean;
+  aliasPath?: string;
+};
 const { Content, headings } = await render(post);
-const allPosts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+const allPosts = await getPublishedPostsSorted();
 const categoryName = post.data.category?.trim() || "Uncategorized";
 const categorySlug = normalizeCategory(categoryName);
 const postTitle = post.data.title.trim();
@@ -60,11 +97,38 @@ const seriesPosts = getSeriesPosts(allPosts, seriesName);
 const seriesContinuationMessage = seriesName ? getSeriesContinuationMessage(seriesName) : "";
 const { newerPost, olderPost } = getAdjacentPosts(allPosts, post.id);
 const relatedPosts = getRelatedPosts(post, allPosts, { limit: 3 });
-const siteUrl = Astro.site ?? new URL("https://guseoh.github.io");
-const postUrl = new URL(Astro.url.pathname, siteUrl).toString();
-const postImage = new URL(post.data.heroImage ?? SITE_OG_IMAGE, siteUrl).toString();
+const siteUrl = Astro.site ?? new URL(SITE.siteUrl);
+const postUrl = getPostUrl(post, siteUrl);
+const postImagePath = getPostOgImagePath(post);
+const postImage = new URL(postImagePath, siteUrl).toString();
 const verificationDate = getPostVerificationDate(post);
 const isStalePost = isPostContentStale(post);
+const commentKey = getPostCommentKey(post);
+const sourcePath = getPostSourcePath(post);
+const editUrl = getPostEditUrl(post);
+const deployedSha = import.meta.env.GITHUB_SHA || "local-preview";
+const issueUrl = new URL(`${REPOSITORY_URL}/issues/new`);
+issueUrl.searchParams.set("template", "content-error.yml");
+issueUrl.searchParams.set("title", `[Content] ${postTitle}`);
+issueUrl.searchParams.set("body", [
+  "## 게시글",
+  postTitle,
+  "",
+  "## URL",
+  postUrl,
+  "",
+  "## Markdown 파일",
+  sourcePath,
+  "",
+  "## 배포 커밋",
+  deployedSha,
+  "",
+  "## 오류가 있는 내용 또는 문단",
+  "",
+  "## 제안하는 수정 방향",
+  ""
+].join("\n"));
+const testedWithEntries = Object.entries(post.data.testedWith ?? {});
 const postStructuredData = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
@@ -92,16 +156,38 @@ const postStructuredData = {
 };
 ---
 
+{isAlias ? (
+  <BaseLayout
+    title={`${post.data.title} | devjune.dev`}
+    description={description || SITE_DESCRIPTION}
+    image={postImagePath}
+    type="article"
+    canonicalUrl={canonicalPath}
+    refreshUrl={canonicalPath}
+    currentCategory={post.data.category}
+  >
+    <section class="hero post-alias-notice" aria-labelledby="alias-title">
+      <p class="library-hero__eyebrow">Moved</p>
+      <h1 id="alias-title">게시글 주소가 변경되었습니다.</h1>
+      <p>
+        이 주소{aliasPath ? `(${aliasPath})` : ""}는 이전 게시글 경로입니다.
+        새 주소로 이동해 주세요.
+      </p>
+      <a href={canonicalPath}>새 주소로 이동</a>
+    </section>
+  </BaseLayout>
+) : (
 <BaseLayout
   title={`${post.data.title} | devjune.dev`}
   description={description || SITE_DESCRIPTION}
-  image={post.data.heroImage}
+  image={postImagePath}
   publishedTime={post.data.date.toISOString()}
   updatedTime={(post.data.updated ?? post.data.date).toISOString()}
   type="article"
   wideContent={true}
   structuredData={postStructuredData}
   currentCategory={post.data.category}
+  canonicalUrl={canonicalPath}
 >
   <PostReadingProgress />
 
@@ -146,6 +232,13 @@ const postStructuredData = {
           </div>
         </dl>
 
+        {testedWithEntries.length > 0 && (
+          <div class="post-tested-with" aria-label="검증 환경">
+            <strong>검증 환경</strong>
+            <span>{testedWithEntries.map(([name, version]) => `${name} ${version}`).join(" · ")}</span>
+          </div>
+        )}
+
         {
           post.data.tags.length > 0 && (
             <div class="post-meta-tags" aria-label="Post tags">
@@ -186,7 +279,7 @@ const postStructuredData = {
                     {seriesPost.id === post.id ? (
                       <span>{seriesPost.data.title}</span>
                     ) : (
-                      <a href={`/blog/${seriesPost.id}/`}>{seriesPost.data.title}</a>
+                      <a href={getPostPath(seriesPost)}>{seriesPost.data.title}</a>
                     )}
                   </li>
                 ))}
@@ -199,9 +292,21 @@ const postStructuredData = {
 
         <PostRelatedPosts relatedPosts={relatedPosts} />
 
+        <section class="post-feedback" aria-labelledby="post-feedback-title">
+          <h2 id="post-feedback-title">이 글 개선하기</h2>
+          <div class="post-feedback__actions">
+            <a href={editUrl} target="_blank" rel="noopener noreferrer" aria-label={`${postTitle} Markdown 파일을 GitHub에서 수정하기`}>
+              GitHub에서 이 글 수정하기
+            </a>
+            <a href={issueUrl.toString()} target="_blank" rel="noopener noreferrer" aria-label={`${postTitle} 내용 오류를 GitHub Issue로 신고하기`}>
+              내용 오류 신고하기
+            </a>
+          </div>
+        </section>
+
         <nav class="post-adjacent" aria-label="Previous and next posts">
           {olderPost ? (
-            <a class="post-adjacent__card" href={`/blog/${olderPost.id}/`}>
+            <a class="post-adjacent__card" href={getPostPath(olderPost)}>
               <span>이전 글</span>
               <strong>{olderPost.data.title}</strong>
             </a>
@@ -210,7 +315,7 @@ const postStructuredData = {
           )}
 
           {newerPost ? (
-            <a class="post-adjacent__card post-adjacent__card--next" href={`/blog/${newerPost.id}/`}>
+            <a class="post-adjacent__card post-adjacent__card--next" href={getPostPath(newerPost)}>
               <span>다음 글</span>
               <strong>{newerPost.data.title}</strong>
             </a>
@@ -220,7 +325,7 @@ const postStructuredData = {
         </nav>
       </footer>
     </article>
-    <PostComments />
+    <PostComments commentKey={commentKey} postUrl={postUrl} />
     </div>
   </div>
 
@@ -230,3 +335,4 @@ const postStructuredData = {
   <PostTableEnhancer />
   <PostCodeEnhancer />
 </BaseLayout>
+)}

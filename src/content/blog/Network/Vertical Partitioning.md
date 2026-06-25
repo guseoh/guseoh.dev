@@ -4,6 +4,8 @@ description: "인프라 아키텍처 설계와 장단점"
 date: 2026-06-09
 updated: 2026-06-09
 category: "Network"
+slug: "network/vertical-partitioning"
+commentKey: "/blog/network/vertical-partitioning/"
 tags:
   - Network
   - Infra

@@ -1,13 +1,13 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { buildBookSummaries, type BookSummary } from "../../utils/books";
 import { getCategoryName, normalizeCategory } from "../../utils/categories";
-import { formatPostDate, getPostDescription, SITE_DESCRIPTION, sortPostsByDate } from "../../utils/posts";
+import { getPublishedPostsSorted } from "../../utils/content/posts";
+import { formatPostDate, getPostDescription, getPostPath, SITE_DESCRIPTION } from "../../utils/posts";
 
 export async function getStaticPaths() {
-  const posts = sortPostsByDate(await getCollection("blog", ({ data }) => !data.draft));
+  const posts = await getPublishedPostsSorted();
 
   return buildBookSummaries(posts).map((book) => ({
     params: { book: book.id },
@@ -65,7 +65,7 @@ function getActivityDate(post: CollectionEntry<"blog">) {
       <ol class="chapter-list">
         {book.posts.map((post, index) => (
           <li>
-            <a href={`/blog/${post.id}/`}>
+            <a href={getPostPath(post)}>
               <span class="chapter-list__number">
                 {String(post.data.chapter ?? index + 1).padStart(2, "0")}
               </span>
