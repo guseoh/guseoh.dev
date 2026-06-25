@@ -814,6 +814,12 @@ html[data-theme="dark"] .post__content > :where(h1, h2, h3, h4, p, ul, ol, .tabl
   background: var(--code-block-bg);
 }
 
+.post__content > .code-block,
+.post__content > pre {
+  max-width: min(100%, var(--post-text-width));
+  margin-inline: auto;
+}
+
 .code-block__header {
   display: flex;
   align-items: center;
