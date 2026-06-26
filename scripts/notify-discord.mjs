@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 const notificationKind =
   process.env.DISCORD_NOTIFICATION_KIND?.trim() || "github-activity";
 const webhookEnvName =
@@ -114,6 +117,118 @@ function formatChangedFiles(value, limit = 8) {
   return shownFiles.join("\n");
 }
 
+function stripYamlValue(value) {
+  const trimmed = value.trim();
+  const quote = trimmed[0];
+
+  if (
+    (quote === "\"" || quote === "'") &&
+    trimmed.length >= 2 &&
+    trimmed.at(-1) === quote
+  ) {
+    return trimmed.slice(1, -1);
+  }
+
+  return trimmed;
+}
+
+function readFrontmatterValue(source, key) {
+  const lines = source.split(/\r?\n/);
+
+  if (lines[0]?.trim() !== "---") {
+    return undefined;
+  }
+
+  for (const line of lines.slice(1)) {
+    if (line.trim() === "---") {
+      return undefined;
+    }
+
+    const match = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/);
+    if (!match || match[1] !== key) {
+      continue;
+    }
+
+    return stripYamlValue(match[2]);
+  }
+
+  return undefined;
+}
+
+function readChangedPosts(value) {
+  const files = [...new Set(splitLines(value))]
+    .filter((file) => file.startsWith("src/content/blog/"))
+    .filter((file) => file.endsWith(".md"));
+
+  return files.map((file) => {
+    const normalizedFile = file.replaceAll("\\", "/");
+    const absolutePath = path.resolve(process.cwd(), normalizedFile);
+    const exists = fs.existsSync(absolutePath);
+
+    if (!exists) {
+      return {
+        file: normalizedFile,
+        title: path.basename(normalizedFile),
+        description: "삭제되었거나 현재 checkout에서 찾을 수 없는 게시글입니다.",
+        exists: false
+      };
+    }
+
+    const source = fs.readFileSync(absolutePath, "utf8");
+
+    return {
+      file: normalizedFile,
+      title: readFrontmatterValue(source, "title") || path.basename(normalizedFile),
+      description: readFrontmatterValue(source, "description") || "설명이 등록되지 않았습니다.",
+      exists: true
+    };
+  });
+}
+
+function getPostTitleSummary(posts) {
+  if (posts.length === 0) {
+    return "게시글 정보 없음";
+  }
+
+  if (posts.length === 1) {
+    return posts[0].title;
+  }
+
+  return `${posts[0].title} 외 ${posts.length - 1}개`;
+}
+
+function getPostDescriptionSummary(posts) {
+  if (posts.length === 0) {
+    return "변경된 게시글 파일 목록을 확인해 주세요.";
+  }
+
+  if (posts.length === 1) {
+    return posts[0].description;
+  }
+
+  return "여러 게시글이 함께 변경되었습니다. 상세 목록을 확인해 주세요.";
+}
+
+function formatChangedPosts(posts, fallbackFiles) {
+  if (posts.length === 0) {
+    return formatChangedFiles(fallbackFiles);
+  }
+
+  const shownPosts = posts.slice(0, 5).map((post) => [
+    `**${truncate(post.title, 120)}**`,
+    truncate(post.description, 220),
+    inlineCode(post.file),
+    post.exists ? undefined : "삭제/이름 변경 가능"
+  ].filter(Boolean).join("\n"));
+  const hiddenCount = posts.length - shownPosts.length;
+
+  if (hiddenCount > 0) {
+    shownPosts.push(`외 ${hiddenCount}개`);
+  }
+
+  return truncate(shownPosts.join("\n\n"), 1000);
+}
+
 function formatJobResult(result) {
   switch (result) {
     case "success":
@@ -224,10 +339,13 @@ async function sendBlogDeployNotification() {
   const buildResult = process.env.BUILD_RESULT?.trim() || "unknown";
   const deployResult = process.env.DEPLOY_RESULT?.trim() || "unknown";
   const isSuccess = buildResult === "success" && deployResult === "success";
+  const statusIcon = isSuccess ? "✅" : "❌";
+  const statusLabel = isSuccess ? "성공" : "실패";
   const commitSha = process.env.COMMIT_SHA?.trim();
   const commitMessage = process.env.COMMIT_MESSAGE?.trim() || "커밋 메시지 없음";
   const commitAuthor = process.env.COMMIT_AUTHOR?.trim() || "확인 필요";
   const changedFiles = process.env.BLOG_CHANGED_FILES || "";
+  const changedPosts = readChangedPosts(changedFiles);
   const workflowRunUrl =
     process.env.WORKFLOW_RUN_URL?.trim() ||
     `${repositoryUrl}/actions/runs/${process.env.GITHUB_RUN_ID || ""}`;
@@ -240,13 +358,22 @@ async function sendBlogDeployNotification() {
     ? `${repositoryUrl}/commit/${commitSha}`
     : process.env.COMMIT_URL?.trim();
   const shortCommitSha = commitSha?.slice(0, 7);
+  const repositoryOwner = repository.split("/")[0] || "guseoh";
+  const blogIconUrl =
+    process.env.BLOG_NOTIFICATION_ICON_URL?.trim() ||
+    `${serverUrl}/${repositoryOwner}.png?size=96`;
+  const postTitle = getPostTitleSummary(changedPosts);
+  const postDescription = getPostDescriptionSummary(changedPosts);
   const notificationTitle = isSuccess
-    ? "✅ 게시글 검증 및 배포 성공"
-    : "🚨 게시글 검증 또는 배포 실패";
+    ? "✅ 게시글 등록 성공"
+    : "❌ 게시글 등록 실패";
   const description = isSuccess
-    ? "src/content/blog 변경을 포함한 main 배포가 콘텐츠 검사, 빌드, GitHub Pages 배포, Smoke Test를 통과했습니다."
-    : "src/content/blog 변경을 포함한 main 배포에서 콘텐츠 검사, 빌드, GitHub Pages 배포 또는 Smoke Test 단계가 실패했습니다. Actions 로그를 확인해 주세요.";
+    ? "새 게시글 또는 게시글 변경 사항이 검증과 GitHub Pages 배포를 통과했습니다."
+    : "게시글 변경 사항의 검증, 빌드, GitHub Pages 배포 또는 Smoke Test 단계에서 문제가 발생했습니다. Actions 로그를 확인해 주세요.";
   const fields = [
+    createField(`${statusIcon} 성공 여부`, `${statusIcon} ${statusLabel}`),
+    createField("📰 제목", truncate(postTitle, 256), false),
+    createField("🧾 설명", truncate(postDescription, 700), false),
     createField("📦 저장소", `[${repository}](${repositoryUrl})`),
     createField("🌿 브랜치", `[\`${branch}\`](${branchUrl})`),
     createField("🧪 Build job", formatJobResult(buildResult)),
@@ -254,12 +381,12 @@ async function sendBlogDeployNotification() {
     createField("👤 커밋 작성자", truncate(commitAuthor, 256)),
     createField("🕒 실행 시각", `${executedAt} KST`),
     createField("📝 커밋 메시지", truncate(commitMessage, 700), false),
-    createField("📄 변경된 게시글", formatChangedFiles(changedFiles), false)
+    createField("📄 변경된 게시글", formatChangedPosts(changedPosts, changedFiles), false)
   ];
 
   if (!isSuccess) {
     fields.splice(
-      4,
+      1,
       0,
       createField("❌ 실패 지점", getBlogFailurePoint(buildResult, deployResult))
     );
@@ -280,7 +407,8 @@ async function sendBlogDeployNotification() {
   }
 
   const payload = {
-    username: "Blog Deploy Bot",
+    username: "Blog Post Bot",
+    avatar_url: blogIconUrl,
     allowed_mentions: {
       parse: []
     },
@@ -290,9 +418,16 @@ async function sendBlogDeployNotification() {
         url: workflowRunUrl || repositoryUrl,
         description,
         color: isSuccess ? COLORS.success : COLORS.error,
+        author: {
+          name: "devjune.dev 게시글 알림",
+          icon_url: blogIconUrl
+        },
+        thumbnail: {
+          url: blogIconUrl
+        },
         fields,
         footer: {
-          text: "guseoh.github.io · Deploy to GitHub Pages"
+          text: `guseoh.github.io · 게시글 등록 ${statusLabel}`
         },
         timestamp: new Date().toISOString()
       }
