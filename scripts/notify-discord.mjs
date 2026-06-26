@@ -1,14 +1,17 @@
-const webhookUrl = process.env.DISCORD_WEBHOOK_URL?.trim();
+const notificationKind =
+  process.env.DISCORD_NOTIFICATION_KIND?.trim() || "github-activity";
+const webhookEnvName =
+  notificationKind === "blog-deploy"
+    ? "BLOG_DISCORD_WEBHOOK_URL"
+    : "DISCORD_WEBHOOK_URL";
+const webhookUrl = process.env[webhookEnvName]?.trim();
 
 if (!webhookUrl) {
   console.log(
-    "DISCORD_WEBHOOK_URL이 설정되지 않아 Discord 알림을 생략합니다."
+    `${webhookEnvName}이 설정되지 않아 Discord 알림을 생략합니다.`
   );
   process.exit(0);
 }
-
-const notificationKind =
-  process.env.DISCORD_NOTIFICATION_KIND?.trim() || "github-activity";
 
 const serverUrl = process.env.SERVER_URL?.trim() || "https://github.com";
 const repository =

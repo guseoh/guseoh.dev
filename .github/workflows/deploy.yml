@@ -187,7 +187,7 @@ jobs:
         run: node scripts/notify-discord.mjs
         env:
           DISCORD_NOTIFICATION_KIND: blog-deploy
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          BLOG_DISCORD_WEBHOOK_URL: ${{ secrets.BLOG_DISCORD_WEBHOOK_URL }}
 
           REPOSITORY: ${{ github.repository }}
           BRANCH: main
