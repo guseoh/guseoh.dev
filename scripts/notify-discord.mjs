@@ -7,6 +7,9 @@ if (!webhookUrl) {
   process.exit(0);
 }
 
+const notificationKind =
+  process.env.DISCORD_NOTIFICATION_KIND?.trim() || "github-activity";
+
 const serverUrl = process.env.SERVER_URL?.trim() || "https://github.com";
 const repository =
   process.env.REPOSITORY?.trim() || "guseoh/guseoh.github.io";
@@ -78,6 +81,75 @@ function createField(name, value, inline = true) {
   };
 }
 
+function splitLines(value) {
+  return (value || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function inlineCode(value) {
+  return `\`${String(value).replaceAll("`", "'")}\``;
+}
+
+function formatChangedFiles(value, limit = 8) {
+  const files = [...new Set(splitLines(value))];
+
+  if (files.length === 0) {
+    return "-";
+  }
+
+  const shownFiles = files
+    .slice(0, limit)
+    .map((file) => inlineCode(truncate(file, 120)));
+  const hiddenCount = files.length - shownFiles.length;
+
+  if (hiddenCount > 0) {
+    shownFiles.push(`외 ${hiddenCount}개`);
+  }
+
+  return shownFiles.join("\n");
+}
+
+function formatJobResult(result) {
+  switch (result) {
+    case "success":
+      return "✅ success";
+
+    case "failure":
+      return "❌ failure";
+
+    case "cancelled":
+      return "⚠️ cancelled";
+
+    case "skipped":
+      return "➖ skipped";
+
+    default:
+      return result ? `⚠️ ${result}` : "확인 필요";
+  }
+}
+
+function getBlogFailurePoint(buildResult, deployResult) {
+  if (buildResult !== "success") {
+    return `build job (${buildResult || "unknown"})`;
+  }
+
+  if (deployResult !== "success") {
+    return `deploy job / GitHub Pages / smoke test (${deployResult || "unknown"})`;
+  }
+
+  return "확인 필요";
+}
+
+function buildUrl(path, baseUrl) {
+  try {
+    return new URL(path, baseUrl).toString();
+  } catch {
+    return baseUrl;
+  }
+}
+
 function getSourceLabel(source) {
   const sourceLabels = {
     graphql: "GitHub GraphQL API",
@@ -123,6 +195,113 @@ function getDeployStatus() {
     default:
       return `⚠️ ${deployOutcome}`;
   }
+}
+
+async function sendDiscordPayload(payload, notificationTitle) {
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const responseBody = await response.text();
+
+    throw new Error(
+      `Discord webhook 요청 실패: ${response.status} ${responseBody}`
+    );
+  }
+
+  console.log(`Discord 알림 전송 완료: ${notificationTitle}`);
+}
+
+async function sendBlogDeployNotification() {
+  const buildResult = process.env.BUILD_RESULT?.trim() || "unknown";
+  const deployResult = process.env.DEPLOY_RESULT?.trim() || "unknown";
+  const isSuccess = buildResult === "success" && deployResult === "success";
+  const commitSha = process.env.COMMIT_SHA?.trim();
+  const commitMessage = process.env.COMMIT_MESSAGE?.trim() || "커밋 메시지 없음";
+  const commitAuthor = process.env.COMMIT_AUTHOR?.trim() || "확인 필요";
+  const changedFiles = process.env.BLOG_CHANGED_FILES || "";
+  const workflowRunUrl =
+    process.env.WORKFLOW_RUN_URL?.trim() ||
+    `${repositoryUrl}/actions/runs/${process.env.GITHUB_RUN_ID || ""}`;
+  const deployedUrl =
+    process.env.DEPLOYED_BLOG_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    "https://guseoh.github.io/";
+  const blogUrl = buildUrl("/blog/", deployedUrl);
+  const commitUrl = commitSha
+    ? `${repositoryUrl}/commit/${commitSha}`
+    : process.env.COMMIT_URL?.trim();
+  const shortCommitSha = commitSha?.slice(0, 7);
+  const notificationTitle = isSuccess
+    ? "✅ 게시글 검증 및 배포 성공"
+    : "🚨 게시글 검증 또는 배포 실패";
+  const description = isSuccess
+    ? "src/content/blog 변경을 포함한 main 배포가 콘텐츠 검사, 빌드, GitHub Pages 배포, Smoke Test를 통과했습니다."
+    : "src/content/blog 변경을 포함한 main 배포에서 콘텐츠 검사, 빌드, GitHub Pages 배포 또는 Smoke Test 단계가 실패했습니다. Actions 로그를 확인해 주세요.";
+  const fields = [
+    createField("📦 저장소", `[${repository}](${repositoryUrl})`),
+    createField("🌿 브랜치", `[\`${branch}\`](${branchUrl})`),
+    createField("🧪 Build job", formatJobResult(buildResult)),
+    createField("🚀 Deploy/Smoke job", formatJobResult(deployResult)),
+    createField("👤 커밋 작성자", truncate(commitAuthor, 256)),
+    createField("🕒 실행 시각", `${executedAt} KST`),
+    createField("📝 커밋 메시지", truncate(commitMessage, 700), false),
+    createField("📄 변경된 게시글", formatChangedFiles(changedFiles), false)
+  ];
+
+  if (!isSuccess) {
+    fields.splice(
+      4,
+      0,
+      createField("❌ 실패 지점", getBlogFailurePoint(buildResult, deployResult))
+    );
+  }
+
+  if (shortCommitSha && commitUrl) {
+    fields.push(
+      createField("🔖 커밋", `[\`${shortCommitSha}\`](${commitUrl})`)
+    );
+  }
+
+  fields.push(createField("🔗 배포 블로그", `[블로그 열기](${blogUrl})`));
+
+  if (workflowRunUrl) {
+    fields.push(
+      createField("🔎 Actions", `[워크플로 실행 결과](${workflowRunUrl})`)
+    );
+  }
+
+  const payload = {
+    username: "Blog Deploy Bot",
+    allowed_mentions: {
+      parse: []
+    },
+    embeds: [
+      {
+        title: notificationTitle,
+        url: workflowRunUrl || repositoryUrl,
+        description,
+        color: isSuccess ? COLORS.success : COLORS.error,
+        fields,
+        footer: {
+          text: "guseoh.github.io · Deploy to GitHub Pages"
+        },
+        timestamp: new Date().toISOString()
+      }
+    ]
+  };
+
+  await sendDiscordPayload(payload, notificationTitle);
+}
+
+if (notificationKind === "blog-deploy") {
+  await sendBlogDeployNotification();
+  process.exit(0);
 }
 
 function getNotification() {
@@ -292,20 +471,4 @@ const payload = {
   ]
 };
 
-const response = await fetch(webhookUrl, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(payload)
-});
-
-if (!response.ok) {
-  const responseBody = await response.text();
-
-  throw new Error(
-    `Discord webhook 요청 실패: ${response.status} ${responseBody}`
-  );
-}
-
-console.log(`Discord 알림 전송 완료: ${notification.title}`);
+await sendDiscordPayload(payload, notification.title);

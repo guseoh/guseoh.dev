@@ -16,6 +16,72 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  detect-blog-changes:
+    name: Detect blog content changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.detect.outputs.changed }}
+      files: ${{ steps.detect.outputs.files }}
+    steps:
+      - name: Detect src/content/blog changes
+        id: detect
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const blogPrefix = "src/content/blog/";
+          const event = process.env.GITHUB_EVENT_PATH
+            ? JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"))
+            : {};
+          const files = new Set();
+
+          function addBlogFile(files, filePath) {
+            if (typeof filePath === "string" && filePath.startsWith(blogPrefix)) {
+              files.add(filePath);
+            }
+          }
+
+          if (
+            process.env.GITHUB_EVENT_NAME === "push" &&
+            process.env.GITHUB_REF === "refs/heads/main"
+          ) {
+            for (const commit of event.commits ?? []) {
+              for (const key of ["added", "modified", "removed"]) {
+                for (const filePath of commit[key] ?? []) {
+                  addBlogFile(files, filePath);
+                }
+              }
+            }
+          }
+
+          const sortedFiles = [...files].sort();
+          const delimiter = `BLOG_FILES_${Date.now()}`;
+          fs.appendFileSync(
+            process.env.GITHUB_OUTPUT,
+            [
+              `changed=${sortedFiles.length > 0}`,
+              `files<<${delimiter}`,
+              ...sortedFiles,
+              delimiter,
+              ""
+            ].join("\n")
+          );
+
+          if (sortedFiles.length > 0) {
+            console.log(`src/content/blog 변경 파일 ${sortedFiles.length}개를 감지했습니다.`);
+            for (const file of sortedFiles) {
+              console.log(`- ${file}`);
+            }
+          } else {
+            console.log("src/content/blog 변경 파일이 없어 Discord 게시글 배포 알림을 생략합니다.");
+          }
+          NODE
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -65,6 +131,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -88,3 +156,51 @@ jobs:
           SMOKE_EXPECTED_SHA: ${{ needs.build.outputs.sha }}
           SMOKE_RETRIES: 8
           SMOKE_RETRY_DELAY_MS: 10000
+
+  notify-blog-deploy:
+    name: Notify blog deployment
+    needs:
+      - detect-blog-changes
+      - build
+      - deploy
+    if: >-
+      always() &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      needs.detect-blog-changes.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout notification script
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+
+      - name: Setup Node for notification
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: Notify Discord
+        continue-on-error: true
+        run: node scripts/notify-discord.mjs
+        env:
+          DISCORD_NOTIFICATION_KIND: blog-deploy
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: main
+          SERVER_URL: ${{ github.server_url }}
+          SITE_URL: https://guseoh.github.io/
+
+          BUILD_RESULT: ${{ needs.build.result }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          DEPLOYED_BLOG_URL: ${{ needs.deploy.outputs.page_url }}
+          BLOG_CHANGED_FILES: ${{ needs.detect-blog-changes.outputs.files }}
+
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          COMMIT_AUTHOR: ${{ github.event.head_commit.author.name || github.actor }}
+          WORKFLOW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
