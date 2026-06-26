@@ -304,7 +304,7 @@
         document.documentElement.classList.toggle("left-sidebar-collapsed", !narrow && shouldCollapse);
         document.body.classList.toggle("has-sidebar-open", modalOpen);
         sidebar.setAttribute("aria-hidden", shouldCollapse ? "true" : "false");
-        sidebar.inert = narrow && shouldCollapse;
+        sidebar.inert = shouldCollapse;
 
         if (modalOpen) {
           sidebar.setAttribute("role", "dialog");

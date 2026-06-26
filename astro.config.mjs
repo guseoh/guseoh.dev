@@ -1,4 +1,5 @@
 ﻿import { defineConfig } from "astro/config";
+import { rehypeExternalLinks } from "./src/plugins/rehype-external-links.mjs";
 import { rehypeImageFlags } from "./src/plugins/rehype-image-flags.mjs";
 import { rehypeTableScroll } from "./src/plugins/rehype-table-scroll.mjs";
 import { remarkCallout } from "./src/plugins/remark-callout.mjs";
@@ -35,7 +36,11 @@ export default defineConfig({
       remarkCodeMeta,
       [remarkLinkMention, { site: SITE.siteUrl }]
     ],
-    rehypePlugins: [rehypeTableScroll, rehypeImageFlags],
+    rehypePlugins: [
+      [rehypeExternalLinks, { site: SITE.siteUrl }],
+      rehypeTableScroll,
+      rehypeImageFlags
+    ],
     syntaxHighlight: {
       type: "shiki",
       excludeLangs: ["math"]

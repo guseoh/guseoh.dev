@@ -977,12 +977,15 @@ html[data-theme="dark"] .astro-code span {
 
 .post .table-scroll {
   width: 100%;
+  max-width: min(100%, var(--post-text-width));
   margin: 1rem auto 0;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-inline: contain;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--post-bg);
+  -webkit-overflow-scrolling: touch;
 }
 
 .post .table-scroll:focus-visible {
@@ -1000,7 +1003,7 @@ html[data-theme="dark"] .astro-code span {
   caption-side: top;
   position: sticky;
   left: 0;
-  max-width: min(100vw - 3rem, var(--post-content-width));
+  max-width: min(100vw - 3rem, var(--post-text-width));
   border-bottom: 1px solid var(--border);
   background: color-mix(in srgb, var(--surface) 78%, var(--post-bg));
   color: var(--heading);
@@ -1016,9 +1019,15 @@ html[data-theme="dark"] .astro-code span {
 .post td {
   min-width: 8rem;
   border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
   padding: 0.65rem 0.75rem;
   text-align: left;
   vertical-align: top;
+}
+
+.post :where(th, td) :not(pre) > code {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .post th:first-child,

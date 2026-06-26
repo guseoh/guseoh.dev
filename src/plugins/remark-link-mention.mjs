@@ -92,6 +92,7 @@ function renderLinkMention(data) {
   const description = data.description
     ? `<span class="link-mention__description">${escapeHtml(data.description)}</span>`
     : "";
+  const externalAttributes = data.isInternal ? "" : ' target="_blank" rel="noopener noreferrer"';
   const icon = data.icon
     ? `<img class="link-mention__favicon" src="${escapeHtml(data.icon)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" />`
     : "";
@@ -103,7 +104,7 @@ function renderLinkMention(data) {
   </span>`
     : `<span class="link-mention__media link-mention__media--fallback" aria-hidden="true">${placeholder}</span>`;
 
-  return `<a class="link-mention" href="${escapeHtml(data.href)}" data-link-mention="${data.isInternal ? "internal" : "external"}">
+  return `<a class="link-mention" href="${escapeHtml(data.href)}" data-link-mention="${data.isInternal ? "internal" : "external"}"${externalAttributes}>
   <span class="link-mention__content">
     <span class="link-mention__title">${escapeHtml(data.title)}</span>
     ${description}

@@ -105,7 +105,8 @@ const verificationDate = getPostVerificationDate(post);
 const isStalePost = isPostContentStale(post);
 const commentKey = getPostCommentKey(post);
 const sourcePath = getPostSourcePath(post);
-const editUrl = getPostEditUrl(post);
+const showEditLink = import.meta.env.DEV;
+const editUrl = showEditLink ? getPostEditUrl(post) : "";
 const deployedSha = import.meta.env.GITHUB_SHA || "local-preview";
 const issueUrl = new URL(`${REPOSITORY_URL}/issues/new`);
 issueUrl.searchParams.set("template", "content-error.yml");
@@ -295,9 +296,11 @@ const postStructuredData = {
         <section class="post-feedback" aria-labelledby="post-feedback-title">
           <h2 id="post-feedback-title">이 글 개선하기</h2>
           <div class="post-feedback__actions">
-            <a href={editUrl} target="_blank" rel="noopener noreferrer" aria-label={`${postTitle} Markdown 파일을 GitHub에서 수정하기`}>
-              GitHub에서 이 글 수정하기
-            </a>
+            {showEditLink && editUrl && (
+              <a href={editUrl} target="_blank" rel="noopener noreferrer" aria-label={`${postTitle} Markdown 파일을 GitHub에서 수정하기`}>
+                GitHub에서 이 글 수정하기
+              </a>
+            )}
             <a href={issueUrl.toString()} target="_blank" rel="noopener noreferrer" aria-label={`${postTitle} 내용 오류를 GitHub Issue로 신고하기`}>
               내용 오류 신고하기
             </a>
