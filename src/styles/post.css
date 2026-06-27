@@ -90,6 +90,14 @@
   line-height: 1.62;
 }
 
+.post__header > h1,
+.post__header > .post__description,
+.post__header > .post-meta-tags {
+  width: 100%;
+  max-width: min(100%, var(--post-text-width));
+  margin-inline: auto;
+}
+
 .post-meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.6rem, 1fr));
