@@ -1,5 +1,5 @@
 ---
-title: "[Java]자바의 상속은 무엇일까?"
+title: "[Java] 자바의 상속은 무엇일까?"
 description: "자바 상속의 의미와 extends, 멤버의 상속 범위, super를 이용한 생성자 연결, 메서드 재정의와 설계 시 주의점을 알아보자."
 date: 2026-06-25
 updated: 2026-06-25
