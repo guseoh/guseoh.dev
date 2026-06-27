@@ -51,12 +51,8 @@
   --post-embed-hover-bg: color-mix(in srgb, var(--surface-hover) 68%, var(--surface));
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--post-bg);
   color: var(--ink);
   padding: 1.45rem;
-  box-shadow: 0 18px 34px -30px var(--shadow);
   text-rendering: optimizeLegibility;
 }
 
