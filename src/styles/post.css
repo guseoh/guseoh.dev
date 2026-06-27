@@ -1,6 +1,9 @@
 .post-view {
   /* Desktop post grid: readable article width + right sticky TOC with a visible gutter. */
   --post-body-max: clamp(860px, 56vw, 960px);
+  --post-body-expanded-max: clamp(64rem, 72vw, 76rem);
+  --post-content-expanded-width: 66rem;
+  --post-text-expanded-width: 52rem;
   --post-toc-width: clamp(12rem, 12vw, 15rem);
   --post-toc-gap: clamp(2.5rem, 3.5vw, 4.75rem);
   width: min(100%, calc(var(--post-body-max) + var(--post-toc-width) + var(--post-toc-gap)));
@@ -1740,6 +1743,27 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 
 html.post-lightbox-open {
   scrollbar-gutter: stable;
+}
+
+@media (min-width: 1440px) {
+  html.left-sidebar-collapsed .post-view:not(.post-view--single),
+  .site-shell.sidebar-collapsed .post-view:not(.post-view--single) {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, var(--post-toc-width));
+    justify-content: stretch;
+  }
+
+  html.left-sidebar-collapsed .post-view:not(.post-view--single) > .post-column,
+  .site-shell.sidebar-collapsed .post-view:not(.post-view--single) > .post-column {
+    max-width: var(--post-body-expanded-max);
+    justify-self: end;
+  }
+
+  html.left-sidebar-collapsed .post-view:not(.post-view--single) .post,
+  .site-shell.sidebar-collapsed .post-view:not(.post-view--single) .post {
+    --post-content-width: var(--post-content-expanded-width);
+    --post-text-width: var(--post-text-expanded-width);
+  }
 }
 
 @media (max-width: 1439px) {
