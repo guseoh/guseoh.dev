@@ -42,7 +42,6 @@
 .post {
   --post-content-width: 58rem;
   --post-text-width: 47rem;
-  --post-meta-width: min(calc(var(--post-text-width) + 8rem), 56rem);
   --post-meta-bg: color-mix(in srgb, var(--surface) 42%, var(--bg));
   --post-meta-border: color-mix(in srgb, var(--border) 72%, var(--bg));
   --post-meta-muted: color-mix(in srgb, var(--muted-readable) 78%, var(--muted));
@@ -63,6 +62,9 @@
 .post__header {
   display: grid;
   gap: 0;
+  width: 100%;
+  max-width: min(100%, var(--post-text-width));
+  margin-inline: auto;
   margin-bottom: 1.05rem;
   padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--border);
@@ -99,7 +101,6 @@
 .post__header > .post__description,
 .post__header > .post-meta-tags {
   width: 100%;
-  max-width: min(100%, var(--post-text-width));
   margin-inline: auto;
 }
 
@@ -208,7 +209,6 @@
   .table-scroll,
   .post-freshness-note,
   figure,
-  .post__header,
   .post__content,
   .post-meta-grid,
   .post-meta-tags,
@@ -221,7 +221,7 @@
 
 .post__header > .post-meta-grid {
   width: 100%;
-  max-width: min(calc(100% - 0.8rem), var(--post-meta-width));
+  max-width: min(100%, var(--post-text-width));
 }
 
 .post__content {
