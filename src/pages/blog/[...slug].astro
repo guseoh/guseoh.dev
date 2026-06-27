@@ -213,7 +213,7 @@ const postStructuredData = {
             </div>
           )}
           {post.data.lastVerified && (
-            <div class="post-meta-item">
+            <div class="post-meta-item post-meta-item--verification">
               <dt>마지막 검증</dt>
               <dd><time datetime={post.data.lastVerified.toISOString()}>{formatPostDate(post.data.lastVerified)}</time></dd>
             </div>

@@ -42,6 +42,10 @@
 .post {
   --post-content-width: 58rem;
   --post-text-width: 47rem;
+  --post-meta-width: min(calc(var(--post-text-width) + 8rem), 56rem);
+  --post-meta-bg: color-mix(in srgb, var(--surface) 42%, var(--bg));
+  --post-meta-border: color-mix(in srgb, var(--border) 72%, var(--bg));
+  --post-meta-muted: color-mix(in srgb, var(--muted-readable) 78%, var(--muted));
   --post-body-weight: 400;
   --post-heading-weight: 700;
   --post-embed-radius: 8px;
@@ -58,9 +62,9 @@
 
 .post__header {
   display: grid;
-  gap: 0.9rem;
-  margin-bottom: 1.3rem;
-  padding-bottom: 1.05rem;
+  gap: 0;
+  margin-bottom: 1.05rem;
+  padding-bottom: 0.9rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -88,6 +92,7 @@
   font-size: 1rem;
   font-weight: var(--post-body-weight);
   line-height: 1.62;
+  margin-top: 0.42rem;
 }
 
 .post__header > h1,
@@ -101,38 +106,71 @@
 .post-meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.6rem, 1fr));
-  gap: 0.65rem;
-  margin: 0;
+  gap: 0.54rem;
+  margin: 0.78rem 0 0;
 }
 
 .post-meta-item {
   min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 74%, var(--bg));
-  padding: 0.64rem 0.7rem;
+  border: 1px solid var(--post-meta-border);
+  border-radius: 7px;
+  background: var(--post-meta-bg);
+  padding: 0.54rem 0.62rem;
+  box-shadow: none;
 }
 
 .post-meta-item dt {
-  color: var(--muted);
+  color: var(--post-meta-muted);
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 760;
   line-height: 1;
 }
 
 .post-meta-item dd {
-  margin: 0.38rem 0 0;
+  margin: 0.3rem 0 0;
   color: var(--ink);
-  font-size: 0.84rem;
-  font-weight: 750;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
 }
 
 .post-meta-item a {
   display: inline-flex;
 }
 
+.post-meta-item time {
+  white-space: nowrap;
+}
+
+.post-meta-item .tag--category {
+  gap: 0.28rem;
+  border-color: transparent;
+  background: color-mix(in srgb, var(--accent-soft) 42%, transparent);
+  color: var(--link);
+  font-size: inherit;
+  font-weight: 650;
+  padding: 0.12rem 0.18rem;
+}
+
+.post-meta-item .tag--category:hover,
+.post-meta-item .tag--category:focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 26%, transparent);
+  background: color-mix(in srgb, var(--surface-hover) 58%, transparent);
+  color: var(--link-hover);
+}
+
+.post-meta-item--verification {
+  background: color-mix(in srgb, var(--post-meta-bg) 74%, var(--bg));
+}
+
+.post-meta-item--verification dd {
+  color: color-mix(in srgb, var(--muted-readable) 88%, var(--ink));
+  font-weight: 560;
+}
+
 .post-meta-tags {
-  margin-top: 0.1rem;
+  margin-top: 0.7rem;
 }
 
 .post-tested-with {
@@ -146,6 +184,7 @@
   color: var(--muted-readable);
   font-size: 0.84rem;
   line-height: 1.45;
+  margin-top: 0.65rem;
   padding: 0.6rem 0.7rem;
 }
 
@@ -178,6 +217,11 @@
 ) {
   max-width: min(100%, var(--post-content-width));
   margin-inline: auto;
+}
+
+.post__header > .post-meta-grid {
+  width: 100%;
+  max-width: min(calc(100% - 0.8rem), var(--post-meta-width));
 }
 
 .post__content {
@@ -1903,6 +1947,16 @@ html.post-lightbox-open {
 
   .post-meta-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.72rem;
+  }
+
+  .post-meta-item {
+    padding: 0.58rem 0.62rem;
+  }
+
+  .post-meta-tags {
+    margin-top: 0.68rem;
   }
 
   .code-block__header {
