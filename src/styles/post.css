@@ -1,11 +1,11 @@
 .post-view {
   /* Desktop post grid: readable article width + right sticky TOC with a visible gutter. */
-  --post-body-max: clamp(860px, 56vw, 960px);
+  --post-body-max: clamp(780px, 52vw, 900px);
   --post-body-expanded-max: clamp(64rem, 72vw, 76rem);
   --post-content-expanded-width: 66rem;
   --post-text-expanded-width: 52rem;
-  --post-toc-width: clamp(12rem, 12vw, 15rem);
-  --post-toc-gap: clamp(2.5rem, 3.5vw, 4.75rem);
+  --post-toc-width: clamp(12.5rem, 12vw, 15rem);
+  --post-toc-gap: clamp(2rem, 3vw, 4rem);
   width: min(100%, calc(var(--post-body-max) + var(--post-toc-width) + var(--post-toc-gap)));
   display: grid;
   grid-template-columns: minmax(0, var(--post-body-max)) minmax(12rem, var(--post-toc-width));
@@ -1251,10 +1251,10 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
   width: 100%;
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--card-bg) 92%, var(--bg));
-  padding: 0.72rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.2rem 0 0.2rem 0.35rem;
 }
 
 .post-toc-mobile {
@@ -1270,15 +1270,15 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   border-radius: 8px;
-  background: var(--card-bg);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
   color: var(--heading);
   font-size: 0.84rem;
   font-weight: 800;
   padding: 0.65rem 0.78rem;
   cursor: pointer;
-  box-shadow: 0 14px 28px -26px var(--shadow);
+  box-shadow: none;
 }
 
 .post-toc-mobile__toggle:hover,
@@ -1303,10 +1303,11 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 
 .post-toc-mobile__panel {
   margin-top: 0.45rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--card-bg);
-  padding: 0.62rem;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.2rem 0 0.2rem 0;
 }
 
 .post-toc-mobile__panel[hidden] {
@@ -1315,7 +1316,7 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 
 .post-toc-mobile__list {
   display: grid;
-  gap: 0.24rem;
+  gap: 0.04rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1323,12 +1324,13 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 
 .post-toc-mobile__item a {
   display: block;
-  border-left: 3px solid transparent;
-  border-radius: 6px;
+  border-left: 2px solid transparent;
+  border-radius: 0 6px 6px 0;
   color: var(--muted-readable);
-  font-size: 0.8rem;
-  line-height: 1.4;
-  padding: 0.34rem 0.52rem;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  margin-left: -1px;
+  padding: 0.36rem 0.52rem 0.36rem 0.7rem;
   text-decoration: none;
 }
 
@@ -1338,53 +1340,56 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 
 .post-toc-mobile__item a:hover,
 .post-toc-mobile__item a:focus-visible {
-  background: color-mix(in srgb, var(--tag-bg) 72%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 46%, transparent);
   color: var(--link-hover);
 }
 
 .post-toc-mobile__item a.is-active {
   border-left-color: var(--accent);
-  background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface));
+  background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
   color: var(--link-hover);
   font-weight: 800;
 }
 
 .post-toc__title {
-  color: var(--muted-readable);
-  font-size: 0.72rem;
+  color: var(--heading);
+  font-size: 0.78rem;
   font-weight: 850;
-  line-height: 1;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
 .post-toc__list {
   display: grid;
-  gap: 0.28rem;
-  margin: 0.58rem 0 0;
+  gap: 0.04rem;
+  margin: 0.68rem 0 0;
+  border-left: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   padding: 0;
   list-style: none;
 }
 
 .post-toc__item a {
   display: block;
-  border-left: 3px solid transparent;
-  border-radius: 6px;
+  border-left: 2px solid transparent;
+  border-radius: 0 6px 6px 0;
   color: var(--muted-readable);
-  font-size: 0.75rem;
-  line-height: 1.35;
-  padding: 0.24rem 0.38rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin-left: -1px;
+  overflow-wrap: anywhere;
+  padding: 0.34rem 0.42rem 0.34rem 0.72rem;
   text-decoration: none;
 }
 
 .post-toc__item a:hover,
 .post-toc__item a:focus-visible {
-  background: color-mix(in srgb, var(--tag-bg) 72%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 46%, transparent);
   color: var(--link-hover);
 }
 
 .post-toc__item a.is-active {
   border-left-color: var(--accent);
-  background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface));
+  background: color-mix(in srgb, var(--accent-soft) 58%, transparent);
   color: var(--link-hover);
   font-weight: 800;
 }
@@ -1403,7 +1408,7 @@ html[data-theme="dark"] .post .markdown-alert :not(pre) > code {
 }
 
 .post-toc__item.depth-3 a {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
 }
 
 .post-footer {
@@ -1796,15 +1801,15 @@ html.post-lightbox-open {
 @media (min-width: 1440px) {
   html.left-sidebar-collapsed .post-view:not(.post-view--single),
   .site-shell.sidebar-collapsed .post-view:not(.post-view--single) {
-    width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(12rem, var(--post-toc-width));
-    justify-content: stretch;
+    width: min(100%, calc(var(--post-body-expanded-max) + var(--post-toc-width) + var(--post-toc-gap)));
+    grid-template-columns: minmax(0, var(--post-body-expanded-max)) minmax(12rem, var(--post-toc-width));
+    justify-content: center;
   }
 
   html.left-sidebar-collapsed .post-view:not(.post-view--single) > .post-column,
   .site-shell.sidebar-collapsed .post-view:not(.post-view--single) > .post-column {
-    max-width: var(--post-body-expanded-max);
-    justify-self: end;
+    max-width: none;
+    justify-self: stretch;
   }
 
   html.left-sidebar-collapsed .post-view:not(.post-view--single) .post,
