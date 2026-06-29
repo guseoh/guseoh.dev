@@ -1,233 +1,262 @@
 ---
-title: "자바의 추상화는 무엇일까?"
-description: "객체지향의 추상화가 필요한 이유를 알아보고, 추상 클래스와 추상 메서드로 공통 규칙과 달라지는 구현을 분리하는 방법을 살펴보자."
+title: "[Java]자바의 추상화는 무엇일까?"
+description: "객체지향의 추상화가 필요한 이유를 알아보고, 추상 클래스로 공통 흐름과 구현마다 달라지는 동작을 분리하는 방법을 살펴보자."
 date: 2026-06-26
-updated: 2026-06-26
+updated: 2026-06-29
 category: "Java"
 slug: "java/추상화/abstraction"
 commentKey: "/blog/java/추상화/abstraction/"
 tags:
-  - Java
-  - OOP
-  - Abstraction
-  - Abstract Class
+    - Java
+    - OOP
+    - Abstraction
+    - Abstract Class
 book: ""
 chapter: 1
 heroImage: "/og-image.svg"
-draft: false
+draft: true
 ---
 
 ## 1. 들어가기 전
 
-이전 글에서는 상속을 이용해 기존 클래스의 상태와 행동을 하위 클래스에서 이어받는 방법을 살펴봤다. 하지만 여러 클래스에서 비슷한 코드가 발견됐다고 해서 곧바로 상속 관계를 만들어서는 안 된다.
+이전 글에서는 상속을 사용해 상위 클래스의 상태와 행동을 하위 클래스가 물려받는 방법을 살펴봤다. 상속 관계를 만들기 전에는 여러 객체를 어떤 기준으로 묶을지, 외부에 어떤 역할을 제공할지부터 정해야 한다.
 
-먼저 각 클래스가 어떤 공통 역할을 가지는지, 외부에 어떤 동작을 제공해야 하는지 결정해야 한다. 구현에 필요한 세부 사항과 외부에서 알아야 할 내용을 구분하는 과정도 필요하다. 이때 사용하는 객체지향의 개념이 **추상화(Abstraction)**다.
+이 과정이 **추상화(Abstraction)** 다.
 
-이 글에서는 추상화를 단순히 복잡한 코드를 감추는 기술이 아니라, **객체가 맡을 역할과 외부에 제공할 동작을 선택하는 설계 과정**으로 본다. Java의 `abstract` 키워드는 그 결과를 코드로 표현하는 방법 가운데 하나다.
+프로그램은 현실의 대상을 그대로 옮기지 않는다. 현재 해결하려는 문제에 필요한 속성과 행동을 선택하고, 나머지는 모델에서 제외한다. 로그인 기능에서는 회원의 인증 정보가 필요하지만 배송지와 포인트는 필요하지 않은 것처럼, 같은 대상도 문제에 따라 다르게 표현된다.
 
-## 2. 추상화는 무엇을 남기는가
+이 글에서는 추상화의 의미를 먼저 살펴보고, 여러 배송비 정책의 공통 흐름과 서로 다른 계산식을 추상 클래스로 분리해 본다.
 
-추상화는 복잡한 대상에서 현재 프로그램에 필요한 특징만 선택해 표현하는 과정이다. 대상의 모든 정보를 클래스에 담는 것이 아니라, 프로그램이 해결하려는 문제와 관계있는 상태와 행동만 남긴다.
+## 2. 문제에 필요한 특징과 역할을 선택한다
 
-알림을 보내는 프로그램을 예로 들어 보자. 이메일 알림은 메일 서버와 통신해야 하고, 문자 알림은 문자 발송 서비스를 호출해야 한다. 두 방식의 내부 구현은 서로 다르지만 알림을 요청하는 코드는 다음 사실만 알면 된다.
+같은 회원을 다루더라도 기능마다 필요한 정보는 다르다.
 
-> 알림은 수신자에게 메시지를 전송한다.
+<!-- table-caption: 기능에 따라 달라지는 회원의 정보와 행동 -->
 
-메일 서버의 연결 방식이나 문자 발송 API의 요청 형식은 알림을 사용하는 코드가 반드시 알아야 할 정보가 아니다. 이 세부 구현을 각 알림 객체 내부에 두고, 외부에는 `send()`라는 동작만 제공하면 호출 코드는 알림이 **무엇을 하는지**에 집중할 수 있다.
+| 문제     | 필요한 정보와 행동             |
+| ------ | ---------------------- |
+| 로그인    | 인증 정보, 계정 상태, 인증 가능 여부 |
+| 상품 배송  | 수령인, 배송지, 연락처          |
+| 포인트 관리 | 포인트 잔액, 적립과 사용 규칙      |
 
-추상화는 단순한 생략과도 다르다. 필요한 정보까지 제거하는 것이 아니라, 외부 코드가 객체를 올바르게 사용하기 위해 알아야 할 역할과 규칙을 남겨야 한다.
+로그인 기능에서 회원의 배송지를 관리할 필요는 없다. 반대로 상품을 배송하는 과정에서는 인증 비밀번호를 알 필요가 없다.
 
-### 추상화의 기준은 목적에 따라 달라진다
+추상화는 이처럼 **현재 문제를 해결하는 데 필요한 특징을 선택하는 과정**이다. 현실의 모든 정보를 클래스 하나에 담는 것이 아니라, 프로그램에서 사용할 역할과 행동을 기준으로 모델을 만든다.
 
-같은 대상이라도 프로그램의 목적이 달라지면 선택해야 할 특징도 달라진다.
+여러 객체를 하나의 타입으로 묶을 때도 같은 기준을 적용할 수 있다.
 
-회원 객체를 로그인 기능에서 사용한다면 이메일과 비밀번호가 중요할 수 있다. 배송 기능에서는 이름과 주소가 더 중요하다. 현실의 회원이 가진 모든 정보를 하나의 클래스에 그대로 옮기는 것이 추상화의 목표는 아니다.
+일반 배송 정책에는 기본 배송비와 무료 배송 기준이 필요하다. 무료 배송 정책은 별도의 금액 정보 없이 항상 0원을 반환할 수 있다. 내부 데이터는 다르지만 두 객체 모두 외부에 같은 역할을 제공한다.
 
-**현재 프로그램에서 객체가 맡은 책임을 기준으로 필요한 특징을 선택하는 것**이 중요하다.
+```text
+주문 금액을 받는다.
+        ↓
+배송비를 계산한다.
+        ↓
+계산 결과를 반환한다.
+```
 
-> [!note] 추상화와 캡슐화
->
-> 추상화는 외부에 어떤 역할과 동작을 보여 줄지 결정한다. 캡슐화는 객체의 상태와 구현을 내부에 모으고, 외부에서 허용되지 않은 방식으로 접근하지 못하게 제한한다.
->
-> `private`으로 필드를 감췄다고 해서 역할이 명확해지는 것은 아니다. 반대로 역할을 잘 정의했더라도 내부 상태를 아무 제한 없이 변경할 수 있다면 객체의 규칙을 지키기 어렵다. 두 개념은 서로 관련되어 있지만 같은 의미는 아니다.
+두 객체를 같은 타입으로 다룰 수 있는 이유는 필드가 비슷해서가 아니라 **배송비를 계산한다는 행동이 같기 때문**이다.
 
-## 3. Java에서 추상화를 표현하는 방법
+## 3. 공통 흐름과 달라지는 계산을 분리한다
 
-Java에서는 일반 클래스와 메서드만으로도 추상화를 적용할 수 있다. 메서드 이름과 매개변수를 통해 객체가 제공할 동작을 정의하고, 내부 구현을 `private` 메서드로 감추는 것도 추상화의 한 형태다.
+배송비 정책마다 계산식은 다르지만 다음 흐름은 공통으로 유지해야 한다고 가정해 보자.
 
-여러 하위 클래스가 공통 역할을 가지면서 일부 동작을 서로 다르게 구현해야 한다면 **추상 클래스와 추상 메서드**를 사용할 수 있다.
+1. 주문 금액을 검증한다.
+2. 정책에 맞는 배송비를 계산한다.
+3. 계산 결과를 검증한다.
+4. 배송비를 반환한다.
 
-알림 전송의 공통 흐름은 부모 클래스에 두고, 실제 발송 방식만 하위 클래스에 맡겨 보자.
+공통된 실행 순서와 검증은 상위 클래스에 두고, 실제 계산식은 하위 클래스에 맡길 수 있다.
 
-```java
-abstract class Notification {
+```java title="DeliveryFeePolicy.java" showLineNumbers
+public abstract class DeliveryFeePolicy {
 
-    private final String recipient;
+    public final long calculate(long orderAmount) {
+        validateOrderAmount(orderAmount);
 
-    protected Notification(String recipient) {
-        if (recipient == null || recipient.isBlank()) {
+        long deliveryFee = calculateFee(orderAmount);
+
+        validateDeliveryFee(deliveryFee);
+        return deliveryFee;
+    }
+
+    protected abstract long calculateFee(long orderAmount);
+
+    private void validateOrderAmount(long orderAmount) {
+        if (orderAmount < 0) {
             throw new IllegalArgumentException(
-                    "수신자는 비어 있을 수 없습니다."
+                    "주문 금액은 음수일 수 없습니다."
             );
         }
-
-        this.recipient = recipient;
     }
 
-    public final void send(String message) {
-        if (message == null || message.isBlank()) {
-            throw new IllegalArgumentException(
-                    "메시지는 비어 있을 수 없습니다."
+    private void validateDeliveryFee(long deliveryFee) {
+        if (deliveryFee < 0) {
+            throw new IllegalStateException(
+                    "배송비는 음수일 수 없습니다."
             );
         }
-
-        doSend(recipient, message);
     }
-
-    protected abstract void doSend(
-            String recipient,
-            String message
-    );
 }
 ```
 
-`Notification`은 모든 알림이 가져야 할 수신자와 메시지 검증 규칙을 정의한다. `send()`를 호출하면 공통 검증을 수행한 뒤 실제 발송 작업을 `doSend()`에 맡긴다.
+외부 호출자는 `calculate()`를 사용한다. 이 메서드는 주문 금액을 검증하고 `calculateFee()`에 실제 계산을 맡긴 뒤 결과가 음수가 아닌지 확인한다.
 
-알림의 종류에 따라 발송 방식이 달라지므로 `Notification`만으로는 `doSend()`의 구현을 결정할 수 없다. 메서드의 이름, 매개변수와 반환 타입만 선언하고 구현은 하위 클래스가 담당하도록 남겨 둔다.
+`calculateFee()`에는 구현부가 없다. 배송비를 계산해야 한다는 역할만 선언하고, 계산 방법은 하위 클래스가 정한다.
 
-```java
-class EmailNotification extends Notification {
+`calculate()`는 `final`이므로 하위 클래스에서 재정의할 수 없다. 정책이 추가되더라도 입력 검증과 결과 검증 순서는 그대로 유지되고, 변경되는 부분은 `calculateFee()`의 계산식으로 제한된다.
 
-    public EmailNotification(String recipient) {
-        super(recipient);
-    }
+### 3.1 정책마다 계산식을 구현한다
+
+일반 배송 정책은 주문 금액이 50,000원 이상이면 0원을, 그보다 작으면 3,000원을 반환한다.
+
+```java title="StandardDeliveryFeePolicy.java" showLineNumbers
+public final class StandardDeliveryFeePolicy
+        extends DeliveryFeePolicy {
+
+    private static final long FREE_DELIVERY_THRESHOLD = 50_000;
+    private static final long BASIC_DELIVERY_FEE = 3_000;
 
     @Override
-    protected void doSend(
-            String recipient,
-            String message
-    ) {
-        System.out.println(
-                recipient + "에게 이메일 전송: " + message
-        );
+    protected long calculateFee(long orderAmount) {
+        if (orderAmount >= FREE_DELIVERY_THRESHOLD) {
+            return 0;
+        }
+
+        return BASIC_DELIVERY_FEE;
     }
 }
 ```
 
-```java
-class SmsNotification extends Notification {
+무료 배송 정책은 주문 금액과 관계없이 0원을 반환한다.
 
-    public SmsNotification(String recipient) {
-        super(recipient);
-    }
+```java title="FreeDeliveryFeePolicy.java" showLineNumbers
+public final class FreeDeliveryFeePolicy
+        extends DeliveryFeePolicy {
 
     @Override
-    protected void doSend(
-            String recipient,
-            String message
-    ) {
-        System.out.println(
-                recipient + "에게 문자 전송: " + message
-        );
+    protected long calculateFee(long orderAmount) {
+        return 0;
     }
 }
 ```
 
-이 구조에서 추상 클래스는 단순히 중복 코드를 모아 놓은 부모 클래스가 아니다. 모든 알림이 따라야 할 전송 절차와 반드시 제공해야 하는 동작을 함께 정의한다.
+두 클래스는 계산식이 다르지만 외부에 제공하는 사용 방법은 같다.
 
-`send()`는 `final`로 선언했기 때문에 하위 클래스가 검증 과정을 제거하거나 전송 순서를 바꿀 수 없다. 반면 실제 발송 방식은 `doSend()`를 재정의해 각 클래스에 맞게 구현한다.
+```java title="DeliveryFeeExample.java" showLineNumbers
+public class DeliveryFeeExample {
 
-### 추상 클래스와 추상 메서드의 규칙
+    public static void main(String[] args) {
+        DeliveryFeePolicy standardPolicy =
+                new StandardDeliveryFeePolicy();
 
-추상 클래스는 클래스 선언에 `abstract`를 붙여 작성한다.
+        DeliveryFeePolicy freePolicy =
+                new FreeDeliveryFeePolicy();
 
-```java
-abstract class Notification {
+        System.out.println(standardPolicy.calculate(40_000));
+        System.out.println(standardPolicy.calculate(60_000));
+        System.out.println(freePolicy.calculate(40_000));
+    }
 }
 ```
 
-추상 메서드는 구현부 없이 선언부만 작성한다. 중괄호 대신 세미콜론으로 선언을 끝낸다.
-
-```java
-protected abstract void doSend(
-        String recipient,
-        String message
-);
+```text
+3000
+0
+0
 ```
 
-추상 클래스와 추상 메서드에는 다음 규칙이 적용된다.
+`standardPolicy.calculate(40_000)`을 호출하면 상위 클래스의 `calculate()`가 주문 금액을 먼저 검증한다. 이후 실제 객체인 `StandardDeliveryFeePolicy`의 `calculateFee()`가 3,000원을 반환하고, 상위 클래스가 그 결과를 다시 검증한다.
 
-* 추상 메서드를 선언한 클래스는 반드시 추상 클래스여야 한다.
-* 추상 클래스는 `new`로 직접 객체를 생성할 수 없다.
-* 추상 클래스에는 필드, 생성자, 일반 메서드와 추상 메서드를 함께 선언할 수 있다.
-* 구체적인 하위 클래스는 상속받은 추상 메서드를 모두 구현해야 한다.
-* 추상 메서드를 구현하지 않은 하위 클래스도 다시 `abstract`로 선언해야 한다.
+`freePolicy`도 같은 `calculate()`를 사용하지만 실제 객체가 다르므로 `FreeDeliveryFeePolicy`의 계산식이 실행된다. 같은 호출이 객체에 따라 다른 메서드 구현을 선택하는 원리는 다음 글의 주제인 다형성에서 자세히 다룬다.
 
-다음 코드는 컴파일되지 않는다.
+### 3.2 상위 클래스가 공통 조건을 지킨다
+
+`calculate()`는 0 이상의 주문 금액만 받으며, 계산 결과도 0 이상이어야 한다.
+
+음수인 주문 금액을 전달하면 계산을 시작하기 전에 `IllegalArgumentException`이 발생한다.
 
 ```java
-Notification notification =
-        new Notification("member@example.com");
+DeliveryFeePolicy policy =
+        new StandardDeliveryFeePolicy();
+
+policy.calculate(-1_000);
 ```
 
-`Notification`은 실제 발송 방식을 완성하지 않은 타입이다. 어떤 방식으로 메시지를 전송할지 결정되지 않았으므로 해당 클래스만으로 객체를 만들 수 없다.
+하위 클래스가 실수로 음수 배송비를 반환하는 경우에는 `IllegalStateException`이 발생한다.
 
-추상 클래스에도 생성자를 선언할 수 있다는 점은 객체 생성 가능 여부와 구분해야 한다. `EmailNotification` 객체를 생성하면 먼저 `Notification`의 생성자가 호출되어 수신자를 초기화하고, 이후 하위 클래스의 생성 과정이 이어진다. 추상 클래스의 생성자는 하위 객체에 포함되는 부모 부분을 초기화하기 위해 존재한다.
+```java title="InvalidDeliveryFeePolicy.java"
+public final class InvalidDeliveryFeePolicy
+        extends DeliveryFeePolicy {
 
-> [!note] 추상 클래스에 추상 메서드가 반드시 필요한가?
->
-> 추상 메서드가 하나도 없어도 클래스를 `abstract`로 선언할 수 있다. 클래스의 구현은 모두 존재하지만 해당 타입 자체로 객체를 만들지 않고, 하위 클래스를 통해서만 사용하도록 설계할 때 가능하다.
->
-> 단순히 객체 생성을 막는 목적이라면 무조건 추상 클래스를 선택하지 않는다. 하위 클래스가 구현을 완성해야 한다는 의미가 없다면 생성자의 접근 범위를 제한하는 방식이 의도를 더 정확하게 표현할 수 있다.
+    @Override
+    protected long calculateFee(long orderAmount) {
+        return -1_000;
+    }
+}
+```
 
-## 4. 추상화가 잘못되는 경우
+이 클래스는 `long` 값을 반환하므로 컴파일된다. 값이 올바른 범위에 있는지는 실행 중에 상위 클래스의 `validateDeliveryFee()`가 검사한다.
 
-`abstract` 키워드를 사용했다고 해서 좋은 추상화가 만들어지는 것은 아니다. 어떤 역할을 공통으로 묶었는지가 문법보다 중요하다.
+상위 클래스가 입력과 결과를 검증하므로 각 배송비 정책에서 같은 조건을 반복해서 구현하지 않아도 된다.
 
-### 모든 중복이 공통 역할을 의미하지는 않는다
+## 4. 현재 예제에 필요한 `abstract` 규칙
 
-두 클래스에 같은 필드나 비슷한 코드가 있다고 해서 반드시 같은 부모 클래스를 가져야 하는 것은 아니다. 우연히 현재 구현이 비슷할 뿐, 변경되는 이유나 객체가 맡은 역할은 다를 수 있다.
+추상화는 문제에 필요한 역할과 책임을 선택하는 설계 과정이며, `abstract`는 그 결과를 클래스와 메서드로 표현하는 자바 문법 가운데 하나다.
 
-중복 제거만을 목적으로 상속 구조를 만들면 한 클래스의 변경이 관계없는 하위 클래스에 영향을 줄 수 있다. 추상화는 코드 모양보다 **객체가 같은 종류로 다뤄질 수 있는지**를 먼저 확인해야 한다.
+### 4.1 추상 클래스는 직접 생성할 수 없다
 
-알림 예제에서 이메일과 문자를 하나로 묶은 이유도 출력 코드가 비슷해서가 아니다. 두 객체 모두 수신자에게 메시지를 전달한다는 같은 역할을 수행하기 때문이다.
+`abstract`로 선언한 클래스는 `new`로 직접 생성할 수 없다.
 
-### 모든 하위 클래스가 계약을 지킬 수 있어야 한다
+```java
+// 컴파일 오류
+DeliveryFeePolicy policy =
+        new DeliveryFeePolicy();
+```
 
-상위 타입에 선언한 동작은 모든 구체적인 하위 클래스가 의미 있게 구현할 수 있어야 한다.
+실제 객체는 추상 클래스를 상속하고 필요한 메서드를 구현한 구체 클래스의 생성자를 호출해 만든다.
 
-예를 들어 `Document` 추상 클래스에 `playAudio()`를 선언하면 텍스트 문서도 해당 메서드를 구현해야 한다. 텍스트 문서에서 지원하지 않는다는 예외만 던지거나 아무 동작도 하지 않는다면, 처음부터 모든 문서가 제공할 수 없는 기능을 공통 계약에 넣은 것이다.
+```java
+DeliveryFeePolicy policy =
+        new StandardDeliveryFeePolicy();
+```
 
-이런 구조가 나타난다면 하위 클래스의 구현 문제가 아니라 추상화의 범위가 잘못되었는지 살펴봐야 한다.
+추상 클래스도 일반 클래스처럼 필드, 생성자와 구현된 메서드를 가질 수 있다. 현재 예제에서는 `calculate()`와 두 검증 메서드가 구현된 메서드에 해당한다.
 
-추상화를 설계할 때는 다음 질문이 도움이 된다.
+### 4.2 추상 메서드는 하위 클래스가 구현한다
 
-* 외부 코드가 여러 객체에 같은 작업을 요청하는가?
-* 구현은 달라도 호출 방법과 결과의 의미는 같은가?
-* 모든 하위 클래스가 해당 동작을 억지 구현 없이 제공할 수 있는가?
-* 상위 타입에 둔 규칙이 하위 클래스 전체에 실제로 적용되는가?
+추상 메서드는 실행할 본문 없이 선언만 작성한다.
 
-추상화는 호출 코드가 알아야 할 내용을 줄여 주지만, 구체적인 객체의 차이를 무조건 없애지는 않는다. 공통 역할은 상위 타입에 남기고 달라지는 구현은 구체적인 클래스가 맡도록 경계를 정해야 한다.
+```java
+protected abstract long calculateFee(long orderAmount);
+```
 
-이렇게 정의된 공통 타입을 이용하면 호출 코드는 구체적인 클래스보다 추상적인 역할을 기준으로 객체를 다룰 수 있다. 같은 메서드 호출이 실제 객체에 따라 다른 구현으로 이어지는 과정은 다음 글의 주제인 **다형성**에서 살펴본다.
+추상 클래스가 아닌 구체 클래스는 상속받은 추상 메서드의 구현을 제공해야 한다.
+
+다음 클래스는 `calculateFee()`를 구현하지 않았으므로 컴파일되지 않는다.
+
+```java
+// 컴파일 오류
+public class FixedDeliveryFeePolicy
+        extends DeliveryFeePolicy {
+}
+```
+
+구현을 더 아래의 하위 클래스에 맡기려면 현재 클래스도 `abstract`로 선언해야 한다.
+
+```java
+public abstract class AdditionalDeliveryFeePolicy
+        extends DeliveryFeePolicy {
+}
+```
+
+현재 예제에서 필요한 핵심은 상위 클래스가 공통 흐름을 구현하고, 하위 클래스가 추상 메서드에 정책별 계산식을 채운다는 점이다. 추상 클래스와 인터페이스의 선택 기준이나 세부 문법 차이는 이후 글에서 별도로 살펴본다.
 
 ## 5. 참고 자료
 
-### 공식 문서
-
-* [The Java Language Specification - Chapter 8. Classes](https://docs.oracle.com/javase/specs/jls/se25/html/jls-8.html#jls-8.1.1.1) - Oracle
-  추상 클래스의 인스턴스 생성 제한, 추상 메서드를 가진 클래스의 선언 규칙과 하위 클래스 구현 조건을 확인했다.
-
-* [Abstract Methods and Classes](https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html) - Oracle Java Tutorials
-  추상 클래스가 필드, 생성자, 구현된 메서드와 추상 메서드를 함께 가질 수 있다는 설명과 사용 예제를 참고했다. 이 문서는 JDK 8 기준으로 작성되었으므로 세부 문법 규칙은 최신 Java 언어 명세를 기준으로 확인했다.
-
-### 한글 참고 자료
-
-* [추상 클래스](https://wikidocs.net/219) - 점프 투 자바
-  추상 클래스와 추상 메서드의 기본 문법, 객체 생성 제한과 하위 클래스의 구현 규칙을 확인할 수 있다.
-
-* [추상 클래스(Abstract) 용도 완벽 이해하기](https://inpa.tistory.com/entry/JAVA-%E2%98%95-%EC%B6%94%EC%83%81-%ED%81%B4%EB%9E%98%EC%8A%A4Abstract-%EC%9A%A9%EB%8F%84-%EC%99%84%EB%B2%BD-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0) - Inpa Dev
-  공통 기능과 하위 클래스마다 달라지는 구현을 구분하는 방법, 추상 메서드로 구현을 요구하는 이유를 다양한 예제로 설명한다.
-
-* [추상화](https://wikidocs.net/288127) - 프로그래밍 입문자를 위한 Java 기초
-  객체지향에서 추상화가 의미하는 바와 Java의 추상 클래스 및 추상 메서드가 어떤 관계인지 함께 살펴볼 수 있다.
+* [The Java Language Specification, Java SE 17 Edition - Chapter 8. Classes](https://docs.oracle.com/javase/specs/jls/se17/html/jls-8.html)
+* [Abstract Methods and Classes - Dev.java](https://dev.java/learn/inheritance/abstract-classes/)
+* [생각하라, 객체지향처럼](https://techblog.woowahan.com/2502/)
+* [Java Abstract Class](https://johngrib.github.io/wiki/java/abstract-class/)
+* [템플릿 메소드 패턴](https://johngrib.github.io/wiki/pattern/template-method/)
+* [추상 클래스(Abstract) 용도 완벽 이해하기](https://inpa.tistory.com/entry/JAVA-%E2%98%95-%EC%B6%94%EC%83%81-%ED%81%B4%EB%9E%98%EC%8A%A4Abstract-%EC%9A%A9%EB%8F%84-%EC%99%84%EB%B2%BD-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0)
