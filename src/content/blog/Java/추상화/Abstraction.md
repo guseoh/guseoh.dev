@@ -14,7 +14,7 @@ tags:
 book: ""
 chapter: 1
 heroImage: "/og-image.svg"
-draft: true
+draft: false
 ---
 
 ## 1. 들어가기 전
