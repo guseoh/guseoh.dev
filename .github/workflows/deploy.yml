@@ -46,16 +46,55 @@ jobs:
             }
           }
 
+          function addCommitFiles(files, commit) {
+            for (const key of ["added", "modified", "removed"]) {
+              for (const filePath of commit?.[key] ?? []) {
+                addBlogFile(files, filePath);
+              }
+            }
+          }
+
+          async function addCompareFiles(files, event) {
+            const before = event.before;
+            const after = event.after ?? process.env.GITHUB_SHA;
+            const repository = process.env.GITHUB_REPOSITORY;
+
+            if (!before || !after || !repository || /^0+$/.test(before) || before === after) {
+              return;
+            }
+
+            const apiUrl = process.env.GITHUB_API_URL ?? "https://api.github.com";
+            const token = process.env.GITHUB_TOKEN;
+            const response = await fetch(`${apiUrl}/repos/${repository}/compare/${before}...${after}`, {
+              headers: {
+                Accept: "application/vnd.github+json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {})
+              }
+            });
+
+            if (!response.ok) {
+              console.warn(`GitHub compare API로 변경 파일을 확인하지 못했습니다: ${response.status}`);
+              return;
+            }
+
+            const compare = await response.json();
+            for (const file of compare.files ?? []) {
+              addBlogFile(files, file.filename);
+            }
+          }
+
           if (
             process.env.GITHUB_EVENT_NAME === "push" &&
             process.env.GITHUB_REF === "refs/heads/main"
           ) {
             for (const commit of event.commits ?? []) {
-              for (const key of ["added", "modified", "removed"]) {
-                for (const filePath of commit[key] ?? []) {
-                  addBlogFile(files, filePath);
-                }
-              }
+              addCommitFiles(files, commit);
+            }
+
+            addCommitFiles(files, event.head_commit);
+
+            if (files.size === 0) {
+              await addCompareFiles(files, event);
             }
           }
 
@@ -81,6 +120,8 @@ jobs:
             console.log("src/content/blog 변경 파일이 없어 Discord 게시글 배포 알림을 생략합니다.");
           }
           NODE
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   build:
     runs-on: ubuntu-latest
