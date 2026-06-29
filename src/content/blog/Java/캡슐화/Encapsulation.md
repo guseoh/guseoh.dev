@@ -6,6 +6,8 @@ updated: 2026-06-27
 category: "Java"
 slug: "java/캡슐화/Encapsulation"
 commentKey: "/blog/java/캡슐화/Encapsulation/"
+aliases:
+    - "/blog/java/캡슐화/encapsulation/"
 tags:
     - Java
     - OOP
