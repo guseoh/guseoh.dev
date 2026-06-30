@@ -1,16 +1,11 @@
 {
   "username": "guseoh",
-  "generatedAt": "2026-06-29T17:46:29.510Z",
+  "generatedAt": "2026-06-30T17:11:11.907Z",
   "source": "public-html",
-  "from": "2025-07-01",
-  "to": "2026-06-30",
-  "totalContributions": 2339,
+  "from": "2025-07-02",
+  "to": "2026-07-01",
+  "totalContributions": 2338,
   "days": [
-    {
-      "date": "2025-07-01",
-      "count": 1,
-      "level": 1
-    },
     {
       "date": "2025-07-02",
       "count": 1,
@@ -1828,6 +1823,11 @@
     },
     {
       "date": "2026-06-30",
+      "count": 0,
+      "level": 0
+    },
+    {
+      "date": "2026-07-01",
       "count": 0,
       "level": 0
     }
